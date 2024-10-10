@@ -1,0 +1,74 @@
+<!-- Modal -->
+<th:block th:fragment="login_modal">
+    <!-- Login Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Đăng nhập</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="loginForm" class="mb-3">
+                        <div class="form-group">
+                            <label for="login_email">Email <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" name="login_email" id="login_email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="login_password">Mật khẩu <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" name="login_password" id="login_password" required>
+                        </div>
+                        <div class="form-footer text-right">
+                            <button type="submit" class="btn btn-primary">Đăng nhập</button>
+                            <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#exampleModalRegister" data-dismiss="modal">Đăng ký</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registration Modal -->
+    <div class="modal fade" id="exampleModalRegister" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Đăng ký</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="registerForm">
+                        <div class="form-group">
+                            <label for="register_full_name">Họ và tên <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="register_full_name" id="register_full_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register_email">Email <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" name="register_email" id="register_email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register_password">Mật khẩu <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" name="register_password" id="register_password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register_phone">Số điện thoại</label>
+                            <input type="text" class="form-control" name="register_phone" id="register_phone">
+                        </div>
+                        <div class="form-group">
+                            <label for="register_address">Địa chỉ</label>
+                            <input type="text" class="form-control" name="register_address" id="register_address">
+                        </div>
+                        <div class="form-footer text-right">
+                            <button type="submit" class="btn btn-primary">Đăng ký</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+

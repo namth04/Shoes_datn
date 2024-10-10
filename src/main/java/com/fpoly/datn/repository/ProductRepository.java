@@ -1,0 +1,177 @@
+package com.fpoly.datn.repository;
+
+import com.fpoly.datn.entity.Product;
+import com.fpoly.datn.model.dto.ChartDTO;
+import com.fpoly.datn.model.dto.ProductInfoDTO;
+import com.fpoly.datn.model.dto.ShortProductInfoDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Repository
+public interface ProductRepository extends JpaRepository<Product, String> {
+
+    //Lấy sản phẩm theo tên
+    Product findByName(String name);
+
+    //Lấy tất cả sản phẩm
+    @Query(value = "SELECT * FROM product pro right join (SELECT DISTINCT p.* FROM product p " +
+            "INNER JOIN product_category pc ON p.id = pc.product_id " +
+            "INNER JOIN category c ON c.id = pc.category_id " +
+            "WHERE p.id LIKE CONCAT('%',?1,'%') " +
+            "AND p.name LIKE CONCAT('%',?2,'%') " +
+            "AND c.id LIKE CONCAT('%',?3,'%') " +
+            "AND p.brand_id LIKE CONCAT('%',?4,'%') " +
+            "AND p.material_id LIKE CONCAT('%',?5,'%') " + // Thêm material_id
+            "AND p.sole_id LIKE CONCAT('%',?6,'%') " + // Thêm sole_id
+            ") as tb1 on pro.id = tb1.id", nativeQuery = true)
+    Page<Product> adminGetListProducts(String id, String name, String category, String brand, String material, String sole, Pageable pageable);
+
+
+    //Lấy sản phẩm được bán nhiều
+    @Query(nativeQuery = true,name = "getListBestSellProducts")
+    List<ProductInfoDTO> getListBestSellProducts(int limit);
+
+    //Lấy sản phẩm mới nhất
+    @Query(nativeQuery = true,name = "getListNewProducts")
+    List<ProductInfoDTO> getListNewProducts(int limit);
+
+    //Lấy sản phẩm được xem nhiều
+    @Query(nativeQuery = true,name = "getListViewProducts")
+    List<ProductInfoDTO> getListViewProducts(int limit);
+
+    //Lấy sản phẩm liên quan
+    @Query(nativeQuery = true, name = "getRelatedProducts")
+    List<ProductInfoDTO> getRelatedProducts(String id, int limit);
+
+    //Lấy sản phẩm
+    @Query(name = "getAllProduct", nativeQuery = true)
+    List<ShortProductInfoDTO> getListProduct();
+
+    //Lấy sản phẩm có sẵn size
+    @Query(nativeQuery = true, name = "getAllBySizeAvailable")
+    List<ShortProductInfoDTO> getAvailableProducts();
+    // Lấy sản phẩm có sẵn màu sắc
+    @Query(nativeQuery = true, name = "getAllByColorAvailable")
+    List<ShortProductInfoDTO> getAvailableColors();
+
+    //Trừ một sản phẩm đã bán
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE product SET total_sold = total_sold - 1 WHERE id = ?1", nativeQuery = true)
+    void minusOneProductTotalSold(String productId);
+
+    //Cộng một sản phẩm đã bán
+    @Transactional
+    @Modifying
+    @Query(nativeQuery = true, value = "Update product set total_sold = total_sold + 1 where id = ?1")
+    void plusOneProductTotalSold(String productId);
+
+    //Tìm kiến sản phẩm theo size
+    @Query(nativeQuery = true, name = "searchProductBySize")
+    List<ProductInfoDTO> searchProductBySize(List<Long> brands, List<Long> categories, long minPrice, long maxPrice, List<Integer> sizes, int limit, int offset);
+   //Color
+   @Query(nativeQuery = true, name = "searchProductByColor")
+   List<ProductInfoDTO> searchProductByColor(List<Long> brands, List<Long> categories, long minPrice, long maxPrice, List<String> colors, int limit, int offset);
+   //
+    @Query(nativeQuery = true, name = "searchProductByColorAndSize")
+    List<ProductInfoDTO> searchProductBySizeAndColor(
+            List<Long> brands,
+            List<Long> categories,
+            long minPrice,
+            long maxPrice,
+            List<Integer> sizes,
+            List<String> colors,
+            int limit,
+            int offset
+    );
+
+    //Đếm số sản phẩm
+    @Query(nativeQuery = true, value = "SELECT COUNT(DISTINCT d.id) " +
+            "FROM (" +
+            "SELECT DISTINCT product.id " +
+            "FROM product " +
+            "INNER JOIN product_category " +
+            "ON product.id = product_category.product_id " +
+            "WHERE product.status = 1 AND product.brand_id IN (?1) AND product_category.category_id IN (?2) " +
+            "AND product.price > ?3 AND product.price < ?4) as d " +
+            "INNER JOIN product_size " +
+            "ON product_size.product_id = d.id " +
+            "WHERE product_size.size IN (?5)")
+    int countProductBySize(List<Long> brands, List<Long> categories, long minPrice, long maxPrice, List<Integer> sizes);
+    @Query(nativeQuery = true, value = "SELECT COUNT(DISTINCT d.id) " +
+            "FROM (" +
+            "SELECT DISTINCT product.id " +
+            "FROM product " +
+            "INNER JOIN product_category ON product.id = product_category.product_id " +
+            "WHERE product.status = 1 " +
+            "AND product.brand_id IN (?1) " +
+            "AND product_category.category_id IN (?2) " +
+            "AND product.price > ?3 " +
+            "AND product.price < ?4) as d " +
+            "INNER JOIN product_color ON product_color.product_id = d.id " +
+            "WHERE product_color.color IN (?5)")
+    int countProductByColor(List<Long> brands, List<Long> categories, long minPrice, long maxPrice, List<String> colors);
+    @Query(nativeQuery = true, value = "SELECT COUNT(DISTINCT d.id) " +
+            "FROM (" +
+            "SELECT DISTINCT product.id " +
+            "FROM product " +
+            "INNER JOIN product_category ON product.id = product_category.product_id " +
+            "WHERE product.status = 1 " +
+            "AND product.brand_id IN (?1) " +
+            "AND product_category.category_id IN (?2) " +
+            "AND product.price > ?3 " +
+            "AND product.price < ?4) AS d " +
+            "INNER JOIN product_color ON product_color.product_id = d.id " +
+            "INNER JOIN product_size ON product_size.product_id = d.id " + // Kết hợp bảng product_size
+            "WHERE product_color.color IN (?5) " +
+            "AND product_size.size IN (?6)") // Điều kiện cho kích thước
+    int countProductByColorAndSize(
+            List<Long> brands,
+            List<Long> categories,
+            long minPrice,
+            long maxPrice,
+            List<String> colors,
+            List<Integer> sizes // Danh sách kích thước
+    );
+
+    //Tìm kiến sản phẩm k theo size
+    @Query(nativeQuery = true, name = "searchProductAllSize")
+    List<ProductInfoDTO> searchProductAllSize(List<Long> brands, List<Long> categories, long minPrice, long maxPrice, int limit, int offset);
+    //
+    @Query(nativeQuery = true, name = "searchProductAllColor")
+    List<ProductInfoDTO> searchProductAllColor(List<Long> brands, List<Long> categories, long minPrice, long maxPrice, List<String> colors, int limit, int offset);
+
+    //Đếm số sản phẩm
+    @Query(nativeQuery = true, value = "SELECT COUNT(DISTINCT product.id) " +
+            "FROM product " +
+            "INNER JOIN product_category " +
+            "ON product.id = product_category.product_id " +
+            "WHERE product.status = 1 AND product.brand_id IN (?1) AND product_category.category_id IN (?2) " +
+            "AND product.price > ?3 AND product.price < ?4 ")
+    int countProductAllSize(List<Long> brands, List<Long> categories, long minPrice, long maxPrice);
+
+    //Tìm kiến sản phẩm theo tên và tên danh mục
+    @Query(nativeQuery = true, name = "searchProductByKeyword")
+    List<ProductInfoDTO> searchProductByKeyword(@Param("keyword") String keyword, @Param("limit") int limit, @Param("offset") int offset);
+
+    //Đếm số sản phẩm
+    @Query(nativeQuery = true, value = "SELECT count(DISTINCT product.id) " +
+            "FROM product " +
+            "INNER JOIN product_category " +
+            "ON product.id = product_category.product_id " +
+            "INNER JOIN category " +
+            "ON category.id = product_category.category_id " +
+            "WHERE product.status = true AND (product.name LIKE CONCAT('%',:keyword,'%') OR category.name LIKE CONCAT('%',:keyword,'%')) ")
+    int countProductByKeyword(@Param("keyword") String keyword);
+
+    @Query(name = "getProductOrders",nativeQuery = true)
+    List<ChartDTO> getProductOrders(Pageable pageable, Integer moth, Integer year);
+}

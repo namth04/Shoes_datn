@@ -1,0 +1,28 @@
+package com.fpoly.datn.model.request;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
+
+import java.util.List;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@ToString
+public class FilterProductRequest {
+    private List<Long> brands;
+    private List<Long> materials;
+    private List<Long> soles;
+    private List<Long> categories;
+    private List<Integer> sizes;
+    private List<String> colors;
+
+    @JsonProperty("min_price")
+    private Long minPrice;
+
+    @JsonProperty("max_price")
+    private Long maxPrice;
+
+    private int page;
+}

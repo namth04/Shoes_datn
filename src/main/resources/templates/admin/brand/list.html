@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{/layout/layout_admin :: main-fragment(
+                                                ~{:: title},
+                                                'header',
+                                                'sidebar',
+                                                ~{:: #css-resources},
+                                                ~{:: #js-resources},
+                                                ~{:: #main-content}
+                                               )}">
+<head>
+    <meta charset="UTF-8">
+    <title>Danh sách nhãn hiệu</title>
+    <th:block id="css-resources">
+        <link rel="stylesheet" th:href="@{/adminlte/pagination/simplePagination.css}">
+        <link rel="stylesheet" th:href="@{/adminlte/css/custom.css}">
+    </th:block>
+</head>
+<body>
+<section role="main" class="content-body" id="main-content">
+    <header class="page-header">
+        <div class="right-wrapper text-right">
+            <ol class="breadcrumbs">
+                <li>
+                    <a href="index.html">
+                        <i class="bx bx-home-alt"></i>
+                    </a>
+                </li>
+                <li><span>Tables</span></li>
+                <li><span>Editable</span></li>
+            </ol>
+            <a class="sidebar-right-toggle" data-open="sidebar-right"><i
+                    class="fas fa-chevron-left"></i></a>
+        </div>
+    </header>
+
+    <section class="card">
+        <header class="card-header">
+            <div class="card-actions">
+                <a href="#" class="card-action card-action-toggle" data-card-toggle></a>
+                <a href="#" class="card-action card-action-dismiss" data-card-dismiss></a>
+            </div>
+            <h2 class="card-title">Danh sách nhãn hiệu</h2>
+        </header>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="mb-3">
+                        <button id="addToTable" class="btn btn-primary" data-toggle="modal"
+                                data-target="#modal-add-new-brand">Thêm mới nhãn hiệu <i
+                                class="fas fa-plus"></i></button>
+                        <a href="/admin/brands" class="btn btn-primary">Refresh <i
+                                class="fas fa-redo-alt"></i></a>
+                        <button id="btn-search" class="btn btn-primary">Tìm kiếm <i
+                                class="fas fa-search"></i></button>
+                    </div>
+                </div>
+            </div>
+            <table class="table table-bordered table-striped mb-0" id="datatable-editable">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tên nhãn hiệu</th>
+                    <th>Ảnh nhãn hiệu</th>
+                    <th>Trạng thái nhãn hiệu</th>
+                    <th>Ngày tạo danh mục</th>
+                    <th>Ngày sửa danh mục</th>
+                    <th>Thao tác</th>
+                </tr>
+                <tr>
+                    <form method="GET" id="search-form">
+                        <th>
+                            <input type="text" name="id" id="id" class="form-control search-input">
+                        </th>
+                        <th>
+                            <input type="text" name="name" id="name" class="form-control search-input">
+                        </th>
+                        <th></th>
+                        <th>
+                            <select name="status" class="form-control search-select" id="status">
+                                <option value="">Tất cả</option>
+                                <option value="0">Ẩn</option>
+                                <option value="1">Hiển thị</option>
+                            </select>
+                        </th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <input type="hidden" name="page" id="page">
+                    </form>
+                </tr>
+                </thead>
+                <tbody>
+                <th:block th:each="brand : ${brands}">
+                    <tr th:data-id="${brand.id}">
+                        <td th:text="${brand.id}"></td>
+                        <td class="brand-name" th:data-id="${brand.id}" th:text="${brand.name}"></td>
+                        <td>
+                            <div class="logo-div">
+                                <img th:src="${brand.thumbnail}" th:alt="${brand.name}" class="brand-thumbnail"
+                                     th:data-id="${brand.id}"/>
+                            </div>
+                        </td>
+                        <td>
+                            <label class="switch">
+                                <input type="checkbox" th:checked="${brand.status}" disabled th:data-id="${brand.id}" class="brand-status">
+                                <span class="slider round"></span>
+                            </label>
+                        </td>
+                        <td th:text="${#dates.format(brand.createdAt, 'dd-MM-yyyy HH:mm')}"></td>
+                        <td th:text="${#dates.format(brand.modifiedAt, 'dd-MM-yyyy HH:mm')}"></td>
+                        <td class="actions">
+                            <a href="#" class="edit-brand" th:data-id="${brand.id}"><i
+                                    class="fas fa-pencil-alt"></i></a>
+                            <a href="#" class="delete-brand" th:data-id="${brand.id}"><i class="far fa-trash-alt"></i></a>
+                        </td>
+                    </tr>
+                </th:block>
+                </tbody>
+            </table>
+            <br>
+            <!-- Pagination -->
+            <nav aria-label="Page navigation">
+                <ul class="pagination" id="pagination"></ul>
+            </nav>
+        </div>
+    </section>
+
+    <!-- Modal add new brand-->
+    <div class="modal fade" id="modal-add-new-brand" tabindex="-1" role="dialog" aria-labelledby="modalAddNewBrand"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Thêm nhãn hiệu</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="required-label" for="new-brand">Tên nhãn hiệu</label>
+                        <input type="text" class="form-control" id="new-brand">
+                        <span class="invalid-feedback" id="invalid-feedback-new-brand">Độ dài tên nhãn hiệu từ 1 - 50 ký tự</span>
+                    </div>
+                    <div class="form-group">
+                        <label class="required-label">Logo</label>
+                        <div class="thumbnail-container" style="display:none">
+                            <div class="img-div">
+                                <img class="preview-img" alt="Thumbnail post">
+                            </div>
+                        </div>
+                        <div class="invalid-feedback invalid-feedback-thumbnail">Bạn chưa chọn logo</div>
+                        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#choose-img-modal">
+                            Chọn ảnh
+                        </button>
+                    </div>
+                    <br>
+                    <label>Trạng thái</label>
+                    <br>
+                    <label class="switch">
+                        <input type="checkbox" id="new_status">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary btn-add-new-brand">Thêm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal update brand-->
+    <div class="modal fade" id="modal-update-brand" tabindex="-1" role="dialog" aria-labelledby="modalUpdateBrand"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Chỉnh sửa nhãn hiệu</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" hidden id="update-brand-id">
+                    <div class="form-group">
+                        <label class="required-label" for="update-brand">Tên nhãn hiệu</label>
+                        <input type="text" class="form-control" id="update-brand">
+                        <span class="invalid-feedback" id="invalid-feedback-update-brand">Độ dài tên nhãn hiệu từ 1 - 50 ký tự</span>
+                    </div>
+                    <div class="form-group">
+                        <label class="required-label">Logo</label>
+                        <div class="thumbnail-container" style="display:none">
+                            <div class="img-div">
+                                <img class="preview-img" alt="Thumbnail post">
+                            </div>
+                        </div>
+                        <div class="invalid-feedback invalid-feedback-thumbnail">Bạn chưa chọn logo</div>
+                        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#choose-img-modal">
+                            Chọn ảnh
+                        </button>
+                    </div>
+                    <br>
+                    <label>Trạng thái</label>
+                    <br>
+                    <label class="switch">
+                        <input type="checkbox" id="update_status">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary btn-update-brand">Cập nhật</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal choose image -->
+    <div class="modal fade" id="choose-img-modal" tabindex="-1" role="dialog" aria-labelledby="chooseImgModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Chọn hình ảnh</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="image-list">Chọn ảnh</label>
+                        <div class="row" id="image-list">
+                            <th:block th:each="image : ${images}">
+                                <div class="col-3 img-select" th:data-img="${image.url}">
+                                    <img th:src="${image.url}" class="img-thumbnail" th:alt="${image.name}">
+                                </div>
+                            </th:block>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" id="btn-select-image">Chọn ảnh</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block id="js-resources">
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+        <script src="https://cdn.jsdelivr.net/npm/toastr@2.1.4/toastr.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/dataTables.net/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/dataTables.net-bs4/js/dataTables.bootstrap4.min.js"></script>
+        <script th:src="@{/adminlte/pagination/simplePagination.js}"></script>
+        <script th:src="@{/adminlte/js/table.js}"></script>
+    </th:block>
+</section>
+</body>
+</html>
