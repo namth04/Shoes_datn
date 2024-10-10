@@ -2,9 +2,7 @@ package com.fpoly.datn.model.mapper;
 
 import com.fpoly.datn.entity.Brand;
 import com.fpoly.datn.entity.Category;
-import com.fpoly.datn.entity.Material;
 import com.fpoly.datn.entity.Product;
-import com.fpoly.datn.entity.Sole;
 import com.fpoly.datn.model.dto.ProductDTO;
 import com.fpoly.datn.model.request.CreateProductRequest;
 import com.github.slugify.Slugify;
@@ -43,15 +41,6 @@ public class ProductMapper {
         Brand brand = new Brand();
         brand.setId(createProductRequest.getBrandId());
         product.setBrand(brand);
-        //Sole
-        Sole sole = new Sole();
-        sole.setId(createProductRequest.getSoleId());
-        product.setSole(sole);
-        // material
-        Material material = new Material();
-        material.setId(createProductRequest.getMaterialId());
-        product.setMaterial(material);
-
         //Category
         ArrayList<Category> categories = new ArrayList<>();
         for (Integer id : createProductRequest.getCategoryIds()) {

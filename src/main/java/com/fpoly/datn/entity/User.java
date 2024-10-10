@@ -18,7 +18,9 @@ import java.util.List;
 @Getter
 @Entity
 @Table(name = "users")
-@TypeDef(name ="json", typeClass = JsonStringType.class
+@TypeDef(
+        name ="json",
+        typeClass = JsonStringType.class
 )
 public class User {
     @Id

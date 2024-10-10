@@ -47,6 +47,8 @@ public class Category {
     private String name;
     @Column(name = "slug",nullable = false)
     private String slug;
+//    @Column(name = "description")
+//    private String description;
     @Column(name = "orders")
     private int order;
     @Column(name = "status",columnDefinition = "BOOLEAN")

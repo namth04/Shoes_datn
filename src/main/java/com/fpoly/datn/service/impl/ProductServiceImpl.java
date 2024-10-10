@@ -1,15 +1,9 @@
 package com.fpoly.datn.service.impl;
 
-import com.fpoly.datn.entity.ProductColor;
 import com.fpoly.datn.exception.BadRequestException;
 import com.fpoly.datn.exception.InternalServerException;
 import com.fpoly.datn.exception.NotFoundException;
-import com.fpoly.datn.model.request.CreateColorCountRequest;
-import com.fpoly.datn.repository.OrderRepository;
-import com.fpoly.datn.repository.ProductColorRepository;
 import com.fpoly.datn.repository.ProductRepository;
-import com.fpoly.datn.repository.ProductSizeRepository;
-import com.fpoly.datn.repository.PromotionRepository;
 import com.fpoly.datn.entity.Product;
 import com.fpoly.datn.entity.ProductSize;
 import com.fpoly.datn.entity.Promotion;
@@ -22,7 +16,9 @@ import com.fpoly.datn.model.request.CreateProductRequest;
 import com.fpoly.datn.model.request.CreateSizeCountRequest;
 import com.fpoly.datn.model.request.FilterProductRequest;
 import com.fpoly.datn.model.request.UpdateFeedBackRequest;
-
+import com.fpoly.datn.repository.OrderRepository;
+import com.fpoly.datn.repository.ProductSizeRepository;
+import com.fpoly.datn.repository.PromotionRepository;
 import com.fpoly.datn.service.ProductService;
 import com.fpoly.datn.service.PromotionService;
 import com.fpoly.datn.utils.PageUtil;
@@ -49,8 +45,6 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private ProductSizeRepository productSizeRepository;
-    @Autowired
-    private ProductColorRepository  productColorRepository;
 
     @Autowired
     private PromotionService promotionService;
@@ -62,13 +56,13 @@ public class ProductServiceImpl implements ProductService {
     private OrderRepository orderRepository;
 
     @Override
-    public Page<Product> adminGetListProduct(String id, String name, String category, String brand,String material, String sole, Integer page) {
+    public Page<Product> adminGetListProduct(String id, String name, String category, String brand, Integer page) {
         page--;
         if (page < 0) {
             page = 0;
         }
         Pageable pageable = PageRequest.of(page, LIMIT_PRODUCT, Sort.by("created_at").descending());
-        return productRepository.adminGetListProducts(id, name, category, brand,material,sole, pageable);
+        return productRepository.adminGetListProducts(id, name, category, brand, pageable);
     }
 
     @Override
@@ -217,8 +211,6 @@ public class ProductServiceImpl implements ProductService {
         dto.setTotalSold(product.getTotalSold());
         dto.setDescription(product.getDescription());
         dto.setBrand(product.getBrand());
-        dto.setMaterial(product.getMaterial());
-        dto.setSole(product.getSole());
         dto.setFeedbackImages(product.getImageFeedBack());
         dto.setProductImages(product.getImages());
         dto.setComments(product.getComments());
@@ -253,10 +245,6 @@ public class ProductServiceImpl implements ProductService {
     public List<Integer> getListAvailableSize(String id) {
         return productSizeRepository.findAllSizeOfProduct(id);
     }
-    @Override
-    public List<String> getListAvailableColor(String id) {
-        return productColorRepository.findAllColorOfProduct(id);
-    }
 
     @Override
     public void createSizeCount(CreateSizeCountRequest createSizeCountRequest) {
@@ -290,48 +278,15 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void createColorCount(CreateColorCountRequest createColorCountRequest) {
-        boolean isValid = false;
-        for (String color : COLOR_NAMES) {
-            if (color == createColorCountRequest.getColor()) {
-                isValid = true;
-                break;
-            }
-        }
-        if (!isValid) {
-            throw new BadRequestException("Màu không hợp lệ");
-        }
-
-        //Kiểm trả sản phẩm có tồn tại
-        Optional<Product> product = productRepository.findById(createColorCountRequest.getProductId());
-        if (product.isEmpty()) {
-            throw new NotFoundException("Không tìm thấy sản phẩm trong hệ thống!");
-        }
-
-//        Optional<ProductSize> productSizeOld = productSizeRepository.getProductSizeBySize(createSizeCountRequest.getSize(),createSizeCountRequest.getProductId());
-
-        ProductColor productColor = new ProductColor();
-        productColor.setProductId(createColorCountRequest.getProductId());
-        productColor.setColor(createColorCountRequest.getColor());
-        productColor.setQuantity(createColorCountRequest.getCount());
-
-        productColorRepository.save(productColor);
-
-    }
-
-    @Override
     public List<ProductSize> getListSizeOfProduct(String id) {
         return productSizeRepository.findByProductId(id);
-    }
-    @Override
-    public List<ProductColor> getListColorOfProduct(String id) {
-        return productColorRepository.findByProductId(id);
     }
 
     @Override
     public List<ShortProductInfoDTO> getListProduct() {
         return productRepository.getListProduct();
     }
+
     @Override
     public List<ShortProductInfoDTO> getAvailableProducts() {
         return productRepository.getAvailableProducts();
@@ -345,15 +300,6 @@ public class ProductServiceImpl implements ProductService {
         }
         return false;
     }
-    @Override
-    public boolean checkProductColorAvailable(String id, String color) {
-        ProductColor productColor = productColorRepository.checkProductAndColorAvailable(id,color);
-        if (productColor != null) {
-            return true;
-        }
-        return false;
-    }
-
 
     @Override
     public List<ProductInfoDTO> checkPublicPromotion(List<ProductInfoDTO> products) {
@@ -390,25 +336,15 @@ public class ProductServiceImpl implements ProductService {
         int totalItems;
         List<ProductInfoDTO> products;
 
-        if (req.getSizes().isEmpty() && req.getColors().isEmpty()) {
-            // Nếu không có size và không có color
+        if (req.getSizes().isEmpty()) {
+            //Nếu không có size
             products = productRepository.searchProductAllSize(req.getBrands(), req.getCategories(), req.getMinPrice(), req.getMaxPrice(), LIMIT_PRODUCT_SHOP, pageUtil.calculateOffset());
             totalItems = productRepository.countProductAllSize(req.getBrands(), req.getCategories(), req.getMinPrice(), req.getMaxPrice());
-        } else if (!req.getSizes().isEmpty() && req.getColors().isEmpty()) {
-            // Nếu có size nhưng không có color
+        } else {
+            //Nếu có size
             products = productRepository.searchProductBySize(req.getBrands(), req.getCategories(), req.getMinPrice(), req.getMaxPrice(), req.getSizes(), LIMIT_PRODUCT_SHOP, pageUtil.calculateOffset());
             totalItems = productRepository.countProductBySize(req.getBrands(), req.getCategories(), req.getMinPrice(), req.getMaxPrice(), req.getSizes());
-        } else if (req.getSizes().isEmpty() && !req.getColors().isEmpty()) {
-            // Nếu có color nhưng không có size
-            products = productRepository.searchProductByColor(req.getBrands(), req.getCategories(), req.getMinPrice(), req.getMaxPrice(), req.getColors(), LIMIT_PRODUCT_SHOP, pageUtil.calculateOffset());
-            totalItems = productRepository.countProductByColor(req.getBrands(), req.getCategories(), req.getMinPrice(), req.getMaxPrice(), req.getColors());
-        } else {
-            // Nếu có cả size và color
-            products = productRepository.searchProductBySizeAndColor(req.getBrands(), req.getCategories(), req.getMinPrice(), req.getMaxPrice(), req.getSizes(), req.getColors(), LIMIT_PRODUCT_SHOP, pageUtil.calculateOffset());
-            totalItems = productRepository.countProductByColorAndSize(req.getBrands(), req.getCategories(), req.getMinPrice(), req.getMaxPrice(), req.getColors(), req.getSizes());
         }
-
-
 
         //Tính tổng số trang
         int totalPages = pageUtil.calculateTotalPage(totalItems);

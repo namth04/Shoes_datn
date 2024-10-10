@@ -66,9 +66,6 @@
                     <th>Tên sản phẩm</th>
                     <th>Ảnh</th>
                     <th>Nhãn hiệu</th>
-                    <th>Chất Liệu</th>
-                    <th>Đế Giày</th>
-                    <th>Nhãn hiệu</th>
                     <th>Danh mục</th>
                     <th>Giá nhập</th>
                     <th>Giá bán</th>
@@ -121,8 +118,6 @@
                         <td th:text="${product.name}"></td>
                         <td><img th:src="@{${product.images[0]}}" width="60px" height="60px"></td>
                         <td th:text="${product.brand.name}"></td>
-                        <td th:text="${product.material.name}"></td>
-                        <td th:text="${product.sole.name}"></td>
                         <td>
                             <th:block th:each="category,i : ${product.categories}">
                                 <span th:if="${i.first} == true" th:text="${category.name}"></span>
@@ -156,7 +151,7 @@
     <script type="text/javascript" th:src="@{/adminlte/pagination/jquery.simplePagination.js}"></script>
     <script type="text/javascript" th:src="@{/adminlte/js/table.js}"></script>
     <script th:inline="javascript">
-        let id, name, category, brand,material,sole, page;
+        let id, name, category, brand, page;
         $(function () {
             $("#checkAll").click(function () {
                 $('input:checkbox').not(this).prop('checked', this.checked);
@@ -172,16 +167,12 @@
             id = vars["id"] || ""
             name = vars["name"] || ""
             brand = vars["brand"] || ""
-            material = vars["brand"] || ""
-            sole = vars["brand"] || ""
             category = vars["category"] || ""
             page = vars["page"] || "1"
             $('#page').val(page)
             $('#id').val(id)
             $('#name').val(name)
             $('#brand').val(brand)
-            $('#material').val(brand)
-            $('#sole').val(brand)
             $('#category').val(category)
 
             pagination([[${totalPages}]], [[${currentPage}]]);

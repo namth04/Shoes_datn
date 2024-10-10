@@ -16,8 +16,6 @@ public interface ProductSizeRepository extends JpaRepository<ProductSize,Long> {
     @Query(nativeQuery = true,value = "SELECT ps.size FROM product_size ps WHERE ps.product_id = ?1 AND ps.quantity > 0")
     List<Integer> findAllSizeOfProduct(String id);
 
-
-    //Lấy size của sản phẩm
     List<ProductSize> findByProductId(String id);
 
     //Kiểm trả size sản phẩm

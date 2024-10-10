@@ -1,11 +1,6 @@
 package com.fpoly.datn.controller.admin;
 
-import com.fpoly.datn.entity.Brand;
-import com.fpoly.datn.entity.Category;
-import com.fpoly.datn.entity.Product;
-import com.fpoly.datn.entity.ProductColor;
-import com.fpoly.datn.entity.ProductSize;
-import com.fpoly.datn.entity.User;
+import com.fpoly.datn.entity.*;
 import com.fpoly.datn.model.request.CreateProductRequest;
 import com.fpoly.datn.model.request.CreateSizeCountRequest;
 import com.fpoly.datn.model.request.UpdateFeedBackRequest;
@@ -66,8 +61,6 @@ public class ProductController {
                             @RequestParam(defaultValue = "", required = false) String name,
                             @RequestParam(defaultValue = "", required = false) String category,
                             @RequestParam(defaultValue = "", required = false) String brand,
-                            @RequestParam(defaultValue = "", required = false) String material,
-                            @RequestParam(defaultValue = "", required = false) String sole,
                             @RequestParam(defaultValue = "1", required = false) Integer page) {
 
         //Lấy danh sách nhãn hiệu
@@ -77,7 +70,7 @@ public class ProductController {
         List<Category> categories = categoryService.getListCategories();
         model.addAttribute("categories", categories);
         //Lấy danh sách sản phẩm
-        Page<Product> products = productService.adminGetListProduct(id, name, category, brand,material, sole, page);
+        Page<Product> products = productService.adminGetListProduct(id, name, category, brand, page);
         model.addAttribute("products", products.getContent());
         model.addAttribute("totalPages", products.getTotalPages());
         model.addAttribute("currentPage", products.getPageable().getPageNumber() + 1);
@@ -128,9 +121,7 @@ public class ProductController {
         //Lấy size của sản phẩm
         List<ProductSize> productSizes = productService.getListSizeOfProduct(id);
         model.addAttribute("productSizes", productSizes);
-//
-        List<ProductColor> productColors =productService.getListColorOfProduct(id);
-        model.addAttribute("productColors", productColors);
+
         return "admin/product/edit";
     }
 
@@ -139,10 +130,8 @@ public class ProductController {
                                                   @RequestParam(defaultValue = "", required = false) String name,
                                                   @RequestParam(defaultValue = "", required = false) String category,
                                                   @RequestParam(defaultValue = "", required = false) String brand,
-                                                  @RequestParam(defaultValue = "", required = false) String material,
-                                                  @RequestParam(defaultValue = "", required = false) String sole,
                                                   @RequestParam(defaultValue = "1", required = false) Integer page) {
-        Page<Product> products = productService.adminGetListProduct(id, name, category, brand,material,sole, page);
+        Page<Product> products = productService.adminGetListProduct(id, name, category, brand, page);
         return ResponseEntity.ok(products);
     }
 
