@@ -97,69 +97,42 @@
         <div class="container">
             <h2 class="section-title heading-border ls-20 border-0">Sản phẩm mới</h2>
 
-            <div class="product-details">
-                <h3 class="product-title">
-                    <a th:href="@{/{slug}/{id}(id=${newProduct.id},slug=${newProduct.slug})}" th:text="${newProduct.name}"></a>
-                </h3>
-                <div class="price-box">
-                    <span class="product-price" th:text="${#numbers.formatDecimal(newProduct.price, 0, 'COMMA', 0, 'POINT') + ' vnđ'}"></span>
+            <div class="products-slider custom-products owl-carousel owl-theme nav-outer show-nav-hover nav-image-center" data-owl-options="{
+						'dots': false,
+						'nav': true
+					}">
+                <th:block th:each="newProduct :${newProducts}">
+                    <div class="product-default">
+                    <figure>
+                        <a th:href="@{/{slug}/{id}(id=${newProduct.id},slug=${newProduct.slug})}">
+                            <img th:src="@{${newProduct.images}}" alt="product">
+                        </a>
+                    </figure>
+                    <div class="product-details">
+                        <h3 class="product-title">
+                            <a th:href="@{/{slug}/{id}(id=${newProduct.id},slug=${newProduct.slug})}" th:text="${newProduct.name}"></a>
+                        </h3>
+                        <div class="price-box">
+                            <th:block th:if="${newProduct.promotionPrice}">
+                                <span class="product-price" th:text="${#numbers.formatDecimal(newProduct.promotionPrice, 0, 'COMMA', 0, 'POINT') +' đ'}"></span>
+                                <del class="old-price" th:text="${#numbers.formatDecimal(newProduct.price, 0, 'COMMA', 0, 'POINT') +' đ'}"></del>
+                            </th:block>
+                            <th:block th:unless="${newProduct.promotionPrice}">
+                                <span class="product-price" th:text="${#numbers.formatDecimal(newProduct.price, 0, 'COMMA', 0, 'POINT') +' đ'}"></span>
+                            </th:block>
+                        </div><!-- End .price-box -->
+                        <div class="ratings-container">
+                            <p class="card-text sold">&Dstrok;&atilde; b&aacute;n <span th:text="${newProduct.totalSold}"></span> &dstrok;&ocirc;i</p>
+                        </div><!-- End .product-container -->
+<!--                        <div class="product-action">-->
+<!--                            <a href="#" class="btn-icon-wish"><i class="icon-heart"></i></a>-->
+<!--                            <button class="btn-icon btn-add-cart" data-toggle="modal" data-target="#addCartModal">Mua hàng</button>-->
+<!--                            <a href="ajax/product-quick-view.html" class="btn-quickview" title="Quick View"><i class="fas fa-external-link-alt"></i></a>-->
+<!--                        </div>-->
+                    </div><!-- End .product-details -->
                 </div>
-
-                <div class="ratings-container">
-                    <p class="card-text sold"> <span th:text="${newProduct.totalSold}"></span> &dstrok;&ocirc;i</p>
-                </div><!-- End .ratings-container -->
-
-                <div class="product-action">
-                    <!-- Thêm vào giỏ hàng -->
-                    <button class="btn-icon btn-add-cart" data-toggle="modal" data-target="#addCartModal" th:data-id="${newProduct.id}">Mua hàng</button>
-
-                    <!-- Xem video giới thiệu -->
-                    <a href="video-url" class="btn-quickview" title="Xem video giới thiệu" data-toggle="modal" data-target="#videoModal">
-                        <i class="fas fa-play"></i> Xem video
-                    </a>
-                </div><!-- End .product-action -->
-            </div><!-- End .product-details -->
-
-            <!-- Modal để thêm vào giỏ hàng -->
-            <div class="modal fade" id="addCartModal" tabindex="-1" role="dialog" aria-labelledby="addCartModalLabel" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="addCartModalLabel">Thêm sản phẩm vào giỏ hàng</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <p>Sản phẩm đã được thêm vào giỏ hàng!</p>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                            <button type="button" class="btn btn-primary">Đi đến giỏ hàng</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Modal để xem video giới thiệu -->
-            <div class="modal fade" id="videoModal" tabindex="-1" role="dialog" aria-labelledby="videoModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="videoModalLabel">Video giới thiệu sản phẩm</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <iframe width="100%" height="400" src="video-url" frameborder="0" allowfullscreen></iframe>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                </th:block>
+            </div><!-- End .featured-proucts -->
         </div>
     </section>
 
@@ -357,10 +330,5 @@
 <th:block id="js-resources">
 
 </th:block>
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
 </body>
 </html>

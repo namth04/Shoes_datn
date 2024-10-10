@@ -2,13 +2,13 @@ package com.fpoly.datn.service.impl;
 
 import com.fpoly.datn.exception.BadRequestException;
 import com.fpoly.datn.repository.UserRepository;
-import com.fpoly.datn.service.UserService;
 import com.fpoly.datn.entity.User;
 import com.fpoly.datn.model.dto.UserDTO;
 import com.fpoly.datn.model.mapper.UserMapper;
 import com.fpoly.datn.model.request.ChangePasswordRequest;
 import com.fpoly.datn.model.request.CreateUserRequest;
 import com.fpoly.datn.model.request.UpdateProfileRequest;
+import com.fpoly.datn.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

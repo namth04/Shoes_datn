@@ -19,6 +19,7 @@
 <body>
 <section role="main" class="content-body" id="main-content">
     <header class="page-header">
+        <!--        <h2>Editable Tables</h2>-->
         <div class="right-wrapper text-right">
             <ol class="breadcrumbs">
                 <li>
@@ -40,7 +41,7 @@
                 <a href="#" class="card-action card-action-toggle" data-card-toggle></a>
                 <a href="#" class="card-action card-action-dismiss" data-card-dismiss></a>
             </div>
-            <h2 class="card-title">Danh sách nhãn hiệu</h2>
+            <h2 class="card-title">Danh sách nhãn hiệu </h2>
         </header>
         <div class="card-body">
             <div class="row">
@@ -63,6 +64,7 @@
                     <th>Tên nhãn hiệu</th>
                     <th>Ảnh nhãn hiệu</th>
                     <th>Trạng thái nhãn hiệu</th>
+                    <!--                    <th>Thứ tự nhãn hiệu</th>-->
                     <th>Ngày tạo danh mục</th>
                     <th>Ngày sửa danh mục</th>
                     <th>Thao tác</th>
@@ -92,7 +94,7 @@
                 </thead>
                 <tbody>
                 <th:block th:each="brand : ${brands}">
-                    <tr th:data-id="${brand.id}">
+                    <tr data-item-id="1" th:data-id="${brand.id}">
                         <td th:text="${brand.id}"></td>
                         <td class="brand-name" th:data-id="${brand.id}" th:text="${brand.name}"></td>
                         <td>
@@ -101,18 +103,24 @@
                                      th:data-id="${brand.id}"/>
                             </div>
                         </td>
-                        <td>
-                            <label class="switch">
-                                <input type="checkbox" th:checked="${brand.status}" disabled th:data-id="${brand.id}" class="brand-status">
+                        <th:block th:if="${brand.status} == true">
+                            <td><label class="switch" style="margin-left: 60px;">
+                                <input type="checkbox" checked disabled th:data-id="${brand.id}" class="brand-status">
                                 <span class="slider round"></span>
-                            </label>
-                        </td>
+                            </label></td>
+                        </th:block>
+                        <th:block th:if="${brand.status} == false">
+                            <td><label class="switch" style="margin-left: 60px;">
+                                <input type="checkbox" disabled th:data-id="${brand.id}" class="brand-status">
+                                <span class="slider round"></span>
+                            </label></td>
+                        </th:block>
                         <td th:text="${#dates.format(brand.createdAt, 'dd-MM-yyyy HH:mm')}"></td>
                         <td th:text="${#dates.format(brand.modifiedAt, 'dd-MM-yyyy HH:mm')}"></td>
                         <td class="actions">
                             <a href="#" class="edit-brand" th:data-id="${brand.id}"><i
                                     class="fas fa-pencil-alt"></i></a>
-                            <a href="#" class="delete-brand" th:data-id="${brand.id}"><i class="far fa-trash-alt"></i></a>
+                            <a href="#" class=" delete-brand" th:data-id="${brand.id}"><i class="far fa-trash-alt"></i></a>
                         </td>
                     </tr>
                 </th:block>
@@ -124,6 +132,8 @@
                 <ul class="pagination" id="pagination"></ul>
             </nav>
         </div>
+
+
     </section>
 
     <!-- Modal add new brand-->
@@ -211,54 +221,210 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-primary btn-update-brand">Cập nhật</button>
+                    <button type="button" class="btn btn-primary btn-update-brand">Sửa</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal choose image -->
-    <div class="modal fade" id="choose-img-modal" tabindex="-1" role="dialog" aria-labelledby="chooseImgModal"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Chọn hình ảnh</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="image-list">Chọn ảnh</label>
-                        <div class="row" id="image-list">
-                            <th:block th:each="image : ${images}">
-                                <div class="col-3 img-select" th:data-img="${image.url}">
-                                    <img th:src="${image.url}" class="img-thumbnail" th:alt="${image.name}">
-                                </div>
-                            </th:block>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" id="btn-select-image">Chọn ảnh</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <th:block id="js-resources">
-        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
-        <script src="https://cdn.jsdelivr.net/npm/toastr@2.1.4/toastr.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/dataTables.net/js/jquery.dataTables.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/dataTables.net-bs4/js/dataTables.bootstrap4.min.js"></script>
-        <script th:src="@{/adminlte/pagination/simplePagination.js}"></script>
-        <script th:src="@{/adminlte/js/table.js}"></script>
-    </th:block>
+    <th:block th:replace="~{fragment/choose_image_modal :: choose-img-modal}"></th:block>
 </section>
+
+<th:block id="js-resources">
+    <script type="text/javascript" th:src="@{/adminlte/pagination/jquery.simplePagination.js}"></script>
+    <script type="text/javascript" th:src="@{/adminlte/js/table.js}"></script>
+    <script type="text/javascript" th:src="@{/adminlte/js/list.min.js}"></script>
+    <script type="text/javascript" th:src="@{/adminlte/js/modal_image.js}"></script>
+
+    <!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>-->
+    <script th:inline="javascript">
+        let id, name, status, page;
+        $(function () {
+            let vars = parseUrl();
+            id = vars["id"] || ""
+            name = vars["name"] || ""
+            status = vars["status"] || ""
+            page = vars["page"] || "0"
+
+            $('#id').val(id)
+            $('#name').val(name)
+            $('#status').val(status)
+            $('#page').val(page)
+
+            pagination([[${totalPages}]], [[${currentPage}]])
+        });
+
+        $(function () {
+            let imgs = [[${images}]];
+            let tmp = [];
+            for (img of imgs) {
+                tmp.push({"grid-item-img": img})
+            }
+            initListImg(tmp);
+        })
+
+        $('.btn-choose-img').click(function () {
+            let url = $('#list-user-img .grid-item.choosen .grid-item-img').attr('src');
+            if (url == "" || url == null) {
+                toastr.warning("Bạn chưa chọn ảnh");
+                return;
+            }
+            closeChooseImgModal();
+            $('.thumbnail-container').show();
+            $('.invalid-feedback-thumbnail').hide();
+            $('.preview-img').attr('src', url);
+        })
+
+        $("#modal-add-new-brand").on("hidden.bs.modal", function () {
+            closeModalInsertUpdate();
+        });
+
+        $("#modal-update-brand").on("hidden.bs.modal", function () {
+            closeModalInsertUpdate();
+        });
+
+        function closeModalInsertUpdate() {
+            $('.thumbnail-container').hide();
+            $('#new-brand').val('');
+            $('#update-brand').val('');
+            $('#update-brand-id').val('');
+            $('.preview-img').attr('src', '');
+            $('.invalid-feedback').hide();
+        }
+
+        $('.btn-add-new-brand').click(function () {
+            let newBrand = $('#new-brand').val();
+            let thumbnail = $('.preview-img').attr('src');
+            let status = false;
+            if ($("#new_status").is(":checked")) {
+                status = true;
+            }
+            isValid = true;
+
+            if (newBrand.length === 0) {
+                $('#invalid-feedback-new-brand').show();
+                isValid = false;
+            }
+            if (typeof thumbnail == 'undefined' || thumbnail == '') {
+                $('.invalid-feedback-thumbnail').show();
+                isValid = false;
+            }
+
+            if (isValid) {
+                req = {
+                    name: newBrand,
+                    thumbnail: thumbnail,
+                    status: status
+                }
+                var myJSON = JSON.stringify(req);
+                $.ajax({
+                    url: '/api/admin/brands',
+                    type: 'POST',
+                    data: myJSON,
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        toastr.success("Tạo nhãn hiệu thành công");
+                        $('.modal').modal('hide');
+                        setTimeout(() => location.reload(), 500);
+                    },
+                    error: function (data) {
+                        toastr.warning(data.responseJSON.message);
+                    }
+                });
+            }
+        });
+
+        let brandId;
+        $('.edit-brand').click(function () {
+            brandId = $(this).data('id');
+            $.ajax({
+                url: "/api/admin/brands/" + brandId,
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $('.thumbnail-container').show();
+                    $("#update-brand").val(data.name);
+                    $('.preview-img').attr('src',data.thumbnail);
+                    if (data.status == 1) {
+                        $("#update_status").prop('checked', true)
+                    } else {
+                        $("#update_status").prop('checked', false)
+                    }
+                    $('#modal-update-brand').modal('show');
+                }
+            })
+        });
+
+        $(".btn-update-brand").click(function (){
+            let updateBrand = $('#update-brand').val();
+            let thumbnail = $('.preview-img').attr('src');
+            let status = false;
+            if ($("#update_status").is(":checked")) {
+                status = true;
+            }
+            isValid = true;
+
+            if (updateBrand.length === 0) {
+                $('#invalid-feedback-new-brand').show();
+                isValid = false;
+            }
+            if (typeof thumbnail == 'undefined' || thumbnail == '') {
+                $('.invalid-feedback-thumbnail').show();
+                isValid = false;
+            }
+
+            if (isValid) {
+                req = {
+                    id:brandId,
+                    name: updateBrand,
+                    thumbnail: thumbnail,
+                    status: status
+                }
+                var myJSON = JSON.stringify(req);
+                $.ajax({
+                    url: '/api/admin/brands/'+brandId,
+                    type: 'PUT',
+                    data: myJSON,
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        toastr.success("Sửa nhãn hiệu thành công");
+                        $('.modal').modal('hide');
+                        setTimeout(() => location.reload(), 500);
+                    },
+                    error: function (data) {
+                        toastr.warning(data.responseJSON.message);
+                    }
+                });
+            }
+        })
+
+        $(".delete-brand").on("click",function (){
+           let id = $(this).data('id');
+            swal({
+                title: 'Bạn chắc chắn muốn xóa!',
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                cancelButtonText: "Không",
+                confirmButtonText: "Có",
+            }).then(function (rs){
+                if (rs.value){
+                    $.ajax({
+                        url:"/api/admin/brands/"+ id,
+                        type: "DELETE",
+                        success: function (data){
+                            toastr.success("Xóa danh mục thành công!");
+                            setTimeout(() => location.reload(), 500);
+                        },
+                        error: function (error){
+                            toastr.warning(error.responseJSON.message);
+                        }
+                    })
+                }
+            })
+        })
+
+    </script>
+</th:block>
 </body>
 </html>

@@ -1,13 +1,13 @@
 package com.fpoly.datn.service.impl;
 
 import com.fpoly.datn.exception.InternalServerException;
-import com.fpoly.datn.repository.CommentRepository;
 import com.fpoly.datn.entity.Comment;
 import com.fpoly.datn.entity.Post;
 import com.fpoly.datn.entity.Product;
 import com.fpoly.datn.entity.User;
 import com.fpoly.datn.model.request.CreateCommentPostRequest;
 import com.fpoly.datn.model.request.CreateCommentProductRequest;
+import com.fpoly.datn.repository.CommentRepository;
 import com.fpoly.datn.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

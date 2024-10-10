@@ -1,7 +1,6 @@
 package com.fpoly.datn.service;
 
 import com.fpoly.datn.entity.Product;
-import com.fpoly.datn.entity.ProductColor;
 import com.fpoly.datn.entity.ProductSize;
 import com.fpoly.datn.entity.Promotion;
 import com.fpoly.datn.model.dto.DetailProductInfoDTO;
@@ -10,7 +9,6 @@ import com.fpoly.datn.model.dto.ProductInfoDTO;
 import com.fpoly.datn.model.dto.ShortProductInfoDTO;
 import com.fpoly.datn.model.request.CreateProductRequest;
 import com.fpoly.datn.model.request.CreateSizeCountRequest;
-import com.fpoly.datn.model.request.CreateColorCountRequest;
 import com.fpoly.datn.model.request.FilterProductRequest;
 import com.fpoly.datn.model.request.UpdateFeedBackRequest;
 import org.springframework.data.domain.Page;
@@ -21,88 +19,75 @@ import java.util.List;
 @Service
 public interface ProductService {
 
-    // Lấy sản phẩm cho admin
-    Page<Product> adminGetListProduct(String id, String name, String category, String brand, String material, String sole, Integer page);
+    //Lấy sản phẩm
+    Page<Product> adminGetListProduct(String id, String name, String category, String brand, Integer page);
 
-    // Tạo sản phẩm
+    //Tạo sản phẩm
     Product createProduct(CreateProductRequest createProductRequest);
 
-    // Sửa sản phẩm
+    //Sửa sản phẩm
     void updateProduct(CreateProductRequest createProductRequest, String id);
 
-    // Lấy chi tiết sản phẩm
+    //Lấy chi tiết sản phẩm
     Product getProductById(String id);
 
-    // Xóa sản phẩm theo nhiều ID
+    //Xóa sản phẩm theo id
     void deleteProduct(String[] ids);
 
-    // Xóa sản phẩm theo ID
+    //Xóa sản phẩm theo id
     void deleteProductById(String id);
 
-    // Lấy danh sách sản phẩm bán nhiều nhất
+    //Lấy sản phẩm bán nhiều nhất
     List<ProductInfoDTO> getListBestSellProducts();
 
-    // Lấy danh sách sản phẩm mới nhất
+    //Lấy sản phẩm mới nhất
     List<ProductInfoDTO> getListNewProducts();
 
-    // Lấy danh sách sản phẩm được xem nhiều
+    //Lấy sản phẩm xem nhiều
     List<ProductInfoDTO> getListViewProducts();
 
-    // Lấy chi tiết sản phẩm theo ID
+    //Lấy chi tiết sản phẩm theo id
     DetailProductInfoDTO getDetailProductById(String id);
 
-    // Lấy sản phẩm liên quan
+    //Lấy sản phẩm liên quan
     List<ProductInfoDTO> getRelatedProducts(String id);
 
-    // Lấy các size có sẵn của sản phẩm
+    //Lấy size có sẵn
     List<Integer> getListAvailableSize(String id);
 
-    // Tạo số lượng theo size
+    //Nhập số lượng theo size
     void createSizeCount(CreateSizeCountRequest createSizeCountRequest);
 
-    // Lấy danh sách size của sản phẩm
+    //Lấy size của sản phẩm
     List<ProductSize> getListSizeOfProduct(String id);
 
-    // Lấy các màu có sẵn của sản phẩm
-    List<String> getListAvailableColor(String id);
-
-    // Tạo số lượng theo màu
-    void createColorCount(CreateColorCountRequest createColorCountRequest);
-
-    // Lấy danh sách màu của sản phẩm
-    List<ProductColor> getListColorOfProduct(String id);
-
-
-    // Lấy danh sách sản phẩm ngắn gọn
     List<ShortProductInfoDTO> getListProduct();
 
-    // Lấy sản phẩm có sẵn
+    //Lấy sản phẩm có sẵn size
     List<ShortProductInfoDTO> getAvailableProducts();
 
-    // Kiểm tra xem sản phẩm có size hay không
+    //Check size sản phẩm
     boolean checkProductSizeAvailable(String id, int size);
 
-    // Kiểm tra xem sản phẩm có màu hay không
-    boolean checkProductColorAvailable(String id, String color);
-
-    // Kiểm tra khuyến mãi công khai
+    //Kiểm tra sản phẩm có khuyến mại
     List<ProductInfoDTO> checkPublicPromotion(List<ProductInfoDTO> products);
 
-    // Lọc sản phẩm theo yêu cầu
+    //Tìm kiếm sản phẩm theo danh mục, nhãn hiệu, giá
     PageableDTO filterProduct(FilterProductRequest req);
 
-    // Tìm kiếm sản phẩm theo từ khóa
+    //Tìm kiếm sản phẩm theo tên sản phẩm
     PageableDTO searchProductByKeyword(String keyword, Integer page);
 
-    // Kiểm tra mã khuyến mãi
+    //Kiểm tra khuyến mại
     Promotion checkPromotion(String code);
 
-    // Đếm số lượng sản phẩm
+    //Đếm số lượng sản phẩm
     long getCountProduct();
 
-    // Cập nhật hình ảnh phản hồi
+    //Thêm ảnh feedBack
     void updatefeedBackImages(String id, UpdateFeedBackRequest req);
 
-    // Lấy tất cả sản phẩm
+    //Lấy tất cả sản phẩm
     List<Product> getAllProduct();
+
 }

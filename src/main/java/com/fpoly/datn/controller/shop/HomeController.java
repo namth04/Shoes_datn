@@ -1,24 +1,9 @@
 package com.fpoly.datn.controller.shop;
 
-import com.fpoly.datn.entity.Brand;
-import com.fpoly.datn.entity.Category;
-import com.fpoly.datn.entity.Material;
-import com.fpoly.datn.entity.Order;
-import com.fpoly.datn.entity.Post;
-import com.fpoly.datn.entity.ProductColor;
-import com.fpoly.datn.entity.Promotion;
-import com.fpoly.datn.entity.Sole;
-import com.fpoly.datn.entity.User;
-import com.fpoly.datn.exception.BadRequestException;
+import com.fpoly.datn.entity.*;
 import com.fpoly.datn.exception.NotFoundException;
-import com.fpoly.datn.service.BrandService;
-import com.fpoly.datn.service.CategoryService;
-import com.fpoly.datn.service.MaterialService;
-import com.fpoly.datn.service.OrderService;
-import com.fpoly.datn.service.PostService;
-import com.fpoly.datn.service.ProductService;
-import com.fpoly.datn.service.PromotionService;
-
+import com.fpoly.datn.service.*;
+import com.fpoly.datn.exception.BadRequestException;
 import com.fpoly.datn.model.dto.CheckPromotion;
 import com.fpoly.datn.model.dto.DetailProductInfoDTO;
 import com.fpoly.datn.model.dto.PageableDTO;
@@ -26,7 +11,6 @@ import com.fpoly.datn.model.dto.ProductInfoDTO;
 import com.fpoly.datn.model.request.CreateOrderRequest;
 import com.fpoly.datn.model.request.FilterProductRequest;
 import com.fpoly.datn.security.CustomUserDetails;
-import com.fpoly.datn.service.SoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,11 +34,6 @@ public class HomeController {
     @Autowired
     private BrandService brandService;
 
-    @Autowired
-    private MaterialService materialService;
-
-    @Autowired
-    private SoleService soleService;
     @Autowired
     private PostService postService;
 
@@ -146,6 +125,7 @@ public class HomeController {
         }
         model.addAttribute("product", product);
 
+        //Validate size
         if (size < 35 || size > 42) {
             return "error/404";
         }
@@ -168,11 +148,8 @@ public class HomeController {
         model.addAttribute("sizeCm", SIZE_CM);
         model.addAttribute("size", size);
 
-        model.addAttribute("colorName", COLOR_NAMES);
-
         return "shop/payment";
     }
-
 
     @PostMapping("/api/orders")
     public ResponseEntity<Object> createOrder(@Valid @RequestBody CreateOrderRequest createOrderRequest) {
@@ -189,54 +166,31 @@ public class HomeController {
     }
 
     @GetMapping("/san-pham")
-    public String getProductShopPages(Model model) {
-        // Lấy danh sách nhãn hiệu
+    public String getProductShopPages(Model model){
+
+        //Lấy danh sách nhãn hiệu
         List<Brand> brands = brandService.getListBrand();
-        model.addAttribute("brands", brands);
+        model.addAttribute("brands",brands);
         List<Long> brandIds = new ArrayList<>();
         for (Brand brand : brands) {
             brandIds.add(brand.getId());
         }
         model.addAttribute("brandIds", brandIds);
 
-        // Lấy danh sách nguyên liệu
-        List<Material> materials = materialService.getListMaterial();
-        model.addAttribute("materials", materials);
-        List<Long> materialIds = new ArrayList<>();
-        for (Material material : materials) {
-            materialIds.add(material.getId());
-        }
-        model.addAttribute("materialIds", materialIds);
-
-        // Lấy danh sách đế giày
-        List<Sole> soles = soleService.getListSole();
-        model.addAttribute("soles", soles);
-        List<Long> solesIds = new ArrayList<>();
-        for (Sole sole : soles) {
-            solesIds.add(sole.getId());
-        }
-        model.addAttribute("soleIds", solesIds);
-
-        // Lấy danh sách danh mục
+        //Lấy danh sách danh mục
         List<Category> categories = categoryService.getListCategories();
-        model.addAttribute("categories", categories);
+        model.addAttribute("categories",categories);
         List<Long> categoryIds = new ArrayList<>();
         for (Category category : categories) {
             categoryIds.add(category.getId());
         }
         model.addAttribute("categoryIds", categoryIds);
 
-        // Danh sách size của sản phẩm
+        //Danh sách size của sản phẩm
         model.addAttribute("sizeVn", SIZE_VN);
 
-        // Lấy danh sách màu sắc
-        model.addAttribute("colors", COLOR_NAMES);
-
-
-        // Lấy danh sách sản phẩm
-        FilterProductRequest req = new FilterProductRequest(brandIds,materialIds,solesIds,  categoryIds, new ArrayList<>(),col,(long) 0, Long.MAX_VALUE, 1
-        );
-
+        //Lấy danh sách sản phẩm
+        FilterProductRequest req = new FilterProductRequest(brandIds, categoryIds, new ArrayList<>(), (long) 0, Long.MAX_VALUE, 1);
         PageableDTO result = productService.filterProduct(req);
         model.addAttribute("totalPages", result.getTotalPages());
         model.addAttribute("currentPage", result.getCurrentPage());
@@ -244,8 +198,6 @@ public class HomeController {
 
         return "shop/product";
     }
-
-
 
     @PostMapping("/api/san-pham/loc")
     public ResponseEntity<?> filterProduct(@RequestBody FilterProductRequest req) {

@@ -27,13 +27,6 @@ public class CreateProductRequest {
     @JsonProperty("brand_id")
     private Long brandId;
 
-    @NotNull(message = "Đế giày trống!")
-    @JsonProperty("sole_id")
-    private Long soleId;
-    @NotNull(message = "Chất liệu trống!")
-    @JsonProperty("material_id")
-    private Long materialId;
-
     @NotNull(message = "Danh mục trống!")
     @JsonProperty("category_ids")
     private ArrayList<Integer> categoryIds;

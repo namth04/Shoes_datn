@@ -1,19 +1,10 @@
 package com.fpoly.datn.controller.admin;
 
-import com.fpoly.datn.repository.BrandRepository;
-import com.fpoly.datn.repository.CategoryRepository;
-import com.fpoly.datn.repository.ProductRepository;
-import com.fpoly.datn.repository.StatisticRepository;
-import com.fpoly.datn.repository.UserRepository;
+import com.fpoly.datn.repository.*;
 import com.fpoly.datn.model.dto.ChartDTO;
 import com.fpoly.datn.model.dto.StatisticDTO;
 import com.fpoly.datn.model.request.FilterDayByDay;
-import com.fpoly.datn.service.BrandService;
-import com.fpoly.datn.service.CategoryService;
-import com.fpoly.datn.service.OrderService;
-import com.fpoly.datn.service.PostService;
-import com.fpoly.datn.service.ProductService;
-
+import com.fpoly.datn.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -129,7 +120,7 @@ public class DashboardController {
     public ResponseEntity<Object> getProductOrder(){
         Pageable pageable = PageRequest.of(0,10);
         Date date = new Date();
-        List<ChartDTO> chartDTOS = productRepository.getProductOrders( date.getMonth() +1, date.getYear() + 1900,pageable);
+        List<ChartDTO> chartDTOS = productRepository.getProductOrders(pageable, date.getMonth() +1, date.getYear() + 1900);
         return ResponseEntity.ok(chartDTOS);
     }
 }

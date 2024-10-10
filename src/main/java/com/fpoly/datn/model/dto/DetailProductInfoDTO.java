@@ -2,8 +2,6 @@ package com.fpoly.datn.model.dto;
 
 import com.fpoly.datn.entity.Brand;
 import com.fpoly.datn.entity.Comment;
-import com.fpoly.datn.entity.Material;
-import com.fpoly.datn.entity.Sole;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -40,8 +38,6 @@ public class DetailProductInfoDTO {
     private String description;
 
     private Brand brand;
-    private Sole sole;
-    private Material material;
 
     private List<Comment> comments;
 }

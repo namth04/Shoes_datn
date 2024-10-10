@@ -207,19 +207,16 @@ public class Product {
     @JoinColumn(name = "brand_id")
     private Brand brand;
 
-    @ManyToOne
-    @JoinColumn(name = "sole_id")
-    private Sole sole;
-    @ManyToOne
-    @JoinColumn(name = "material_id")
-    private Material material;
     @ManyToMany
-    @JoinTable(name = "product_category", joinColumns =@JoinColumn(name = "product_id"), inverseJoinColumns =@JoinColumn(name = "category_id")
+    @JoinTable(
+            name = "product_category",
+            joinColumns =@JoinColumn(name = "product_id"),
+            inverseJoinColumns =@JoinColumn(name = "category_id")
     )
     private List<Category> categories;
-// kết nối với giỏ hàng
-    @OneToMany(mappedBy = "product",cascade = CascadeType.ALL)
-    private List<CartProduct> cartProducts = new ArrayList<>();
+
+//    @OneToMany(mappedBy = "product",cascade = CascadeType.ALL)
+//    private List<CartProduct> cartProducts = new ArrayList<>();
 
     @OneToMany(mappedBy = "product")
     private List<Comment> comments;
