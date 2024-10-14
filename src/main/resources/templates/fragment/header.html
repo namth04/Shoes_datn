@@ -7,25 +7,110 @@
                         <i class="icon-menu"></i>
                     </button>
                     <a href="/" class="logo">
-                        <img th:src="@{https://cdn.printgo.vn/uploads/media/772948/thiet-ke-logo-shop-giay-19_1584095087.jpg}"  alt="logo">
+                        <img th:src="@{https://cdn.printgo.vn/uploads/media/772948/thiet-ke-logo-shop-giay-19_1584095087.jpg}" alt="logo">
                     </a>
                 </div><!-- End .header-left -->
 
                 <div class="header-right w-lg-max">
-                    <div class="header-icon header-icon header-search header-search-inline header-search-category w-lg-max text-right">
+                    <div class="header-icon header-search header-search-inline w-lg-max text-right">
                         <a href="#" class="search-toggle search-button" role="button"><i class="icon-search-3"></i></a>
-                            <div class="header-search-wrapper">
-                                <input class="form-control search-input"  placeholder="Nhập sản phẩm cần tìm kiếm..." required>
-                                <button class="btn icon-search-3 p-0 search-button" type="submit"></button>
-                            </div><!-- End .header-search-wrapper -->
+                        <div class="header-search-wrapper">
+                            <input class="form-control search-input" placeholder="Nhập sản phẩm cần tìm kiếm..." required>
+                            <button class="btn icon-search-3 p-0 search-button" type="submit"></button>
+                        </div><!-- End .header-search-wrapper -->
                     </div><!-- End .header-search -->
 
                     <div class="header-contact d-none d-lg-flex pl-4 ml-3 mr-xl-5 pr-4">
                         <img alt="phone" th:src="@{/shop/images/phone.png}" width="30" height="30" class="pb-1">
-                        <h6>Hotline<a href="tel:#" class="text-dark font1">036 279 9888</a></h6>
+                        <h6>Hotline <a href="tel:#" class="text-dark font1">036 279 9888</a></h6>
                     </div>
 
-                    <a href="" data-toggle="modal" data-target="#exampleModal" class="header-icon account-setting"><i class="icon-user-2"></i></a>
+                    <a href="" data-toggle="modal" data-target="#exampleModal" class="header-icon account-setting">
+                        <i class="icon-user-2"></i>
+                    </a>
+
+                    <!-- Cart Dropdown -->
+                    <div class="header-icon dropdown cart-dropdown ml-3">
+                        <a href="#" id="cartDropdown" class="cart-toggle" data-toggle="dropdown">
+                            <i class="icon-shopping-cart"></i>
+                            <span class="cart-count">0</span> <!-- Cart item count -->
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right p-3" aria-labelledby="cartDropdown">
+                            <div class="cart-items">
+                                <!-- Sample cart item - These items will be dynamically inserted via JavaScript -->
+                            </div>
+                            <div class="cart-total mt-3">
+                                <strong>Total: <span id="cartTotalAmount">0</span> &#x20AB;</strong>
+                            </div>
+                            <div class="text-right mt-3">
+                                <a href="/cart" class="btn btn-primary">View Cart</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Inline CSS -->
+                    <style>
+                        /* CSS cho dropdown giỏ hàng */
+                        .cart-dropdown .dropdown-menu {
+                            background-color: white; /* Nền trắng */
+                            border: 1px solid #ddd; /* Viền nhẹ */
+                            border-radius: 5px;
+                            width: 300px; /* Độ rộng của dropdown */
+                            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Đổ bóng nhẹ */
+                        }
+
+                        /* CSS cho các sản phẩm trong giỏ hàng */
+                        .cart-item {
+                            padding: 10px;
+                            border-bottom: 1px solid #f1f1f1;
+                        }
+
+                        /* Căn chỉnh sản phẩm trong giỏ hàng */
+                        .cart-item-image img {
+                            border-radius: 5px;
+                            border: 1px solid #ddd;
+                        }
+
+                        .cart-item-details {
+                            margin-left: 10px;
+                        }
+
+                        /* CSS cho tổng số tiền */
+                        .cart-total {
+                            font-size: 16px;
+                            font-weight: bold;
+                            color: #333;
+                        }
+
+                        /* Đảm bảo text được căn phải */
+                        .text-right {
+                            text-align: right;
+                        }
+
+                        /* Button */
+                        .btn-primary {
+                            background-color: #007bff;
+                            border-color: #007bff;
+                            color: white;
+                        }
+
+                        /* Hiển thị số lượng sản phẩm trong giỏ */
+                        .cart-count {
+                            background-color: #ff5722;
+                            color: white;
+                            border-radius: 50%;
+                            padding: 3px 8px;
+                            font-size: 12px;
+                            position: absolute;
+                            top: -10px;
+                            right: -10px;
+                        }
+                    </style>
+
+
+
+
+
 
                 </div><!-- End .header-right -->
             </div><!-- End .container -->
@@ -35,19 +120,32 @@
             <div class="container">
                 <nav class="main-nav w-100">
                     <ul class="menu">
-                        <li class="active">
-                            <a href="/">Trang chủ</a>
-                        </li>
-<!--                        <th:block th:each="brand : ${brands}">-->
-<!--                            <li><a href="/" th:text="${brand.name}">Trang chủ</a></li>-->
-<!--                        </th:block>-->
+                        <li class="active"><a href="/">Trang chủ</a></li>
                         <li class="float-right mr-0"><a href="/lien-he" class="px-4">Liên hệ</a></li>
-                        <li class="float-right"><a href="/doi-hang">Chính sách</span></a></li>
+                        <li class="float-right"><a href="/doi-hang">Chính sách</a></li>
                         <li class="float-right"><a href="/tin-tuc">Tin tức</a></li>
                         <li class="float-right"><a href="/san-pham">Sản phẩm</a></li>
                     </ul>
                 </nav>
             </div><!-- End .container -->
         </div><!-- End .header-bottom -->
+
+        <!-- Inline CSS for styling -->
+        <style>
+            .product-item {
+                border: 2px solid white; /* White border */
+                padding: 10px;
+                margin-bottom: 10px;
+                background-color: #f8f9fa; /* Light background for contrast */
+                border-radius: 5px; /* Optional: Rounded corners */
+            }
+            .cart-items {
+                max-height: 300px; /* Limit height for the cart dropdown */
+                overflow-y: auto; /* Scroll if too many items */
+            }
+            .cart-item img {
+                border-radius: 3px;
+            }
+        </style>
     </header><!-- End .header -->
 </th:block>

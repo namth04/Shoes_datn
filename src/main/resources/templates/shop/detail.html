@@ -124,24 +124,40 @@
                                 <i class="fas dropdown-arrow"></i>
                             </button>
                         </div>
+
                         <div class="buy-btn">
-                            <button class="btn btn-primary buy red-btn" th:classappend="${canBuy} == true ? '' : 'not-buy'">
+                            <button class="btn btn-primary buy red-btn add-to-cart-btn" th:classappend="${canBuy} == true ? '' : 'not-buy'"
+                                    data-product-id="${product.id}"
+                                    data-product-name="${product.name}"
+                                    data-product-price="${product.price}"
+                                    data-product-img="${product.imagePath}">
                                 <div class="ask-text left-content">
                                     <th:block th:if="${product.promotionPrice}">
-                                        <div class="ask-desc sub-content old-price"><span class="text-price" th:text="${product.price}"></span> &#x20AB;</div>
-                                        <div class="ask-price "><span class="text-price" th:text="${product.promotionPrice}"></span> &#x20AB;</div>
+                                        <div class="ask-desc sub-content old-price">
+                                            <span class="text-price" th:text="${product.price}"></span> &#x20AB;
+                                        </div>
+                                        <div class="ask-price">
+                                            <span class="text-price" th:text="${product.promotionPrice}"></span> &#x20AB;
+                                        </div>
                                     </th:block>
                                     <th:block th:unless="${product.promotionPrice}">
                                         <div class="ask-desc sub-content">Giá bán ưu đãi</div>
-                                        <div class="ask-price "><span class="text-price" th:text="${product.price}"></span> &#x20AB;</div>
+                                        <div class="ask-price">
+                                            <span class="text-price" th:text="${product.price}"></span> &#x20AB;
+                                        </div>
                                     </th:block>
                                 </div>
                                 <div class="buy-text right-content">
-                                    <div class="buy-now ">Mua ngay</div>
+                                    <div class="buy-now">Mua ngay</div>
+                                </div>
+                                <div class="buy-text right-content">
+                                    <div class="gio-hang">Giỏ hàng</div>
                                 </div>
                             </button>
                         </div>
+
                     </div>
+
                     <hr class="divider mb-1">
 
                     <div class="product-single-share">
@@ -375,6 +391,83 @@
                 }, 500);
             }
         })
+
+
+
+
+
+        // Handle the "Giỏ hàng" button click
+        let cartItems = [];
+        let totalPrice = 0;
+        const defaultImage = 'default-image.jpg'; // Đường dẫn đến hình ảnh mặc định
+
+        $('.gio-hang').click(function () {
+            if (isLogined === true) {
+                let size = $('.size-choose').data("id");
+                if (size == null || size === "") {
+                    toastr.warning("Sản phẩm tạm hết hàng. Vui lòng đặt hàng sau.");
+                } else {
+                    let product = {
+                        id: [[${product.id}]],
+                        name: '[[${product.name}]]',
+                        price: [[${product.price}]],
+                        image: [[${product.productImages != null && product.productImages.size() > 0 ? product.productImages[0] : defaultImage}]], // Kiểm tra và sử dụng hình ảnh mặc định
+                        size: size
+                    };
+
+                    // Thêm sản phẩm vào giỏ hàng
+                    cartItems.push(product);
+                    totalPrice += product.price; // Cập nhật tổng giá trị
+
+                    // Cập nhật dropdown giỏ hàng
+                    updateCartDropdown();
+                    toastr.success("Sản phẩm đã được thêm vào giỏ hàng.");
+                }
+            } else {
+                toastr.warning("Vui lòng đăng nhập để đặt hàng");
+                setTimeout(function () {
+                    $('#exampleModal').modal('show');
+                }, 500);
+            }
+        });
+
+        function updateCartDropdown() {
+            $('.cart-count').text(cartItems.length);
+            $('.cart-items').empty();
+
+            cartItems.forEach(function (item) {
+                console.log(item.image);
+                $('.cart-items').append(`
+            <div class="cart-item d-flex justify-content-between align-items-center mb-2">
+                <div class="cart-item-image">
+                    <img src="${item.image}" alt="${item.name}" width="50" height="50">
+                </div>
+                <div class="cart-item-details">
+                    <span class="product-name">${item.name}</span><br>
+                    <span class="product-price">${new Intl.NumberFormat('vi-VN').format(item.price)} &#x20AB;</span><br> <!-- Thêm mã quốc gia cho định dạng -->
+                    <span class="product-size">Size: ${item.size}</span>
+                </div>
+            </div>
+        `);
+            });
+
+            // Cập nhật tổng giá trị trong giỏ hàng
+            $('#cartTotalAmount').text(new Intl.NumberFormat('vi-VN').format(totalPrice) + ' ');
+        }
+
+
+
+
+
+
+            // Function to update cart total
+        function updateCartTotal(amount) {
+            const cartTotalElement = document.getElementById('cartTotal');
+            let currentTotal = parseInt(cartTotalElement.textContent.replace(/[^\d]/g, '')) || 0;
+            cartTotalElement.innerHTML = `Total: ${(currentTotal + amount).toLocaleString()} &#x20AB;`;
+        }
+
+
 
         $("#formCommentProduct").submit(function (e) {
             e.preventDefault();
