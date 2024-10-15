@@ -202,7 +202,7 @@
                         <div>
                             <div class="row">
                                 <form class="form-inline">
-                                    <div class="form-group col-md-2">
+                                    <div class="form-group col-md-3">
                                         <label for="size">Size giày</label>&emsp;
                                         <select class="form-control" id="size">
                                             <th:block th:each="size : ${sizeVN}">
@@ -210,18 +210,40 @@
                                             </th:block>
                                         </select>
                                     </div>
-                                    <div class="form-group col-md-2">
+                                    <div class="form-group col-md-3">
+                                        <label for="product_color">Màu sắc</label>&emsp;
+                                        <select class="form-control" id="product_color">
+                                            <th:block th:each="product_color : ${color}">
+                                                <option th:value="${product_color}" th:text="${product_color}"></option>
+                                            </th:block>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label for="material">Chất liệu</label>&emsp;
+                                        <select class="form-control" id="material">
+                                            <th:block th:each="material : ${material}">
+                                                <option th:value="${material}" th:text="${material}"></option>
+                                            </th:block>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label for="sole">Đế giày</label>&emsp;
+                                        <select class="form-control" id="sole">
+                                            <th:block th:each="sole : ${sole}">
+                                                <option th:value="${sole}" th:text="${sole}"></option>
+                                            </th:block>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-4 mt-3">
                                         <label for="count">Số lượng có sẵn</label>&emsp;
                                         <input type="number" class="form-control" id="count" min="0" value="0">
                                     </div>
-                                    <div class=" form-group col-md-3">
+                                    <div class="form-group col-md-4 mt-3">
                                         <label for="">Thực hiện</label>
                                         <br>
-                                        <button type="button" id="" class="btn btn-primary btn-update-size-count">Cập
-                                            nhật số lượng <i class="fas fa-plus"></i></button>
+                                        <button type="button" id="" class="btn btn-primary btn-update-size-count">Cập nhật số lượng <i class="fas fa-plus"></i></button>
                                         <br>
-                                        <span class="invalid-feedback"
-                                              id="invalid-feedback-size">Vui lòng nhập số lượng</span>
+                                        <span class="invalid-feedback" id="invalid-feedback-size">Vui lòng nhập số lượng</span>
                                     </div>
                                 </form>
                             </div>
@@ -231,12 +253,18 @@
                                 <thead>
                                 <tr>
                                     <th>Size giày</th>
+                                    <th>Màu sắc</th>
+                                    <th>Chất liệu</th>
+                                    <th>Dế giày</th>
                                     <th>Số lượng có sẵn</th>
                                 </tr>
                                 </thead>
                                 <tbody class="list-product-size">
                                 <th:block th:each="ps : ${productSizes}">
                                     <tr>
+                                        <td th:text="${ps.size}" class="product-size" th:data-size="${ps.size}"></td>
+                                        <td th:text="${ps.size}" class="product-size" th:data-size="${ps.size}"></td>
+                                        <td th:text="${ps.size}" class="product-size" th:data-size="${ps.size}"></td>
                                         <td th:text="${ps.size}" class="product-size" th:data-size="${ps.size}"></td>
                                         <td th:text="${ps.quantity}" class="product-count"></td>
                                     </tr>
