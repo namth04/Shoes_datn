@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{/layout/layout_admin :: main-fragment(
+                                                ~{:: title},
+                                                'header',
+                                                'sidebar',
+                                                ~{:: #css-resources},
+                                                ~{:: #js-resources},
+                                                ~{:: #main-content}
+                                               )}">
+<head>
+    <meta charset="UTF-8">
+    <title>Danh sách chất liệu</title>
+    <th:block id="css-resources">
+        <link rel="stylesheet" th:href="@{/adminlte/pagination/simplePagination.css}">
+        <link rel="stylesheet" th:href="@{/adminlte/css/custom.css}">
+    </th:block>
+</head>
+<body>
+<section role="main" class="content-body" id="main-content">
+    <header class="page-header">
+        <div class="right-wrapper text-right">
+            <ol class="breadcrumbs">
+                <li>
+                    <a href="index.html">
+                        <i class="bx bx-home-alt"></i>
+                    </a>
+                </li>
+                <li><span>Bảng</span></li>
+                <li><span>Chất liệu</span></li>
+            </ol>
+            <a class="sidebar-right-toggle" data-open="sidebar-right"><i
+                    class="fas fa-chevron-left"></i></a>
+        </div>
+    </header>
+
+    <section class="card">
+        <header class="card-header">
+            <div class="card-actions">
+                <a href="#" class="card-action card-action-toggle" data-card-toggle></a>
+                <a href="#" class="card-action card-action-dismiss" data-card-dismiss></a>
+            </div>
+            <h2 class="card-title">Danh sách chất liệu</h2>
+        </header>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="mb-3">
+                        <button id="addToTable" class="btn btn-primary" data-toggle="modal"
+                                data-target="#modal-add-new-material">Thêm mới chất liệu <i
+                                class="fas fa-plus"></i></button>
+                        <a href="/admin/materials" class="btn btn-primary">Làm mới <i
+                                class="fas fa-redo-alt"></i></a>
+                        <button id="btn-search" class="btn btn-primary">Tìm kiếm <i
+                                class="fas fa-search"></i></button>
+                    </div>
+                </div>
+            </div>
+            <table class="table table-bordered table-striped mb-0" id="datatable-editable">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tên chất liệu</th>
+                    <th>Trạng thái chất liệu</th>
+                    <th>Ngày tạo</th>
+                    <th>Ngày sửa</th>
+                    <th>Thao tác</th>
+                </tr>
+                <tr>
+                    <form method="GET" id="search-form">
+                        <th>
+                            <input type="text" name="id" id="id" class="form-control search-input">
+                        </th>
+                        <th>
+                            <input type="text" name="name" id="name" class="form-control search-input">
+                        </th>
+                        <th>
+                            <select name="status" class="form-control search-select" id="status">
+                                <option value="">Tất cả</option>
+                                <option value="0">Ẩn</option>
+                                <option value="1">Hiển thị</option>
+                            </select>
+                        </th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <input type="hidden" name="page" id="page">
+                    </form>
+                </tr>
+                </thead>
+                <tbody>
+                <th:block th:each="material : ${materials}">
+                    <tr data-item-id="1" th:data-id="${material.id}">
+                        <td th:text="${material.id}"></td>
+                        <td class="material-name" th:data-id="${material.id}" th:text="${material.name}"></td>
+                        <td>
+                            <label class="switch" style="margin-left: 60px;">
+                                <input type="checkbox" th:checked="${material.status}" disabled
+                                       th:data-id="${material.id}" class="material-status">
+                                <span class="slider round"></span>
+                            </label>
+                        </td>
+                        <td th:text="${#dates.format(material.createdAt, 'dd-MM-yyyy HH:mm')}"></td>
+                        <td th:text="${#dates.format(material.modifiedAt, 'dd-MM-yyyy HH:mm')}"></td>
+                        <td class="actions">
+                            <a href="#" class="edit-material" th:data-id="${material.id}"><i
+                                    class="fas fa-pencil-alt"></i></a>
+                            <a href="#" class="delete-material" th:data-id="${material.id}"><i
+                                    class="far fa-trash-alt"></i></a>
+                        </td>
+                    </tr>
+                </th:block>
+                </tbody>
+            </table>
+            <br>
+            <!-- Pagination -->
+            <nav aria-label="Page navigation">
+                <ul class="pagination" id="pagination"></ul>
+            </nav>
+        </div>
+    </section>
+
+    <!-- Modal thêm chất liệu-->
+    <div class="modal fade" id="modal-add-new-material" tabindex="-1" role="dialog"
+         aria-labelledby="modalAddNewMaterial"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Thêm chất liệu</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Đóng">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="required-label" for="new-material">Tên chất liệu</label>
+                        <input type="text" class="form-control" id="new-material">
+                        <span class="invalid-feedback" id="invalid-feedback-new-material">Độ dài tên chất liệu từ 1 - 20 ký tự</span>
+                    </div>
+                    <br>
+                    <label>Trạng thái</label>
+                    <br>
+                    <label class="switch">
+                        <input type="checkbox" id="new_status">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary btn-add-new-material">Thêm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal sửa chất liệu-->
+    <div class="modal fade" id="modal-update-material" tabindex="-1" role="dialog" aria-labelledby="modalUpdateMaterial"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Chỉnh sửa chất liệu</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Đóng">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" hidden id="update-material-id">
+                    <div class="form-group">
+                        <label class="required-label" for="update-material">Tên chất liệu</label>
+                        <input type="text" class="form-control" id="update-material">
+                        <span class="invalid-feedback" id="invalid-feedback-update-material">Độ dài tên chất liệu từ 1 - 20 ký tự</span>
+                    </div>
+                    <br>
+                    <label>Trạng thái</label>
+                    <br>
+                    <label class="switch">
+                        <input type="checkbox" id="update_status">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary btn-update-material">Sửa</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<th:block id="js-resources">
+    <script type="text/javascript" th:src="@{/adminlte/pagination/jquery.simplePagination.js}"></script>
+    <script type="text/javascript" th:src="@{/adminlte/js/table.js}"></script>
+    <script type="text/javascript" th:src="@{/adminlte/js/list.min.js}"></script>
+
+<!--    <script th:inline="javascript">-->
+<!--        let id, name, status, page;-->
+
+<!--$(function () {-->
+<!--    // Định nghĩa hàm getQueryVariables-->
+<!--    function getQueryVariables() {-->
+<!--        let query = window.location.search.substring(1); // Lấy chuỗi truy vấn sau dấu ?-->
+<!--        let vars = {};-->
+<!--        query.split("&").forEach(function (param) {-->
+<!--            let pair = param.split("=");-->
+<!--            vars[pair[0]] = decodeURIComponent(pair[1] || ""); // Giải mã chuỗi truy vấn và xử lý giá trị rỗng-->
+<!--        });-->
+<!--        return vars;-->
+<!--    }-->
+
+<!--    // Lấy các tham số từ chuỗi truy vấn URL-->
+<!--    let vars = getQueryVariables();-->
+<!--    id = vars['id'];-->
+<!--    name = vars['name'];-->
+<!--    status = vars['status'];-->
+<!--    page = vars['page'];-->
+
+<!--    // Gán giá trị vào các trường tương ứng trên form-->
+<!--    $('#id').val(id);-->
+<!--    $('#name').val(name);-->
+<!--    $('#status').val(status);-->
+<!--    if (page == null || page === '' || page === 'NaN') page = 1; // Kiểm tra và đặt giá trị mặc định cho trang-->
+
+<!--    // Gọi hàm loadMaterial để tải danh sách chất liệu-->
+<!--    loadMaterial(page, id, name, status);-->
+
+<!--    // Ẩn thông báo lỗi khi nhấn vào nút Thêm-->
+<!--    $('#addToTable').click(function () {-->
+<!--        $('#invalid-feedback-new-material').hide();-->
+<!--    });-->
+
+<!--    // Thêm chất liệu mới khi nhấn vào nút-->
+<!--    $('.btn-add-new-material').click(function () {-->
+<!--        let newMaterialName = $('#new-material').val().trim(); // Lấy tên chất liệu mới-->
+<!--        let newStatus = $('#new_status').is(':checked') ? 1 : 0; // Kiểm tra trạng thái-->
+
+<!--        // Kiểm tra độ dài của tên chất liệu-->
+<!--        if (newMaterialName.length < 1 || newMaterialName.length > 20) {-->
+<!--            $('#invalid-feedback-new-material').show(); // Hiển thị thông báo lỗi nếu không hợp lệ-->
+<!--            return;-->
+<!--        } else {-->
+<!--            $('#invalid-feedback-new-material').hide(); // Ẩn thông báo lỗi-->
+<!--        }-->
+
+<!--        // Gửi yêu cầu POST để thêm chất liệu mới-->
+<!--        $.ajax({-->
+<!--            type: "POST",-->
+<!--            url: '/admin/materials',-->
+<!--            contentType: 'application/json',-->
+<!--            data: JSON.stringify({-->
+<!--                name: newMaterialName,-->
+<!--                status: newStatus-->
+<!--            }),-->
+<!--            success: function () {-->
+<!--                alert('Thêm chất liệu thành công');-->
+<!--                $('#modal-add-new-material').modal('hide'); // Đóng modal sau khi thành công-->
+<!--                $('#new-material').val(''); // Xóa giá trị trong input-->
+<!--                loadMaterial(page, id, name, status); // Tải lại danh sách chất liệu-->
+<!--            },-->
+<!--            error: function () {-->
+<!--                alert('Thêm chất liệu không thành công'); // Thông báo nếu thêm thất bại-->
+<!--            }-->
+<!--        });-->
+<!--    });-->
+<!--});-->
+
+<!--            // Chỉnh sửa chất liệu-->
+<!--            $(document).on('click', '.edit-material', function () {-->
+<!--                let materialId = $(this).data('id');-->
+<!--                $.ajax({-->
+<!--                    type: 'GET',-->
+<!--                    url: '/admin/materials/' + materialId,-->
+<!--                    success: function (data) {-->
+<!--                        $('#update-material-id').val(data.id);-->
+<!--                        $('#update-material').val(data.name);-->
+<!--                        $('#update_status').prop('checked', data.status);-->
+<!--                        $('#modal-update-material').modal('show');-->
+<!--                    }-->
+<!--                });-->
+<!--            });-->
+
+<!--            // Xóa chất liệu-->
+<!--            $(document).on('click', '.delete-material', function () {-->
+<!--                let materialId = $(this).data('id');-->
+<!--                if (confirm('Bạn có chắc chắn muốn xóa chất liệu này?')) {-->
+<!--                    $.ajax({-->
+<!--                        type: 'DELETE',-->
+<!--                        url: '/admin/materials/' + materialId,-->
+<!--                        success: function () {-->
+<!--                            alert('Xóa chất liệu thành công');-->
+<!--                            loadMaterial(page, id, name, status);-->
+<!--                        },-->
+<!--                        error: function () {-->
+<!--                            alert('Xóa chất liệu không thành công');-->
+<!--                        }-->
+<!--                    });-->
+<!--                }-->
+<!--            });-->
+
+<!--            // Cập nhật chất liệu-->
+<!--            $('.btn-update-material').click(function () {-->
+<!--                let materialId = $('#update-material-id').val();-->
+<!--                let updatedName = $('#update-material').val().trim();-->
+<!--                let updatedStatus = $('#update_status').is(':checked') ? 1 : 0;-->
+
+<!--                if (updatedName.length < 1 || updatedName.length > 20) {-->
+<!--                    $('#invalid-feedback-update-material').show();-->
+<!--                    return;-->
+<!--                } else {-->
+<!--                    $('#invalid-feedback-update-material').hide();-->
+<!--                }-->
+
+<!--                $.ajax({-->
+<!--                    type: 'PUT',-->
+<!--                    url: '/admin/materials/' + materialId,-->
+<!--                    contentType: 'application/json',-->
+<!--                    data: JSON.stringify({-->
+<!--                        id: materialId,-->
+<!--                        name: updatedName,-->
+<!--                        status: updatedStatus-->
+<!--                    }),-->
+<!--                    success: function () {-->
+<!--                        alert('Cập nhật chất liệu thành công');-->
+<!--                        $('#modal-update-material').modal('hide');-->
+<!--                        loadMaterial(page, id, name, status);-->
+<!--                    },-->
+<!--                    error: function () {-->
+<!--                        alert('Cập nhật chất liệu không thành công');-->
+<!--                    }-->
+<!--                });-->
+<!--            });-->
+<!--        });-->
+
+
+
+
+<!--    </script>-->
+    <script th:inline="javascript">
+        let id, name, status, page;
+        $(function () {
+            let vars = parseUrl();
+            id = vars["id"] || ""
+            name = vars["name"] || ""
+            status = vars["status"] || ""
+            page = vars["page"] || "0"
+
+            $('#id').val(id)
+            $('#name').val(name)
+            $('#status').val(status)
+            $('#page').val(page)
+
+            pagination([[${totalPages}]], [[${currentPage}]])
+        });
+
+<!--        $(function () {-->
+<!--            let imgs = [[${images}]];-->
+<!--            let tmp = [];-->
+<!--            for (img of imgs) {-->
+<!--                tmp.push({"grid-item-img": img})-->
+<!--            }-->
+<!--            initListImg(tmp);-->
+<!--        })-->
+
+<!--        $('.btn-choose-img').click(function () {-->
+<!--            let url = $('#list-user-img .grid-item.choosen .grid-item-img').attr('src');-->
+<!--            if (url == "" || url == null) {-->
+<!--                toastr.warning("Bạn chưa chọn ảnh");-->
+<!--                return;-->
+<!--            }-->
+<!--            closeChooseImgModal();-->
+<!--            $('.thumbnail-container').show();-->
+<!--            $('.invalid-feedback-thumbnail').hide();-->
+<!--            $('.preview-img').attr('src', url);-->
+<!--        })-->
+
+        $("#modal-add-new-material").on("hidden.bs.modal", function () {
+            closeModalInsertUpdate();
+        });
+
+        $("#modal-update-material").on("hidden.bs.modal", function () {
+            closeModalInsertUpdate();
+        });
+
+        function closeModalInsertUpdate() {
+            $('.thumbnail-container').hide();
+            $('#new-material').val('');
+            $('#update-material').val('');
+            $('#update-material-id').val('');
+            $('.preview-img').attr('src', '');
+            $('.invalid-feedback').hide();
+        }
+
+        $('.btn-add-new-material').click(function () {
+            let newMaterial = $('#new-material').val();
+            let thumbnail = $('.preview-img').attr('src');
+            let status = false;
+            if ($("#new_status").is(":checked")) {
+                status = true;
+            }
+            isValid = true;
+
+            if (newMaterial.length === 0) {
+                $('#invalid-feedback-new-material').show();
+                isValid = false;
+            }
+            if (typeof thumbnail == 'undefined' || thumbnail == '') {
+                $('.invalid-feedback-thumbnail').show();
+                isValid = false;
+            }
+
+            if (isValid) {
+                req = {
+                    name: newMaterial,
+                    thumbnail: thumbnail,
+                    status: status
+                }
+                var myJSON = JSON.stringify(req);
+                $.ajax({
+                    url: '/api/admin/materials',
+                    type: 'POST',
+                    data: myJSON,
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        toastr.success("Tạo chất liệu thành công");
+                        $('.modal').modal('hide');
+                        setTimeout(() => location.reload(), 500);
+                    },
+                    error: function (data) {
+                        toastr.warning(data.responseJSON.message);
+                    }
+                });
+            }
+        });
+
+        let materialId;
+        $('.edit-material').click(function () {
+            brandId = $(this).data('id');
+            $.ajax({
+                url: "/api/admin/materials/" + materialId,
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $('.thumbnail-container').show();
+                    $("#update-material").val(data.name);
+                    $('.preview-img').attr('src',data.thumbnail);
+                    if (data.status == 1) {
+                        $("#update_status").prop('checked', true)
+                    } else {
+                        $("#update_status").prop('checked', false)
+                    }
+                    $('#modal-update-material').modal('show');
+                }
+            })
+        });
+
+        $(".btn-update-material").click(function (){
+            let updateMaterial = $('#update-material').val();
+            let thumbnail = $('.preview-img').attr('src');
+            let status = false;
+            if ($("#update_status").is(":checked")) {
+                status = true;
+            }
+            isValid = true;
+
+            if (updateMaterial.length === 0) {
+                $('#invalid-feedback-new-material').show();
+                isValid = false;
+            }
+            if (typeof thumbnail == 'undefined' || thumbnail == '') {
+                $('.invalid-feedback-thumbnail').show();
+                isValid = false;
+            }
+
+            if (isValid) {
+                req = {
+                    id:materialId,
+                    name: updateMaterial,
+                    thumbnail: thumbnail,
+                    status: status
+                }
+                var myJSON = JSON.stringify(req);
+                $.ajax({
+                    url: '/api/admin/materials/'+materialId,
+                    type: 'PUT',
+                    data: myJSON,
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        toastr.success("Sửa chất liệu thành công");
+                        $('.modal').modal('hide');
+                        setTimeout(() => location.reload(), 500);
+                    },
+                    error: function (data) {
+                        toastr.warning(data.responseJSON.message);
+                    }
+                });
+            }
+        })
+
+        $(".delete-material").on("click",function (){
+           let id = $(this).data('id');
+            swal({
+                title: 'Bạn chắc chắn muốn xóa!',
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                cancelButtonText: "Không",
+                confirmButtonText: "Có",
+            }).then(function (rs){
+                if (rs.value){
+                    $.ajax({
+                        url:"/api/admin/materials/"+ id,
+                        type: "DELETE",
+                        success: function (data){
+                            toastr.success("Xóa chất liệu thành công!");
+                            setTimeout(() => location.reload(), 500);
+                        },
+                        error: function (error){
+                            toastr.warning(error.responseJSON.message);
+                        }
+                    })
+                }
+            })
+        })
+
+    </script>
+</th:block>
+</body>
+</html>
