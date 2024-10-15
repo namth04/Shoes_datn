@@ -63,7 +63,7 @@
                     <th>Trạng thái</th>
                     <th width="20%">Sản phẩm</th>
                     <th>Ngày tạo</th>
-                    <th>Ngày sửa</th>
+
                 </tr>
                 <tr>
                 <tr class="heading-search">
@@ -121,9 +121,6 @@
                         <td th:text="${order.product.name}"></td>
                         <td>
                             <span th:text="${#dates.format(order.createdAt, 'dd-MM-yyyy HH:mm')}"></span>
-                        </td>
-                        <td>
-                            <span th:text="${#dates.format(order.modifiedAt, 'dd-MM-yyyy HH:mm')}"></span>
                         </td>
                     </tr>
                 </th:block>

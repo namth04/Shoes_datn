@@ -1,4 +1,4 @@
-package com.fpoly.datn.model.request;
+package com.fpoly.datn.model.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @Setter
 @Getter
-public class CreateRateProductRequest {
-    private String productId;
-    private int rate;
+public class MaterialDTO {
+    private long id;
+    private String name;
+    private String description;
+    private boolean status;
 }

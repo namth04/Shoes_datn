@@ -35,6 +35,11 @@ public class HomeController {
     private BrandService brandService;
 
     @Autowired
+    private MaterialService materialService;
+
+    @Autowired
+    private SoleService soleService;
+    @Autowired
     private PostService postService;
 
     @Autowired
@@ -176,7 +181,22 @@ public class HomeController {
             brandIds.add(brand.getId());
         }
         model.addAttribute("brandIds", brandIds);
-
+  //
+        List<Material> materials = materialService.getListMaterial();
+        model.addAttribute("materials",materials);
+        List<Long> materialIds = new ArrayList<>();
+        for (Material material : materials) {
+            materialIds.add(material.getId());
+        }
+        model.addAttribute("materialIds", materialIds);
+        // danh sách đế giày
+        List<Sole> soles = soleService.getListSole();
+        model.addAttribute("soles",soles);
+        List<Long> soleIds = new ArrayList<>();
+        for (Sole sole : soles) {
+            soleIds.add(sole.getId());
+        }
+        model.addAttribute("soleIds", soleIds);
         //Lấy danh sách danh mục
         List<Category> categories = categoryService.getListCategories();
         model.addAttribute("categories",categories);
@@ -190,7 +210,7 @@ public class HomeController {
         model.addAttribute("sizeVn", SIZE_VN);
 
         //Lấy danh sách sản phẩm
-        FilterProductRequest req = new FilterProductRequest(brandIds, categoryIds, new ArrayList<>(), (long) 0, Long.MAX_VALUE, 1);
+        FilterProductRequest req = new FilterProductRequest(brandIds,materialIds, categoryIds,soleIds, new ArrayList<>(), (long) 0, Long.MAX_VALUE, 1);
         PageableDTO result = productService.filterProduct(req);
         model.addAttribute("totalPages", result.getTotalPages());
         model.addAttribute("currentPage", result.getCurrentPage());
