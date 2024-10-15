@@ -6,7 +6,7 @@ import com.fpoly.datn.exception.InternalServerException;
 import com.fpoly.datn.exception.NotFoundException;
 import com.fpoly.datn.repository.ProductRepository;
 import com.fpoly.datn.repository.StatisticRepository;
-import com.vuhien.application.entity.*;
+//import com.vuhien.application.entity.*;
 import com.fpoly.datn.model.dto.OrderDetailDTO;
 import com.fpoly.datn.model.dto.OrderInfoDTO;
 import com.fpoly.datn.model.request.CreateOrderRequest;
