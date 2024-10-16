@@ -74,7 +74,7 @@ public class MaterialController {
         return ResponseEntity.ok("Xóa chất liệu thành công!");
     }
     @GetMapping("/api/admin/materials/{id}")
-    public ResponseEntity<Object> getBrandById(@PathVariable long id){
+    public ResponseEntity<Object> getMaterialById(@PathVariable long id){
         Material material = materialService.getMaterialById(id);
         return ResponseEntity.ok(material);
     }

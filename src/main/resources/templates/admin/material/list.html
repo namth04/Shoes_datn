@@ -48,9 +48,9 @@
                 <div class="col-sm-4">
                     <div class="mb-3">
                         <button id="addToTable" class="btn btn-primary" data-toggle="modal"
-                                data-target="#modal-add-new-sole">Thêm mới chất liệu <i
+                                data-target="#modal-add-new-material">Thêm mới chất liệu <i
                                 class="fas fa-plus"></i></button>
-                        <a href="/admin/soles" class="btn btn-primary">Refresh <i
+                        <a href="/admin/materials" class="btn btn-primary">Refresh <i
                                 class="fas fa-redo-alt"></i></a>
                         <button id="btn-search" class="btn btn-primary">Tìm kiếm <i
                                 class="fas fa-search"></i></button>
@@ -134,7 +134,7 @@
 
     </section>
 
-    <!-- Modal add new sole-->
+    <!-- Modal add new material-->
     <div class="modal fade" id="modal-add-new-material" tabindex="-1" role="dialog" aria-labelledby="modalAddNewMaterial"
          aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -283,9 +283,9 @@
 
         function closeModalInsertUpdate() {
             $('.thumbnail-container').hide();
-            $('#new-sole').val('');
-            $('#update-sole').val('');
-            $('#update-sole-id').val('');
+            $('#new-material').val('');
+            $('#update-material').val('');
+            $('#update-material-id').val('');
             $('.preview-img').attr('src', '');
             $('.invalid-feedback').hide();
         }
@@ -300,18 +300,18 @@
             isValid = true;
 
             if (newMaterial.length === 0) {
-                $('#invalid-feedback-new-sole').show();
+                $('#invalid-feedback-new-material').show();
                 isValid = false;
             }
-            if (typeof thumbnail == 'undefined' || thumbnail == '') {
-                $('.invalid-feedback-thumbnail').show();
-                isValid = false;
-            }
+            // if (typeof thumbnail == 'undefined' || thumbnail == '') {
+            //     $('.invalid-feedback-thumbnail').show();
+            //     isValid = false;
+            // }
 
             if (isValid) {
                 req = {
-                    name: newSole,
-                    thumbnail: thumbnail,
+                    name: newMaterial,
+                    // thumbnail: thumbnail,
                     status: status
                 }
                 var myJSON = JSON.stringify(req);
@@ -336,7 +336,7 @@
         $('.edit-material').click(function () {
             materialId = $(this).data('id');
             $.ajax({
-                url: "/api/admin/material/" + materialId,
+                url: "/api/admin/materials/" + materialId,
                 type: "GET",
                 contentType: "application/json; charset=utf-8",
                 success: function (data) {
