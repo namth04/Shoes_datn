@@ -621,7 +621,7 @@
             let req = {
                 color: color,
                 colorCount: colorCount,
-                product_id: [[${product.id}]]
+                product_id: [[${product.id}]] // Ensure this resolves to the correct value
             };
 
             console.log(req); // Debugging
@@ -642,13 +642,34 @@
                     toastr.success("Cập nhật thành công");
                 },
                 error: function (data) {
-                    toastr.warning(data.responseJSON.message);
+                    // Check if responseJSON exists and has a message property
+                    let errorMessage = data.responseJSON ? data.responseJSON.message : 'Có lỗi xảy ra';
+                    toastr.warning(errorMessage);
                 },
                 complete: function () {
                     $('#invalid-feedback-color').hide();
                 }
             });
+            $.ajax({
+                url: '/api/admin/products/colors',
+                type: 'PUT',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({
+                    color: 'Black',
+                    colorCount: 12,
+                    product_id: 'bkAulB'
+                }),
+                success: function (data) {
+                    console.log('Success:', data);
+                },
+                error: function (data) {
+                    console.log('Error:', data.responseText);
+                }
+            });
+
         });
+
+
     </script>
 
 </th:block>

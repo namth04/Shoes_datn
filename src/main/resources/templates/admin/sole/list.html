@@ -305,15 +305,15 @@
                 $('#invalid-feedback-new-sole').show();
                 isValid = false;
             }
-            if (typeof thumbnail == 'undefined' || thumbnail == '') {
-                $('.invalid-feedback-thumbnail').show();
-                isValid = false;
-            }
+            // if (typeof thumbnail == 'undefined' || thumbnail == '') {
+            //     $('.invalid-feedback-thumbnail').show();
+            //     isValid = false;
+            // }
 
             if (isValid) {
                 req = {
                     name: newSole,
-                    thumbnail: thumbnail,
+                    // thumbnail: thumbnail,
                     status: status
                 }
                 var myJSON = JSON.stringify(req);

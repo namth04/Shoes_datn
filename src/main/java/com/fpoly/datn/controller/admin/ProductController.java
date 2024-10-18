@@ -32,7 +32,8 @@ import java.io.*;
 import java.nio.file.Files;
 import java.util.List;
 
-import static com.fpoly.datn.config.Contant.COLOR_VN;
+
+import static com.fpoly.datn.config.Contant.COlOR_VN;
 import static com.fpoly.datn.config.Contant.SIZE_VN;
 
 @Slf4j
@@ -150,7 +151,7 @@ public class ProductController {
         //Lấy danh sách size
         model.addAttribute("sizeVN", SIZE_VN);
 
-        model.addAttribute("colorVN", COLOR_VN);
+        model.addAttribute("colorVN", COlOR_VN);
 
         //Lấy size của sản phẩm
         List<ProductSize> productSizes = productService.getListSizeOfProduct(id);

@@ -291,26 +291,24 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void createColorCount(CreateColorCountRequest createColorCountRequest) {
 
-        //Kiểm trả color
-        boolean isValid = false;
-        for (String color : COLOR_VN) {
-            if (color == createColorCountRequest.getColor()) {
-                isValid = true;
-                break;
-            }
-        }
-        if (!isValid) {
+        // Kiểm tra color
+        if (!COlOR_VN.contains(createColorCountRequest.getColor())) {
             throw new BadRequestException("Color không hợp lệ");
         }
 
-        //Kiểm trả sản phẩm có tồn tại
-        Optional<Product> product = productRepository.findById(createColorCountRequest.getProductId());
-        if (product.isEmpty()) {
-            throw new NotFoundException("Không tìm thấy sản phẩm trong hệ thống!");
+        // Kiểm tra sản phẩm có tồn tại
+        Product product = productRepository.findById(createColorCountRequest.getProductId())
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy sản phẩm trong hệ thống!"));
+
+        // Kiểm tra xem màu đã tồn tại cho sản phẩm chưa
+        Optional<ProductColor> existingProductColor = productColorRepository
+                .findByProductIdAndColor(createColorCountRequest.getProductId(), createColorCountRequest.getColor());
+
+        if (existingProductColor.isPresent()) {
+            throw new BadRequestException("Màu sắc cho sản phẩm đã tồn tại!");
         }
 
-//        Optional<ProductSize> productSizeOld = productSizeRepository.getProductSizeBySize(createSizeCountRequest.getSize(),createSizeCountRequest.getProductId());
-
+        // Tạo mới ProductColor
         ProductColor productColor = new ProductColor();
         productColor.setProductId(createColorCountRequest.getProductId());
         productColor.setColor(createColorCountRequest.getColor());

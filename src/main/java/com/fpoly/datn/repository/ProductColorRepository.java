@@ -8,9 +8,11 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProductColorRepository extends JpaRepository<ProductColor, Long> {
+    Optional<ProductColor> findByProductIdAndColor(String productId, String color);
 
     // Lấy màu của sản phẩm
     @Query(nativeQuery = true, value = "SELECT pc.color FROM product_color pc WHERE pc.product_id = ?1 AND pc.quantity > 0")
@@ -32,10 +34,10 @@ public interface ProductColorRepository extends JpaRepository<ProductColor, Long
     @Transactional
     @Modifying
     @Query(nativeQuery = true, value = "UPDATE product_color SET quantity = quantity + 1 WHERE product_id = ?1 AND color = ?2")
-    void plusOneProductByColor(String id, String color);
+    public void plusOneProductByColor(String id, String color);
 
     @Transactional
     @Modifying
     @Query(nativeQuery = true, value = "DELETE FROM product_color WHERE product_id = ?1")
-    void deleteByProductId(String id);
+     public void deleteByProductId(String id);
 }

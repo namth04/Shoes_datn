@@ -70,12 +70,12 @@ public class SoleController {
     }
 
     @DeleteMapping("/api/admin/soles/{id}")
-    public ResponseEntity<Object> deleteBrand(@PathVariable long id) {
+    public ResponseEntity<Object> deleteSole(@PathVariable long id) {
         soleService.deleteSole(id);
         return ResponseEntity.ok("Xóa đế giày thành công!");
     }
     @GetMapping("/api/admin/soles/{id}")
-    public ResponseEntity<Object> getBrandById(@PathVariable long id){
+    public ResponseEntity<Object> getSoleById(@PathVariable long id){
         Sole sole = soleService.getSoleById(id);
         return ResponseEntity.ok(sole);
     }
