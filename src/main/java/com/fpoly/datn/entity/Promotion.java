@@ -32,6 +32,8 @@ public class Promotion {
     private boolean isActive;
     @Column(name = "is_public",columnDefinition = "TINYINT(1)")
     private boolean isPublic;
+    @Column(name ="quantity")
+    private int quantity;
     @Column(name = "created_at")
     private Timestamp createdAt;
     @Column(name = "expired_at")

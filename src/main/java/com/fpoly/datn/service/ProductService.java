@@ -1,12 +1,14 @@
 package com.fpoly.datn.service;
 
 import com.fpoly.datn.entity.Product;
+import com.fpoly.datn.entity.ProductColor;
 import com.fpoly.datn.entity.ProductSize;
 import com.fpoly.datn.entity.Promotion;
 import com.fpoly.datn.model.dto.DetailProductInfoDTO;
 import com.fpoly.datn.model.dto.PageableDTO;
 import com.fpoly.datn.model.dto.ProductInfoDTO;
 import com.fpoly.datn.model.dto.ShortProductInfoDTO;
+import com.fpoly.datn.model.request.CreateColorCountRequest;
 import com.fpoly.datn.model.request.CreateProductRequest;
 import com.fpoly.datn.model.request.CreateSizeCountRequest;
 import com.fpoly.datn.model.request.FilterProductRequest;
@@ -20,7 +22,7 @@ import java.util.List;
 public interface ProductService {
 
     //Lấy sản phẩm
-    Page<Product> adminGetListProduct(String id, String name, String category, String brand, Integer page);
+    Page<Product> adminGetListProduct(String id, String name, String category, String brand,String material, String sole, Integer page);
 
     //Tạo sản phẩm
     Product createProduct(CreateProductRequest createProductRequest);
@@ -54,20 +56,26 @@ public interface ProductService {
 
     //Lấy size có sẵn
     List<Integer> getListAvailableSize(String id);
+    List<String> getListAvailableColor(String id);
 
-    //Nhập số lượng theo size
+    //Nhập số lượng theo size, color
     void createSizeCount(CreateSizeCountRequest createSizeCountRequest);
 
-    //Lấy size của sản phẩm
+    void createColorCount(CreateColorCountRequest createColorCountRequest);
+
+    //Lấy size, màu của sản phẩm
     List<ProductSize> getListSizeOfProduct(String id);
+    List<ProductColor> getListColorOfProduct(String id);
 
     List<ShortProductInfoDTO> getListProduct();
 
-    //Lấy sản phẩm có sẵn size
+    //Lấy sản phẩm có sẵn size và color
     List<ShortProductInfoDTO> getAvailableProducts();
+
 
     //Check size sản phẩm
     boolean checkProductSizeAvailable(String id, int size);
+    boolean checkProductColorAvailable(String id, String color);
 
     //Kiểm tra sản phẩm có khuyến mại
     List<ProductInfoDTO> checkPublicPromotion(List<ProductInfoDTO> products);

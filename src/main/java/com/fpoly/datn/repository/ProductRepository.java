@@ -22,20 +22,17 @@ public interface ProductRepository extends JpaRepository<Product, String> {
     Product findByName(String name);
 
     //Lấy tất cả sản phẩm
-    @Query(value = "SELECT * FROM product pro right join (SELECT DISTINCT p.* FROM product p " +
+    @Query(value = "SELECT * FROM product pro RIGHT JOIN (SELECT DISTINCT p.* FROM product p " +
             "INNER JOIN product_category pc ON p.id = pc.product_id " +
             "INNER JOIN category c ON c.id = pc.category_id " +
             "WHERE p.id LIKE CONCAT('%',?1,'%') " +
             "AND p.name LIKE CONCAT('%',?2,'%') " +
             "AND c.id LIKE CONCAT('%',?3,'%') " +
-            "AND p.brand_id LIKE CONCAT('%',?4,'%')) as tb1 on pro.id=tb1.id", nativeQuery = true)
-    Page<Product> adminGetListProducts(String id, String name, String category, String brand, Pageable pageable);
-
-//    @Query(value = "SELECT NEW com.vuhien.application.model.dto.ProductInfoDTO(p.id, p.name, p.slug, p.price ,p.images ->> '$[0]', p.total_sold) " +
-//            "FROM product p " +
-//            "WHERE p.status = 1 " +
-//            "ORDER BY p.created_at DESC limit ?1",nativeQuery = true)
-//    List<ProductInfoDTO> getListBestSellProducts(int limit);
+            "AND p.brand_id LIKE CONCAT('%',?4,'%') " +
+            "AND p.material_id LIKE CONCAT('%',?5,'%') " +
+            "AND p.sole_id LIKE CONCAT('%',?6,'%')) AS tb1 ON pro.id=tb1.id",
+            nativeQuery = true)
+    Page<Product> adminGetListProducts(String id, String name, String category, String brand, String material, String sole, Pageable pageable);
 
     //Lấy sản phẩm được bán nhiều
     @Query(nativeQuery = true,name = "getListBestSellProducts")
@@ -67,6 +64,10 @@ public interface ProductRepository extends JpaRepository<Product, String> {
     @Query(value = "UPDATE product SET total_sold = total_sold - 1 WHERE id = ?1", nativeQuery = true)
     void minusOneProductTotalSold(String productId);
 
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE promotion SET quantity = quantity - 1 WHERE id = ?1", nativeQuery = true)
+    void minusOnePromotion(String productId);
     //Cộng một sản phẩm đã bán
     @Transactional
     @Modifying

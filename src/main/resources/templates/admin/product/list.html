@@ -18,7 +18,6 @@
 <body>
 <section role="main" class="content-body" id="main-content">
     <header class="page-header">
-        <!--        <h2>Editable Tables</h2>-->
         <div class="right-wrapper text-right">
             <ol class="breadcrumbs">
                 <li>
@@ -67,9 +66,9 @@
                     <th>Ảnh</th>
                     <th>Nhãn hiệu</th>
                     <th>Danh mục</th>
-                    <th>Giá nhập</th>
+                    <th>Chất Liệu</th>
+                    <th>Đế Giày</th>
                     <th>Giá bán</th>
-                    <th>Ngày tạo</th>
                     <th>Ngày sửa</th>
                     <th>Đã bán</th>
                     <th>Thao tác</th>
@@ -92,17 +91,23 @@
                                 </th:block>
                             </select>
                         </th>
+                        <th></th>
                         <th>
-                            <select name="category" class="form-control search-select" id="category">
+                            <select name="material" class="form-control search-select" id="material">
                                 <option value="">Tất cả</option>
-                                <th:block th:each="category : ${categories}">
-                                    <option th:value="${category.id}" th:text="${category.name}"></option>
+                                <th:block th:each="material : ${materials}">
+                                    <option th:value="${material.id}" th:text="${material.name}"></option>
                                 </th:block>
                             </select>
                         </th>
-                        <th></th>
-                        <th></th>
-                        <th></th>
+                        <th>
+                             <select  name="sole" class="form-control search-select" id="sole">
+                                 <option value="">Tất Cả </option>
+                                 <th:block th:each="sole : ${soles}">
+                                     <option th:value="${sole.id}" th:text="${sole.name}"></option>
+                                 </th:block>
+                             </select>
+                        </th>
                         <th></th>
                         <th></th>
                         <th></th>
@@ -112,36 +117,44 @@
                 </thead>
                 <tbody>
                 <th:block th:each="product : ${products}">
-                    <tr data-item-id="1">
-<!--                        <td><input type="checkbox" id="checkbox_${product.id}" class="myCheckbox" th:value="${product.id}"></td>-->
+                    <tr data-item-id="${product.id}">
+                        <!-- Uncomment if you want to add checkboxes -->
+                        <!-- <td><input type="checkbox" id="checkbox_${product.id}" class="myCheckbox" th:value="${product.id}"></td> -->
                         <td th:text="${product.id}"></td>
                         <td th:text="${product.name}"></td>
                         <td><img th:src="@{${product.images[0]}}" width="60px" height="60px"></td>
                         <td th:text="${product.brand.name}"></td>
                         <td>
-                            <th:block th:each="category,i : ${product.categories}">
-                                <span th:if="${i.first} == true" th:text="${category.name}"></span>
-                                <span th:if="${i.first} == false" th:text="', ' + ${category.name}"></span>
+                            <th:block th:each="category, i : ${product.categories}">
+                                <span th:if="${i.first}" th:text="${category.name}"></span>
+                                <span th:if="${!i.first}" th:text="', ' + ${category.name}"></span>
                             </th:block>
                         </td>
+                        <td th:text="${product.material.name}"></td>
+                        <td th:text="${product.sole.name}"></td>
+
                         <td class="money" th:text="${product.price}"></td>
-                        <td class="money" th:text="${product.salePrice}"></td>
-                        <td th:text="${#dates.format(product.createdAt, 'dd-MM-yyyy')}"></td>
                         <td th:text="${#dates.format(product.modifiedAt, 'dd-MM-yyyy')}"></td>
                         <td th:text="${product.totalSold}"></td>
                         <td class="actions">
-                            <a th:href="@{/admin/products/{slug}/{id}(id=${product.id}, slug=${product.slug})}" class="on-default edit-row"><i class="fas fa-pencil-alt"></i></a>
-                            <a href="#" th:data-id="${product.id}" class="on-default remove-row delete-product"><i class="far fa-trash-alt"></i></a>
+                            <a th:href="@{/admin/products/{slug}/{id}(id=${product.id}, slug=${product.slug})}" class="on-default edit-row">
+                                <i class="fas fa-pencil-alt"></i>
+                            </a>
+                            <a href="#" th:data-id="${product.id}" class="on-default remove-row delete-product">
+                                <i class="far fa-trash-alt"></i>
+                            </a>
                         </td>
                     </tr>
                 </th:block>
                 </tbody>
             </table>
             <br>
+
             <!-- Pagination -->
             <nav aria-label="Page navigation">
                 <ul class="pagination" id="pagination"></ul>
             </nav>
+
         </div>
     </section>
 
@@ -151,7 +164,7 @@
     <script type="text/javascript" th:src="@{/adminlte/pagination/jquery.simplePagination.js}"></script>
     <script type="text/javascript" th:src="@{/adminlte/js/table.js}"></script>
     <script th:inline="javascript">
-        let id, name, category, brand, page;
+        let id, name, category, brand, material, sole, page;
         $(function () {
             $("#checkAll").click(function () {
                 $('input:checkbox').not(this).prop('checked', this.checked);
@@ -167,12 +180,16 @@
             id = vars["id"] || ""
             name = vars["name"] || ""
             brand = vars["brand"] || ""
+            material = vars["material"] || ""
+            sole = vars["sole"] || ""
             category = vars["category"] || ""
             page = vars["page"] || "1"
             $('#page').val(page)
             $('#id').val(id)
             $('#name').val(name)
             $('#brand').val(brand)
+            $('#material').val(material)
+            $('#sole').val(sole)
             $('#category').val(category)
 
             pagination([[${totalPages}]], [[${currentPage}]]);

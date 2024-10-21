@@ -4,6 +4,7 @@ import com.fpoly.datn.entity.*;
 import com.fpoly.datn.exception.BadRequestException;
 import com.fpoly.datn.exception.InternalServerException;
 import com.fpoly.datn.exception.NotFoundException;
+import com.fpoly.datn.repository.ProductColorRepository;
 import com.fpoly.datn.repository.ProductRepository;
 import com.fpoly.datn.repository.StatisticRepository;
 import com.fpoly.datn.model.dto.OrderDetailDTO;
@@ -38,6 +39,8 @@ public class OrderServiceImpl implements OrderService {
     private ProductSizeRepository productSizeRepository;
 
     @Autowired
+    private ProductColorRepository productColorRepository;
+    @Autowired
     private OrderRepository orderRepository;
 
     @Autowired
@@ -71,7 +74,10 @@ public class OrderServiceImpl implements OrderService {
         if (productSize == null) {
             throw new BadRequestException("Size giày sản phẩm tạm hết, Vui lòng chọn sản phẩm khác!");
         }
-
+        ProductColor productColor = productColorRepository.checkProductAndColorAvailable(createOrderRequest.getProductId(), createOrderRequest.getColor());
+        if (productColor == null) {
+            throw new BadRequestException("Màu sắc của sản phẩm tạm hết, Vui lòng chọn màu sắc sản phẩm khác!");
+        }
         //Kiểm tra giá sản phẩm
         if (product.get().getSalePrice() != createOrderRequest.getProductPrice()) {
             throw new BadRequestException("Giá sản phẩm thay đổi, Vui lòng đặt hàng lại!");
