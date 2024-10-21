@@ -64,7 +64,10 @@
                         <a class="nav-link" data-toggle="tab" href="#tabs-2" role="tab">Nhập số lượng sản phẩm</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" data-toggle="tab" href="#tabs-3" role="tab">Thêm ảnh feedback cho sản
+                        <a class="nav-link" data-toggle="tab" href="#tabs-3" role="tab">Thêm màu sắc cho sản phẩm</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" href="#tabs-4" role="tab">Thêm ảnh feedback cho sản
                             phẩm</a>
                     </li>
                 </ul>
@@ -116,6 +119,28 @@
                                                         <th:block th:each="brand : ${brands}">
                                                             <option th:value="${brand.id}" th:text="${brand.name}"
                                                                     th:selected="${product.brand.id == brand.id}"></option>
+                                                        </th:block>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="brand" class="required-label">Chất liệu sản phẩm
+                                                        <span
+                                                                class="required">*</span></label>
+                                                    <select class="form-control" id="material">
+                                                        <th:block th:each="material : ${materials}">
+                                                            <option th:value="${material.id}" th:text="${material.name}"
+                                                                    th:selected="${product.material.id == material.id}"></option>
+                                                        </th:block>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="brand" class="required-label">Đế giày sản phẩm
+                                                        <span
+                                                                class="required">*</span></label>
+                                                    <select class="form-control" id="sole">
+                                                        <th:block th:each="sole : ${soles}">
+                                                            <option th:value="${sole.id}" th:text="${sole.name}"
+                                                                    th:selected="${product.sole.id == sole.id}"></option>
                                                         </th:block>
                                                     </select>
                                                 </div>
@@ -245,9 +270,59 @@
                             </table>
                         </div>
                     </div>
+                    <div class="tab-pane " id="tabs-3" role="tabpanel">
+                            <div class="container mt-4">
+                                <div class="row">
+                                    <form class="form-inline col-12">
+                                        <div class="form-group col-md-4 mb-3">
+                                            <label for="color" class="mr-2">Màu Sắc</label>
+                                            <select class="form-control" id="color">
+                                                <!-- Populate color options using Thymeleaf -->
+                                                <th:block th:each="color : ${colorVN}">
+                                                    <option th:value="${color}" th:text="${color}"></option>
+                                                </th:block>
+                                            </select>
+                                        </div>
+                                        <div class="form-group col-md-4 mb-3">
+                                            <label for="colorCount" class="mr-2">Số lượng</label>
+                                            <input type="number" class="form-control" id="colorCount" min="0" value="0">
+                                        </div>
+                                        <div class="form-group col-md-4 mb-3">
+                                            <label for="" class="mr-2">Thực hiện</label>
+                                            <div class="d-flex align-items-center">
+                                                <button type="button" class="btn btn-primary btn-update-color-count">
+                                                    Cập nhật <i class="fas fa-plus"></i>
+                                                </button>
+                                                <span class="invalid-feedback ml-3" id="invalid-feedback-color">
+                            Vui lòng nhập số lượng
+                        </span>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        <div>
+                            <table class="table table-striped table-bordered table-hover">
+                                <thead>
+                                <tr>
+                                    <th>Màu Sắc</th>
+                                    <th>Số lượng màu sắc</th>
+                                </tr>
+                                </thead>
+                                <tbody class="list-product-color">
+                                <th:block th:each="ps : ${productColors}">
+                                    <tr>
+                                        <td th:text="${ps.color}" class="product-color" th:data-color="${ps.color}"></td>
+                                        <td th:text="${ps.quantity}" class="product-count-color"></td>
+                                    </tr>
+                                </th:block>
+                                </tbody>
+                            </table>
+                        </div>
+                        </div>
 
                     <!-- Tab onfeet image -->
-                    <div class="tab-pane fade" id="tabs-3" role="tabpanel">
+                    <div class="tab-pane fade" id="tabs-4" role="tabpanel">
                         <div class="row">
                             <div class="col-12">
                                 <div class="form-group">
@@ -403,6 +478,12 @@
                 brand: {
                     required: true,
                 },
+                material: {
+                    required: true,
+                },
+                sole: {
+                    required: true,
+                },
                 price: {
                     required: true,
                 },
@@ -424,6 +505,12 @@
                 brand: {
                     required: "Nhãn hiệu sản phẩm trống. Vui lòng nhập nhãn hiệu cho sản phẩm!"
                 },
+                material: {
+                    required: "Chất liệu sản phẩm trống. Vui lòng nhập chất liệu cho sản phẩm!"
+                },
+                sole: {
+                    required: "Đế giày sản phẩm trống. Vui lòng nhập đế giày cho sản phẩm!"
+                },
                 price: {
                     required: "Giá sản phẩm trống. Vui lòng nhập giá sản phẩm!",
                 },
@@ -440,6 +527,8 @@
                 let name = $("#name").val();
                 let description = $("#description").val();
                 let brand = $("#brand").val();
+                let material = $("#material").val();
+                let sole = $("#sole").val();
                 let category = $("#category").val();
                 let price = parseInt($("#price").val());
                 let salePrice = parseInt($("#salePrice").val());
@@ -457,6 +546,8 @@
                     name: name,
                     description: description,
                     brand_id: brand,
+                    material_id: material,
+                    sole_id : sole,
                     category_ids: category,
                     price: price,
                     salePrice: salePrice,
@@ -515,7 +606,72 @@
                 }
             });
         })
+        $('.btn-update-color-count').click(function (event) {
+            event.preventDefault();
+
+            let color = $('#color').val();
+            let colorCount = parseInt($('#colorCount').val());
+
+            if (isNaN(colorCount)) {
+                $('#invalid-feedback-color').show();
+                return;
+            }
+
+            // Ensure product_id and other values are properly assigned
+            let req = {
+                color: color,
+                colorCount: colorCount,
+                product_id: [[${product.id}]] // Ensure this resolves to the correct value
+            };
+
+            console.log(req); // Debugging
+
+            $.ajax({
+                url: '/api/admin/products/colors',
+                type: 'PUT',
+                data: JSON.stringify(req),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    let productColors = $('.product-color[data-color=' + color + ']');
+
+                    if (productColors.length === 0) {
+                        $('.list-product-color').append(`<tr><td class="product-color" data-color="${color}">${color}</td><td class="product-count-color">${colorCount}</td></tr>`);
+                    } else {
+                        $(productColors).parent().find('.product-count-color').text(colorCount);
+                    }
+                    toastr.success("Cập nhật thành công");
+                },
+                error: function (data) {
+                    // Check if responseJSON exists and has a message property
+                    let errorMessage = data.responseJSON ? data.responseJSON.message : 'Có lỗi xảy ra';
+                    toastr.warning(errorMessage);
+                },
+                complete: function () {
+                    $('#invalid-feedback-color').hide();
+                }
+            });
+            $.ajax({
+                url: '/api/admin/products/colors',
+                type: 'PUT',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({
+                    color: 'Black',
+                    colorCount: 12,
+                    product_id: 'bkAulB'
+                }),
+                success: function (data) {
+                    console.log('Success:', data);
+                },
+                error: function (data) {
+                    console.log('Error:', data.responseText);
+                }
+            });
+
+        });
+
+
     </script>
+
 </th:block>
 </body>
 </html>

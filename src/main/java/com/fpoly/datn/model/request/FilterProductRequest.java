@@ -12,6 +12,8 @@ import java.util.List;
 @ToString
 public class FilterProductRequest {
     private List<Long> brands;
+    private List<Long> materials;
+    private List<Long> soles;
 
     private List<Long> categories;
 

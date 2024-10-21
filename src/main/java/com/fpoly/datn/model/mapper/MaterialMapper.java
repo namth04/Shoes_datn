@@ -1,7 +1,9 @@
 package com.fpoly.datn.model.mapper;
 
-import com.fpoly.datn.entity.Brand;
+
+
 import com.fpoly.datn.entity.Material;
+
 import com.fpoly.datn.model.dto.MaterialDTO;
 import com.fpoly.datn.model.request.CreateMaterialRequest;
 
@@ -14,10 +16,10 @@ public class MaterialMapper {
         materialDTO.setName(material.getName());
         materialDTO.setDescription(material.getDescription());
         materialDTO.setStatus(material.isStatus());
+
+
         return materialDTO;
-
     }
-
     public static Material toMaterial(CreateMaterialRequest createMaterialRequest){
         Material material = new Material();
         material.setName(createMaterialRequest.getName());

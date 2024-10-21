@@ -1,6 +1,7 @@
 package com.fpoly.datn.controller.admin;
 
 import com.fpoly.datn.entity.*;
+import com.fpoly.datn.model.request.CreateColorCountRequest;
 import com.fpoly.datn.model.request.CreateProductRequest;
 import com.fpoly.datn.model.request.CreateSizeCountRequest;
 import com.fpoly.datn.model.request.UpdateFeedBackRequest;
@@ -8,7 +9,9 @@ import com.fpoly.datn.security.CustomUserDetails;
 import com.fpoly.datn.service.BrandService;
 import com.fpoly.datn.service.CategoryService;
 import com.fpoly.datn.service.ImageService;
+import com.fpoly.datn.service.MaterialService;
 import com.fpoly.datn.service.ProductService;
+import com.fpoly.datn.service.SoleService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CreationHelper;
@@ -29,6 +32,8 @@ import java.io.*;
 import java.nio.file.Files;
 import java.util.List;
 
+
+import static com.fpoly.datn.config.Contant.COlOR_VN;
 import static com.fpoly.datn.config.Contant.SIZE_VN;
 
 @Slf4j
@@ -38,7 +43,7 @@ public class ProductController {
     private String xlsx = ".xlsx";
     private static final int BUFFER_SIZE = 4096;
     private static final String TEMP_EXPORT_DATA_DIRECTORY = "\\resources\\reports";
-    private static final String EXPORT_DATA_REPORT_FILE_NAME = "San_pham";
+    private static final String EXPORT_DATA_REPORT_FILE_NAME = "Danh_Sach_San_pham";
 
     @Autowired
     private ServletContext context;
@@ -48,6 +53,12 @@ public class ProductController {
 
     @Autowired
     private BrandService brandService;
+
+    @Autowired
+    private SoleService soleService;
+
+    @Autowired
+    private MaterialService materialService;
 
     @Autowired
     private CategoryService categoryService;
@@ -61,16 +72,25 @@ public class ProductController {
                             @RequestParam(defaultValue = "", required = false) String name,
                             @RequestParam(defaultValue = "", required = false) String category,
                             @RequestParam(defaultValue = "", required = false) String brand,
+                            @RequestParam(defaultValue = "", required = false) String material,
+                            @RequestParam(defaultValue = "", required = false) String sole,
                             @RequestParam(defaultValue = "1", required = false) Integer page) {
 
         //Lấy danh sách nhãn hiệu
         List<Brand> brands = brandService.getListBrand();
         model.addAttribute("brands", brands);
+        // lấy danh sách chất liệu
+        List<Material> materials = materialService.getListMaterial();
+        model.addAttribute("materials", materials);
+        // lấy danh sách đế giày
+        List<Sole> soles = soleService.getListSole();
+        model.addAttribute("soles", soles);
         //Lấy danh sách danh mục
         List<Category> categories = categoryService.getListCategories();
         model.addAttribute("categories", categories);
+
         //Lấy danh sách sản phẩm
-        Page<Product> products = productService.adminGetListProduct(id, name, category, brand, page);
+        Page<Product> products = productService.adminGetListProduct(id, name, category, brand, material, sole, page);
         model.addAttribute("products", products.getContent());
         model.addAttribute("totalPages", products.getTotalPages());
         model.addAttribute("currentPage", products.getPageable().getPageNumber() + 1);
@@ -88,6 +108,13 @@ public class ProductController {
         //Lấy danh sách nhãn hiệu
         List<Brand> brands = brandService.getListBrand();
         model.addAttribute("brands", brands);
+        // lấy danh sách chất liệu
+        List<Material> materials = materialService.getListMaterial();
+        model.addAttribute("materials", materials);
+        // lấy danh sách đế giày
+        List<Sole> soles = soleService.getListSole();
+        model.addAttribute("soles", soles);
+
         //Lấy danh sách danh mục
         List<Category> categories = categoryService.getListCategories();
         model.addAttribute("categories", categories);
@@ -114,13 +141,24 @@ public class ProductController {
         // Lấy danh sách nhãn hiệu
         List<Brand> brands = brandService.getListBrand();
         model.addAttribute("brands", brands);
+        // lấy danh sách chất liệu
+        List<Material> materials = materialService.getListMaterial();
+        model.addAttribute("materials", materials);
+        // lấy danh sách đế giày
+        List<Sole> soles = soleService.getListSole();
+        model.addAttribute("soles", soles);
 
         //Lấy danh sách size
         model.addAttribute("sizeVN", SIZE_VN);
 
+        model.addAttribute("colorVN", COlOR_VN);
+
         //Lấy size của sản phẩm
         List<ProductSize> productSizes = productService.getListSizeOfProduct(id);
         model.addAttribute("productSizes", productSizes);
+
+        List<ProductColor> productColors = productService.getListColorOfProduct(id);
+        model.addAttribute("productColors", productColors);
 
         return "admin/product/edit";
     }
@@ -130,8 +168,11 @@ public class ProductController {
                                                   @RequestParam(defaultValue = "", required = false) String name,
                                                   @RequestParam(defaultValue = "", required = false) String category,
                                                   @RequestParam(defaultValue = "", required = false) String brand,
+                                                  @RequestParam(defaultValue = "", required = false) String material,
+                                                  @RequestParam(defaultValue = "", required = false) String sole,
+
                                                   @RequestParam(defaultValue = "1", required = false) Integer page) {
-        Page<Product> products = productService.adminGetListProduct(id, name, category, brand, page);
+        Page<Product> products = productService.adminGetListProduct(id, name, category, brand, material, sole, page);
         return ResponseEntity.ok(products);
     }
 
@@ -168,6 +209,12 @@ public class ProductController {
     @PutMapping("/api/admin/products/sizes")
     public ResponseEntity<?> updateSizeCount(@Valid @RequestBody CreateSizeCountRequest createSizeCountRequest) {
         productService.createSizeCount(createSizeCountRequest);
+
+        return ResponseEntity.ok("Cập nhật thành công!");
+    }
+    @PutMapping("/api/admin/products/colors")
+    public ResponseEntity<?> updateColorCount(@Valid @RequestBody CreateColorCountRequest createColorCountRequest) {
+        productService.createColorCount(createColorCountRequest);
 
         return ResponseEntity.ok("Cập nhật thành công!");
     }
@@ -222,23 +269,31 @@ public class ProductController {
             productBrand.setCellValue("Thương hiệu");
             productBrand.setCellStyle(headerCellStyle);
 
-            XSSFCell price = headerRow.createCell(3);
+            XSSFCell productMaterial = headerRow.createCell(3);
+            productMaterial.setCellValue("Chất Liệu");
+            productMaterial.setCellStyle(headerCellStyle);
+
+            XSSFCell productSole = headerRow.createCell(4);
+            productSole.setCellValue("Đế Giày");
+            productSole.setCellStyle(headerCellStyle);
+
+            XSSFCell price = headerRow.createCell(5);
             price.setCellValue("Giá nhập");
             price.setCellStyle(headerCellStyle);
 
-            XSSFCell priceSell = headerRow.createCell(4);
+            XSSFCell priceSell = headerRow.createCell(6);
             priceSell.setCellValue("Giá bán");
             priceSell.setCellStyle(headerCellStyle);
 
-            XSSFCell createdAt = headerRow.createCell(5);
+            XSSFCell createdAt = headerRow.createCell(7);
             createdAt.setCellValue("Ngày tạo");
             createdAt.setCellStyle(headerCellStyle);
 
-            XSSFCell modifiedAt = headerRow.createCell(6);
+            XSSFCell modifiedAt = headerRow.createCell(8);
             modifiedAt.setCellValue("Ngày sửa");
             modifiedAt.setCellStyle(headerCellStyle);
 
-            XSSFCell totalSold = headerRow.createCell(7);
+            XSSFCell totalSold = headerRow.createCell(9);
             totalSold.setCellValue("Đã bán");
             totalSold.setCellStyle(headerCellStyle);
 
@@ -261,11 +316,20 @@ public class ProductController {
                     productBrandValue.setCellValue(product.getBrand().getName());
                     productBrandValue.setCellStyle(bodyCellStyle);
 
-                    XSSFCell priceValue = bodyRow.createCell(3);
+                    XSSFCell productMaterialValue = bodyRow.createCell(3);
+                    productMaterialValue.setCellValue(product.getMaterial().getName());
+                    productMaterialValue.setCellStyle(bodyCellStyle);
+
+                    XSSFCell productSoleValue = bodyRow.createCell(4);
+                    productSoleValue.setCellValue(product.getSole().getName());
+                    productSoleValue.setCellStyle(bodyCellStyle);
+
+
+                    XSSFCell priceValue = bodyRow.createCell(5);
                     priceValue.setCellValue(product.getPrice());
                     priceValue.setCellStyle(bodyCellStyle);
 
-                    XSSFCell priceSellValue = bodyRow.createCell(4);
+                    XSSFCell priceSellValue = bodyRow.createCell(6);
                     priceSellValue.setCellValue(product.getSalePrice());
                     priceSellValue.setCellStyle(bodyCellStyle);
 
@@ -273,15 +337,15 @@ public class ProductController {
                     CellStyle cellStyle = workbook.createCellStyle();
                     cellStyle.setDataFormat(creationHelper.createDataFormat().getFormat("dd/MM/yyyy HH:mm:ss"));
 
-                    XSSFCell createdAtValue = bodyRow.createCell(5);
+                    XSSFCell createdAtValue = bodyRow.createCell(7);
                     createdAtValue.setCellValue(product.getCreatedAt());
                     createdAtValue.setCellStyle(cellStyle);
 
-                    XSSFCell updatedAtValue = bodyRow.createCell(6);
+                    XSSFCell updatedAtValue = bodyRow.createCell(8);
                     updatedAtValue.setCellValue(product.getModifiedAt());
                     updatedAtValue.setCellStyle(cellStyle);
 
-                    XSSFCell totalSoldValue = bodyRow.createCell(7);
+                    XSSFCell totalSoldValue = bodyRow.createCell(9);
                     totalSoldValue.setCellValue(product.getTotalSold());
                     totalSoldValue.setCellStyle(bodyCellStyle);
                 }
@@ -297,7 +361,7 @@ public class ProductController {
         File file = new File(fullPath);
         if (file.exists()) {
             OutputStream os = null;
-            try(FileInputStream fis = new FileInputStream(file);) {
+            try (FileInputStream fis = new FileInputStream(file);) {
                 String mimeType = context.getMimeType(fullPath);
                 response.setContentType(mimeType);
                 response.setHeader("content-disposition", "attachment; filename=" + fileName + "." + type);
@@ -311,7 +375,7 @@ public class ProductController {
             } catch (Exception e) {
                 log.error("Can't download file, detail: {}", e.getMessage());
             } finally {
-                if(os != null) {
+                if (os != null) {
                     try {
                         os.close();
                     } catch (IOException e) {

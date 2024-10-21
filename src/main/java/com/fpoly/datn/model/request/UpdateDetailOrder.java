@@ -23,6 +23,8 @@ public class UpdateDetailOrder {
     @Max(value = 42)
     private int size;
 
+    private String color;
+
     @JsonProperty("coupon_code")
     private String couponCode;
 

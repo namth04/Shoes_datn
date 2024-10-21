@@ -13,11 +13,11 @@ import javax.validation.constraints.Size;
 @Setter
 @Getter
 public class CreateMaterialRequest {
-    @NotBlank(message = "Tên chất liệu trống")
-    @Size(max = 20, message = "Tên chất liệu có độ dài tối đa 20 ký tự")
+
+    @NotBlank(message = "Tên chất liệu trống!")
+    @Size(max = 50,message = "Tên chất liệu có độ dài tối đa 50 ký tự!")
     private String name;
     private Long id;
-
     private String description;
     private boolean status;
 }

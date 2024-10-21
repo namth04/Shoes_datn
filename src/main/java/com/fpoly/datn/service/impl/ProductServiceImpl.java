@@ -1,8 +1,11 @@
 package com.fpoly.datn.service.impl;
 
+import com.fpoly.datn.entity.ProductColor;
 import com.fpoly.datn.exception.BadRequestException;
 import com.fpoly.datn.exception.InternalServerException;
 import com.fpoly.datn.exception.NotFoundException;
+import com.fpoly.datn.model.request.CreateColorCountRequest;
+import com.fpoly.datn.repository.ProductColorRepository;
 import com.fpoly.datn.repository.ProductRepository;
 import com.fpoly.datn.entity.Product;
 import com.fpoly.datn.entity.ProductSize;
@@ -44,6 +47,8 @@ public class ProductServiceImpl implements ProductService {
     private ProductRepository productRepository;
 
     @Autowired
+    private ProductColorRepository productColorRepository;
+    @Autowired
     private ProductSizeRepository productSizeRepository;
 
     @Autowired
@@ -56,13 +61,13 @@ public class ProductServiceImpl implements ProductService {
     private OrderRepository orderRepository;
 
     @Override
-    public Page<Product> adminGetListProduct(String id, String name, String category, String brand, Integer page) {
+    public Page<Product> adminGetListProduct(String id, String name, String category, String brand,String material,String sole, Integer page) {
         page--;
         if (page < 0) {
             page = 0;
         }
         Pageable pageable = PageRequest.of(page, LIMIT_PRODUCT, Sort.by("created_at").descending());
-        return productRepository.adminGetListProducts(id, name, category, brand, pageable);
+        return productRepository.adminGetListProducts(id, name, category, brand, material,sole, pageable);
     }
 
     @Override
@@ -164,6 +169,7 @@ public class ProductServiceImpl implements ProductService {
         try {
             // Delete product size
             productSizeRepository.deleteByProductId(id);
+            productColorRepository.deleteByProductId(id);
 
             productRepository.deleteById(id);
         } catch (Exception ex) {
@@ -211,6 +217,8 @@ public class ProductServiceImpl implements ProductService {
         dto.setTotalSold(product.getTotalSold());
         dto.setDescription(product.getDescription());
         dto.setBrand(product.getBrand());
+        dto.setMaterial(product.getMaterial());
+        dto.setSole(product.getSole());
         dto.setFeedbackImages(product.getImageFeedBack());
         dto.setProductImages(product.getImages());
         dto.setComments(product.getComments());
@@ -245,6 +253,10 @@ public class ProductServiceImpl implements ProductService {
     public List<Integer> getListAvailableSize(String id) {
         return productSizeRepository.findAllSizeOfProduct(id);
     }
+    @Override
+    public List<String> getListAvailableColor(String id) {
+        return productColorRepository.findAllColorOfProduct(id);
+    }
 
     @Override
     public void createSizeCount(CreateSizeCountRequest createSizeCountRequest) {
@@ -276,10 +288,42 @@ public class ProductServiceImpl implements ProductService {
 
         productSizeRepository.save(productSize);
     }
+    @Override
+    public void createColorCount(CreateColorCountRequest createColorCountRequest) {
+
+        // Kiểm tra color
+        if (!COlOR_VN.contains(createColorCountRequest.getColor())) {
+            throw new BadRequestException("Color không hợp lệ");
+        }
+
+        // Kiểm tra sản phẩm có tồn tại
+        Product product = productRepository.findById(createColorCountRequest.getProductId())
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy sản phẩm trong hệ thống!"));
+
+        // Kiểm tra xem màu đã tồn tại cho sản phẩm chưa
+        Optional<ProductColor> existingProductColor = productColorRepository
+                .findByProductIdAndColor(createColorCountRequest.getProductId(), createColorCountRequest.getColor());
+
+        if (existingProductColor.isPresent()) {
+            throw new BadRequestException("Màu sắc cho sản phẩm đã tồn tại!");
+        }
+
+        // Tạo mới ProductColor
+        ProductColor productColor = new ProductColor();
+        productColor.setProductId(createColorCountRequest.getProductId());
+        productColor.setColor(createColorCountRequest.getColor());
+        productColor.setQuantity(createColorCountRequest.getColorCount());
+
+        productColorRepository.save(productColor);
+    }
 
     @Override
     public List<ProductSize> getListSizeOfProduct(String id) {
         return productSizeRepository.findByProductId(id);
+    }
+    @Override
+    public List<ProductColor> getListColorOfProduct(String id) {
+        return productColorRepository.findByProductId(id);
     }
 
     @Override
@@ -296,6 +340,14 @@ public class ProductServiceImpl implements ProductService {
     public boolean checkProductSizeAvailable(String id, int size) {
         ProductSize productSize = productSizeRepository.checkProductAndSizeAvailable(id, size);
         if (productSize != null) {
+            return true;
+        }
+        return false;
+    }
+    @Override
+    public boolean checkProductColorAvailable(String id, String color) {
+        ProductColor productColor = productColorRepository.checkProductAndColorAvailable(id, color);
+        if (productColor != null) {
             return true;
         }
         return false;

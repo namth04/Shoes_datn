@@ -7,11 +7,13 @@ import lombok.Setter;
 
 import java.sql.Timestamp;
 
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
 @Getter
 public class MaterialDTO {
+
     private Long id;
     private String name;
     private String description;
