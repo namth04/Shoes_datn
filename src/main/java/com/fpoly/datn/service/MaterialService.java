@@ -1,6 +1,5 @@
 package com.fpoly.datn.service;
 
-
 import com.fpoly.datn.entity.Material;
 import com.fpoly.datn.model.request.CreateMaterialRequest;
 import org.springframework.data.domain.Page;
@@ -10,6 +9,7 @@ import java.util.List;
 
 @Service
 public interface MaterialService {
+
     Page<Material> adminGetListMaterials(String id, String name, String status, Integer page);
 
     List<Material> getListMaterial();
@@ -23,4 +23,5 @@ public interface MaterialService {
     Material getMaterialById(long id);
 
     long getCountMaterials();
+
 }

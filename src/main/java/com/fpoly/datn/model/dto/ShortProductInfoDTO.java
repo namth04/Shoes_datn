@@ -16,14 +16,14 @@ public class ShortProductInfoDTO {
     private long price;
 
     List<Integer> availableSizes;
-    List<String> availableColors;
+//    List<String> availableColors;
 
     public ShortProductInfoDTO(String id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    public ShortProductInfoDTO(String id, String name, long price, Object availableSizes, Object availableColors) {
+    public ShortProductInfoDTO(String id, String name, long price, Object availableSizes) {
         this.id = id;
         this.name = name;
         this.price = price;
@@ -38,14 +38,14 @@ public class ShortProductInfoDTO {
             }
         }
 
-        // Xử lý danh sách màu sắc có sẵn
-        if (availableColors != null) {
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                this.availableColors = mapper.readValue((String) availableColors, new TypeReference<List<String>>() {});
-            } catch (IOException e) {
-                this.availableColors = null;
-            }
-        }
+//        // Xử lý danh sách màu sắc có sẵn
+//        if (availableColors != null) {
+//            ObjectMapper mapper = new ObjectMapper();
+//            try {
+//                this.availableColors = mapper.readValue((String) availableColors, new TypeReference<List<String>>() {});
+//            } catch (IOException e) {
+//                this.availableColors = null;
+//            }
+//        }
     }
 }

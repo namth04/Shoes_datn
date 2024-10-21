@@ -37,7 +37,7 @@ import java.util.List;
         }
 )
 @NamedNativeQuery(
-        name = "getProductOrderMaterial",
+        name = "getProductOrderMaterials",
         resultSetMapping = "chartMaterialDTO",
         query = "select m.name as label, count(o.quantity) as value  from material m " +
                 "inner join product p on p.material_id = m.id " +

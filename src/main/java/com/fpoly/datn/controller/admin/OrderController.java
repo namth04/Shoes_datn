@@ -71,6 +71,9 @@ public class OrderController {
 
         // Get list size
         model.addAttribute("sizeVn", SIZE_VN);
+        //
+        model.addAttribute("sizeVn", COlOR_VN);
+
 
 //        //Get list valid promotion
         List<Promotion> promotions = promotionService.getAllValidPromotion();

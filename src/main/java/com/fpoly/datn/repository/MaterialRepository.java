@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+
 @Repository
 public interface MaterialRepository extends JpaRepository<Material, Long> {
     Material findByName(String name);
@@ -20,8 +21,6 @@ public interface MaterialRepository extends JpaRepository<Material, Long> {
             nativeQuery = true)
     Page<Material> adminGetListMaterials(String id, String name, String status, Pageable pageable);
 
-    @Query(name = "getProductOrderMaterial", nativeQuery = true)
-    List<ChartDTO> getProductOrderMaterial();
-
-
+    @Query(name = "getProductOrderMaterials", nativeQuery = true)
+    List<ChartDTO> getProductOrderMaterials();
 }
