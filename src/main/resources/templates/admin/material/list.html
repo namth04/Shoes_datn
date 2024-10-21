@@ -72,9 +72,7 @@
                 </tr>
                 <tr>
                     <form method="GET" id="search-form">
-                        <th>
-                            <input type="text" name="id" id="id" class="form-control search-input">
-                        </th>
+
                         <th>
                             <input type="text" name="name" id="name" class="form-control search-input">
                         </th>
@@ -118,21 +116,14 @@
                             </label></td>
                         </th:block>
 
-                        <td>
-                            <label class="switch" style="margin-left: 60px;">
-                                <input type="checkbox" th:checked="${material.status}" disabled
-                                       th:data-id="${material.id}" class="material-status">
-                                <span class="slider round"></span>
-                            </label>
-                        </td>
+                       
                         <td th:text="${#dates.format(material.createdAt, 'dd-MM-yyyy HH:mm')}"></td>
                         <td th:text="${#dates.format(material.modifiedAt, 'dd-MM-yyyy HH:mm')}"></td>
                         <td class="actions">
                             <a href="#" class="edit-material" th:data-id="${material.id}"><i
                                     class="fas fa-pencil-alt"></i></a>
                             <a href="#" class=" delete-material" th:data-id="${material.id}"><i class="far fa-trash-alt"></i></a>
-                            <a href="#" class="delete-material" th:data-id="${material.id}"><i
-                                    class="far fa-trash-alt"></i></a>
+
                         </td>
                     </tr>
                 </th:block>
