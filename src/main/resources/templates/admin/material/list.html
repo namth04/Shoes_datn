@@ -1,9 +1,5 @@
 <!DOCTYPE html>
-<<<<<<< HEAD
-<html lang="en" xmlns:th="http://www.thymeleaf.org"
-=======
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
       th:replace="~{/layout/layout_admin :: main-fragment(
                                                 ~{:: title},
                                                 'header',
@@ -23,10 +19,7 @@
 <body>
 <section role="main" class="content-body" id="main-content">
     <header class="page-header">
-<<<<<<< HEAD
         <!--        <h2>Editable Tables</h2>-->
-=======
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
         <div class="right-wrapper text-right">
             <ol class="breadcrumbs">
                 <li>
@@ -34,13 +27,10 @@
                         <i class="bx bx-home-alt"></i>
                     </a>
                 </li>
-<<<<<<< HEAD
                 <li><span>Tables</span></li>
                 <li><span>Editable</span></li>
-=======
                 <li><span>Bảng</span></li>
                 <li><span>Chất liệu</span></li>
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
             </ol>
             <a class="sidebar-right-toggle" data-open="sidebar-right"><i
                     class="fas fa-chevron-left"></i></a>
@@ -53,11 +43,8 @@
                 <a href="#" class="card-action card-action-toggle" data-card-toggle></a>
                 <a href="#" class="card-action card-action-dismiss" data-card-dismiss></a>
             </div>
-<<<<<<< HEAD
             <h2 class="card-title">Danh sách chất liệu </h2>
-=======
-            <h2 class="card-title">Danh sách chất liệu</h2>
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
+
         </header>
         <div class="card-body">
             <div class="row">
@@ -66,11 +53,7 @@
                         <button id="addToTable" class="btn btn-primary" data-toggle="modal"
                                 data-target="#modal-add-new-material">Thêm mới chất liệu <i
                                 class="fas fa-plus"></i></button>
-<<<<<<< HEAD
                         <a href="/admin/materials" class="btn btn-primary">Refresh <i
-=======
-                        <a href="/admin/materials" class="btn btn-primary">Làm mới <i
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
                                 class="fas fa-redo-alt"></i></a>
                         <button id="btn-search" class="btn btn-primary">Tìm kiếm <i
                                 class="fas fa-search"></i></button>
@@ -82,11 +65,7 @@
                 <tr>
                     <th>ID</th>
                     <th>Tên chất liệu</th>
-<<<<<<< HEAD
                     <th>Trạng chất liệu</th>
-=======
-                    <th>Trạng thái chất liệu</th>
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
                     <th>Ngày tạo</th>
                     <th>Ngày sửa</th>
                     <th>Thao tác</th>
@@ -99,10 +78,7 @@
                         <th>
                             <input type="text" name="name" id="name" class="form-control search-input">
                         </th>
-<<<<<<< HEAD
-                        <th></th>
-=======
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
+
                         <th>
                             <select name="status" class="form-control search-select" id="status">
                                 <option value="">Tất cả</option>
@@ -122,7 +98,7 @@
                     <tr data-item-id="1" th:data-id="${material.id}">
                         <td th:text="${material.id}"></td>
                         <td class="material-name" th:data-id="${material.id}" th:text="${material.name}"></td>
-<<<<<<< HEAD
+
                         <!--                        <td>-->
                         <!--                            <div class="logo-div">-->
                         <!--                                <img th:src="${brand.thumbnail}" th:alt="${brand.name}" class="brand-thumbnail"-->
@@ -141,7 +117,7 @@
                                 <span class="slider round"></span>
                             </label></td>
                         </th:block>
-=======
+
                         <td>
                             <label class="switch" style="margin-left: 60px;">
                                 <input type="checkbox" th:checked="${material.status}" disabled
@@ -149,18 +125,14 @@
                                 <span class="slider round"></span>
                             </label>
                         </td>
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
                         <td th:text="${#dates.format(material.createdAt, 'dd-MM-yyyy HH:mm')}"></td>
                         <td th:text="${#dates.format(material.modifiedAt, 'dd-MM-yyyy HH:mm')}"></td>
                         <td class="actions">
                             <a href="#" class="edit-material" th:data-id="${material.id}"><i
                                     class="fas fa-pencil-alt"></i></a>
-<<<<<<< HEAD
                             <a href="#" class=" delete-material" th:data-id="${material.id}"><i class="far fa-trash-alt"></i></a>
-=======
                             <a href="#" class="delete-material" th:data-id="${material.id}"><i
                                     class="far fa-trash-alt"></i></a>
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
                         </td>
                     </tr>
                 </th:block>
@@ -172,30 +144,21 @@
                 <ul class="pagination" id="pagination"></ul>
             </nav>
         </div>
-<<<<<<< HEAD
 
 
     </section>
 
-    <!-- Modal add new material-->
-    <div class="modal fade" id="modal-add-new-material" tabindex="-1" role="dialog" aria-labelledby="modalAddNewMaterial"
-=======
-    </section>
+
 
     <!-- Modal thêm chất liệu-->
     <div class="modal fade" id="modal-add-new-material" tabindex="-1" role="dialog"
          aria-labelledby="modalAddNewMaterial"
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
          aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Thêm chất liệu</h5>
-<<<<<<< HEAD
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-=======
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Đóng">
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -203,25 +166,9 @@
                     <div class="form-group">
                         <label class="required-label" for="new-material">Tên chất liệu</label>
                         <input type="text" class="form-control" id="new-material">
-<<<<<<< HEAD
-                        <span class="invalid-feedback" id="invalid-feedback-new-material">Độ dài tên đế giày từ 1 - 50 ký tự</span>
-                    </div>
-                    <!--                    <div class="form-group">-->
-                    <!--                        <label class="required-label">Logo</label>-->
-                    <!--                        <div class="thumbnail-container" style="display:none">-->
-                    <!--                            <div class="img-div">-->
-                    <!--                                <img class="preview-img" alt="Thumbnail post">-->
-                    <!--                            </div>-->
-                    <!--                        </div>-->
-                    <!--                        <div class="invalid-feedback invalid-feedback-thumbnail">Bạn chưa chọn logo</div>-->
-                    <!--                        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#choose-img-modal">-->
-                    <!--                            Chọn ảnh-->
-                    <!--                        </button>-->
-                    <!--                    </div>-->
-=======
+
                         <span class="invalid-feedback" id="invalid-feedback-new-material">Độ dài tên chất liệu từ 1 - 20 ký tự</span>
                     </div>
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
                     <br>
                     <label>Trạng thái</label>
                     <br>
@@ -238,22 +185,15 @@
         </div>
     </div>
 
-<<<<<<< HEAD
-    <!-- Modal update sole-->
-=======
+
     <!-- Modal sửa chất liệu-->
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
     <div class="modal fade" id="modal-update-material" tabindex="-1" role="dialog" aria-labelledby="modalUpdateMaterial"
          aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Chỉnh sửa chất liệu</h5>
-<<<<<<< HEAD
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-=======
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Đóng">
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -262,25 +202,9 @@
                     <div class="form-group">
                         <label class="required-label" for="update-material">Tên chất liệu</label>
                         <input type="text" class="form-control" id="update-material">
-<<<<<<< HEAD
-                        <span class="invalid-feedback" id="invalid-feedback-update-material">Độ dài tên chất liệu từ 1 - 50 ký tự</span>
-                    </div>
-                    <!--                    <div class="form-group">-->
-                    <!--                        <label class="required-label">Logo</label>-->
-                    <!--                        <div class="thumbnail-container" style="display:none">-->
-                    <!--                            <div class="img-div">-->
-                    <!--                                <img class="preview-img" alt="Thumbnail post">-->
-                    <!--                            </div>-->
-                    <!--                        </div>-->
-                    <!--                        <div class="invalid-feedback invalid-feedback-thumbnail">Bạn chưa chọn logo</div>-->
-                    <!--                        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#choose-img-modal">-->
-                    <!--                            Chọn ảnh-->
-                    <!--                        </button>-->
-                    <!--                    </div>-->
-=======
+
                         <span class="invalid-feedback" id="invalid-feedback-update-material">Độ dài tên chất liệu từ 1 - 20 ký tự</span>
                     </div>
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
                     <br>
                     <label>Trạng thái</label>
                     <br>
@@ -297,17 +221,13 @@
         </div>
     </div>
 
-<<<<<<< HEAD
-    <!--    <th:block th:replace="~{fragment/choose_image_modal :: choose-img-modal}"></th:block>-->
-=======
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
+
 </section>
 
 <th:block id="js-resources">
     <script type="text/javascript" th:src="@{/adminlte/pagination/jquery.simplePagination.js}"></script>
     <script type="text/javascript" th:src="@{/adminlte/js/table.js}"></script>
     <script type="text/javascript" th:src="@{/adminlte/js/list.min.js}"></script>
-<<<<<<< HEAD
     <script type="text/javascript" th:src="@{/adminlte/js/modal_image.js}"></script>
 
     <!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>-->
@@ -455,7 +375,6 @@
 
 
 <!--    </script>-->
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
     <script th:inline="javascript">
         let id, name, status, page;
         $(function () {
@@ -472,7 +391,7 @@
 
             pagination([[${totalPages}]], [[${currentPage}]])
         });
-<<<<<<< HEAD
+
         //
         // $(function () {
         //     let imgs = [[${images}]];
@@ -494,7 +413,7 @@
         //     $('.invalid-feedback-thumbnail').hide();
         //     $('.preview-img').attr('src', url);
         // })
-=======
+
 
 <!--        $(function () {-->
 <!--            let imgs = [[${images}]];-->
@@ -516,11 +435,9 @@
 <!--            $('.invalid-feedback-thumbnail').hide();-->
 <!--            $('.preview-img').attr('src', url);-->
 <!--        })-->
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
 
-        $("#modal-add-new-material").on("hidden.bs.modal", function () {
-            closeModalInsertUpdate();
-        });
+
+
 
         $("#modal-update-material").on("hidden.bs.modal", function () {
             closeModalInsertUpdate();
@@ -537,11 +454,8 @@
 
         $('.btn-add-new-material').click(function () {
             let newMaterial = $('#new-material').val();
-<<<<<<< HEAD
-            // let thumbnail = $('.preview-img').attr('src');
-=======
+
             let thumbnail = $('.preview-img').attr('src');
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
             let status = false;
             if ($("#new_status").is(":checked")) {
                 status = true;
@@ -552,26 +466,17 @@
                 $('#invalid-feedback-new-material').show();
                 isValid = false;
             }
-<<<<<<< HEAD
-            // if (typeof thumbnail == 'undefined' || thumbnail == '') {
-            //     $('.invalid-feedback-thumbnail').show();
-            //     isValid = false;
-            // }
-=======
+
             if (typeof thumbnail == 'undefined' || thumbnail == '') {
                 $('.invalid-feedback-thumbnail').show();
                 isValid = false;
             }
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
 
             if (isValid) {
                 req = {
                     name: newMaterial,
-<<<<<<< HEAD
-                    // thumbnail: thumbnail,
-=======
+
                     thumbnail: thumbnail,
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
                     status: status
                 }
                 var myJSON = JSON.stringify(req);
@@ -594,25 +499,17 @@
 
         let materialId;
         $('.edit-material').click(function () {
-<<<<<<< HEAD
             materialId = $(this).data('id');
-=======
             brandId = $(this).data('id');
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
             $.ajax({
                 url: "/api/admin/materials/" + materialId,
                 type: "GET",
                 contentType: "application/json; charset=utf-8",
                 success: function (data) {
-<<<<<<< HEAD
-                    // $('.thumbnail-container').show();
-                    $("#update-material").val(data.name);
-                    // $('.preview-img').attr('src',data.thumbnail);
-=======
                     $('.thumbnail-container').show();
                     $("#update-material").val(data.name);
                     $('.preview-img').attr('src',data.thumbnail);
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
+
                     if (data.status == 1) {
                         $("#update_status").prop('checked', true)
                     } else {
@@ -625,11 +522,7 @@
 
         $(".btn-update-material").click(function (){
             let updateMaterial = $('#update-material').val();
-<<<<<<< HEAD
-            // let thumbnail = $('.preview-img').attr('src');
-=======
             let thumbnail = $('.preview-img').attr('src');
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
             let status = false;
             if ($("#update_status").is(":checked")) {
                 status = true;
@@ -640,27 +533,17 @@
                 $('#invalid-feedback-new-material').show();
                 isValid = false;
             }
-<<<<<<< HEAD
-            // if (typeof thumbnail == 'undefined' || thumbnail == '') {
-            //     $('.invalid-feedback-thumbnail').show();
-            //     isValid = false;
-            // }
-=======
+
             if (typeof thumbnail == 'undefined' || thumbnail == '') {
                 $('.invalid-feedback-thumbnail').show();
                 isValid = false;
             }
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
+
 
             if (isValid) {
                 req = {
                     id:materialId,
                     name: updateMaterial,
-<<<<<<< HEAD
-                    // thumbnail: thumbnail,
-=======
-                    thumbnail: thumbnail,
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
                     status: status
                 }
                 var myJSON = JSON.stringify(req);
@@ -682,11 +565,8 @@
         })
 
         $(".delete-material").on("click",function (){
-<<<<<<< HEAD
-            let id = $(this).data('id');
-=======
+
            let id = $(this).data('id');
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
             swal({
                 title: 'Bạn chắc chắn muốn xóa!',
                 type: 'warning',
@@ -700,11 +580,8 @@
                         url:"/api/admin/materials/"+ id,
                         type: "DELETE",
                         success: function (data){
-<<<<<<< HEAD
                             toastr.success("Xóa danh mục thành công!");
-=======
-                            toastr.success("Xóa chất liệu thành công!");
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
+
                             setTimeout(() => location.reload(), 500);
                         },
                         error: function (error){
@@ -718,8 +595,8 @@
     </script>
 </th:block>
 </body>
-<<<<<<< HEAD
+
 </html>
-=======
+
 </html>
->>>>>>> c1d2be1916d3424352e71581b2cbca536ebbfdc8
+
