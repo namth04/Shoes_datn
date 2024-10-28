@@ -221,8 +221,8 @@
     <script type="text/javascript" th:src="@{/adminlte/js/list.min.js}"></script>
     <script type="text/javascript" th:src="@{/adminlte/js/modal_image.js}"></script>
 
-    <!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>-->
-=======
+<!--        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>-->
+
 
 <!--    <script th:inline="javascript">-->
 <!--        let id, name, status, page;-->
@@ -446,7 +446,7 @@
         $('.btn-add-new-material').click(function () {
             let newMaterial = $('#new-material').val();
 
-            let thumbnail = $('.preview-img').attr('src');
+<!--            let thumbnail = $('.preview-img').attr('src');-->
             let status = false;
             if ($("#new_status").is(":checked")) {
                 status = true;
@@ -458,16 +458,16 @@
                 isValid = false;
             }
 
-            if (typeof thumbnail == 'undefined' || thumbnail == '') {
-                $('.invalid-feedback-thumbnail').show();
-                isValid = false;
-            }
+<!--            if (typeof thumbnail == 'undefined' || thumbnail == '') {-->
+<!--                $('.invalid-feedback-thumbnail').show();-->
+<!--                isValid = false;-->
+<!--            }-->
 
             if (isValid) {
                 req = {
                     name: newMaterial,
 
-                    thumbnail: thumbnail,
+<!--                    thumbnail: thumbnail,-->
                     status: status
                 }
                 var myJSON = JSON.stringify(req);
@@ -497,9 +497,9 @@
                 type: "GET",
                 contentType: "application/json; charset=utf-8",
                 success: function (data) {
-                    $('.thumbnail-container').show();
+<!--                    $('.thumbnail-container').show();-->
                     $("#update-material").val(data.name);
-                    $('.preview-img').attr('src',data.thumbnail);
+<!--                    $('.preview-img').attr('src',data.thumbnail);-->
 
                     if (data.status == 1) {
                         $("#update_status").prop('checked', true)
@@ -513,7 +513,7 @@
 
         $(".btn-update-material").click(function (){
             let updateMaterial = $('#update-material').val();
-            let thumbnail = $('.preview-img').attr('src');
+<!--            let thumbnail = $('.preview-img').attr('src');-->
             let status = false;
             if ($("#update_status").is(":checked")) {
                 status = true;
@@ -525,10 +525,10 @@
                 isValid = false;
             }
 
-            if (typeof thumbnail == 'undefined' || thumbnail == '') {
-                $('.invalid-feedback-thumbnail').show();
-                isValid = false;
-            }
+<!--            if (typeof thumbnail == 'undefined' || thumbnail == '') {-->
+<!--                $('.invalid-feedback-thumbnail').show();-->
+<!--                isValid = false;-->
+<!--            }-->
 
 
             if (isValid) {
