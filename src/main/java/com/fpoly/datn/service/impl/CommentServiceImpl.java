@@ -9,16 +9,20 @@ import com.fpoly.datn.model.request.CreateCommentPostRequest;
 import com.fpoly.datn.model.request.CreateCommentProductRequest;
 import com.fpoly.datn.repository.CommentRepository;
 import com.fpoly.datn.service.CommentService;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 
 @Component
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CommentServiceImpl implements CommentService {
 
-    @Autowired
-    private CommentRepository commentRepository;
+    CommentRepository commentRepository;
 
     @Override
     public Comment createCommentPost(CreateCommentPostRequest createCommentPostRequest, long userId) {

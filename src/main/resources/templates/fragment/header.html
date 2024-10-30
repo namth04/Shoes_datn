@@ -43,8 +43,20 @@
                                 <strong>Total: <span id="cartTotalAmount">0</span> &#x20AB;</strong>
                             </div>
                             <div class="text-right mt-3">
-                                <a href="/cart" class="btn btn-primary">View Cart</a>
+                                <a href="/cart" class="btn btn-primary">Thanh toán</a>
                             </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Hiển thị sản phẩm trong giỏ hàng bên trái -->
+                    <div class="header-cart-items d-none">
+                        <h6>Sản phẩm trong giỏ hàng:</h6>
+                        <div class="cart-items-list">
+                            <!-- Danh sách sản phẩm sẽ được cập nhật qua JavaScript -->
+                        </div>
+                        <div class="cart-total">
+                            Tổng: <span id="headerCartTotalAmount">0</span> &#x20AB;
                         </div>
                     </div>
 
@@ -106,12 +118,6 @@
                             right: -10px;
                         }
                     </style>
-
-
-
-
-
-
                 </div><!-- End .header-right -->
             </div><!-- End .container -->
         </div><!-- End .header-middle -->
@@ -147,5 +153,40 @@
                 border-radius: 3px;
             }
         </style>
+        <script>
+            function updateCartDropdown() {
+                let cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+                let totalPrice = parseFloat(localStorage.getItem('totalPrice')) || 0;
+
+                // Cập nhật số lượng sản phẩm trong giỏ hàng
+                $('.cart-count').text(cartItems.length);
+
+                // Làm rỗng danh sách sản phẩm
+                $('.cart-items').empty();
+
+                // Hiển thị từng sản phẩm trong giỏ hàng
+                cartItems.forEach(function (item) {
+                    $('.cart-items').append(`
+                <div class="cart-item d-flex justify-content-between align-items-center mb-2">
+                    <div class="cart-item-image">
+                        <img src="${item.image}" alt="${item.name}" width="50" height="50">
+                    </div>
+                    <div class="cart-item-details">
+                        <span class="product-name">${item.name}</span><br>
+                        <span class="product-price">${new Intl.NumberFormat('vi-VN').format(item.price)} &#x20AB;</span><br>
+                        <span class="product-size">Size: ${item.size}</span><br>
+                        <span class="product-quantity">Số lượng: ${item.quantity}</span>
+                    </div>
+                </div>
+            `);
+                });
+
+                // Cập nhật tổng giá trị trong giỏ hàng
+                $('#cartTotalAmount').text(new Intl.NumberFormat('vi-VN').format(totalPrice) + ' ₫');
+            }
+
+            // Gọi hàm cập nhật giỏ hàng khi tải trang
+            window.onload = updateCartDropdown;
+        </script>
     </header><!-- End .header -->
 </th:block>

@@ -1,10 +1,8 @@
 package com.fpoly.datn.entity;
 
 import com.fpoly.datn.model.dto.ChartDTO;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -39,24 +37,25 @@ import java.sql.Timestamp;
 @Getter
 @Entity
 @Table(name = "category")
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    long id;
     @Column(name = "name",nullable = false,length = 300)
-    private String name;
+    String name;
     @Column(name = "slug",nullable = false)
-    private String slug;
+    String slug;
 //    @Column(name = "description")
 //    private String description;
     @Column(name = "orders")
-    private int order;
+    int order;
     @Column(name = "status",columnDefinition = "BOOLEAN")
-    private boolean status;
+    boolean status;
     @Column(name = "created_at")
-    private Timestamp createdAt;
+    Timestamp createdAt;
     @Column(name = "modified_at")
-    private Timestamp modifiedAt;
+    Timestamp modifiedAt;
 
 //    @ManyToMany(mappedBy = "categories")
 //    private List<Product> products;

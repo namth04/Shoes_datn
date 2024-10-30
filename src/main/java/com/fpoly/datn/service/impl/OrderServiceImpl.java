@@ -16,6 +16,9 @@ import com.fpoly.datn.repository.OrderRepository;
 import com.fpoly.datn.repository.ProductSizeRepository;
 import com.fpoly.datn.service.OrderService;
 import com.fpoly.datn.service.PromotionService;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,22 +33,19 @@ import java.util.Optional;
 import static com.fpoly.datn.config.Contant.*;
 
 @Controller
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class OrderServiceImpl implements OrderService {
 
-    @Autowired
-    private ProductRepository productRepository;
+     ProductRepository productRepository;
 
-    @Autowired
-    private ProductSizeRepository productSizeRepository;
+     ProductSizeRepository productSizeRepository;
 
-    @Autowired
-    private OrderRepository orderRepository;
+     OrderRepository orderRepository;
 
-    @Autowired
-    private PromotionService promotionService;
+     PromotionService promotionService;
 
-    @Autowired
-    private StatisticRepository statisticRepository;
+     StatisticRepository statisticRepository;
 
     @Override
     public Page<Order> adminGetListOrders(String id, String name, String phone, String status, String product, int page) {

@@ -53,6 +53,34 @@
             .rating > input:not(:checked) ~ label:hover ~ label {
                 background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='126.729' height='126.73'%3e%3cpath fill='%23d8b11e' d='M121.215 44.212l-34.899-3.3c-2.2-.2-4.101-1.6-5-3.7l-12.5-30.3c-2-5-9.101-5-11.101 0l-12.4 30.3c-.8 2.1-2.8 3.5-5 3.7l-34.9 3.3c-5.2.5-7.3 7-3.4 10.5l26.3 23.1c1.7 1.5 2.4 3.7 1.9 5.9l-7.9 32.399c-1.2 5.101 4.3 9.3 8.9 6.601l29.1-17.101c1.9-1.1 4.2-1.1 6.1 0l29.101 17.101c4.6 2.699 10.1-1.4 8.899-6.601l-7.8-32.399c-.5-2.2.2-4.4 1.9-5.9l26.3-23.1c3.8-3.5 1.6-10-3.6-10.5z'/%3e%3c/svg%3e");
             }
+
+            .color-selection {
+                margin-top: 10px;
+            }
+
+            .color-text {
+                margin-right: 10px;
+                font-weight: bold;
+            }
+
+            .color-options {
+                display: inline-flex;
+                gap: 8px;
+            }
+
+            .color-option {
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                border: 2px solid #ccc;
+                cursor: pointer;
+                transition: border 0.3s ease;
+            }
+
+            .color-option:hover {
+                border: 2px solid #000;
+            }
+
         </style>
     </th:block>
 </head>
@@ -125,8 +153,24 @@
                             </button>
                         </div>
 
+                        <!-- New Color Selection Section -->
+                        <div class="color-selection">
+                            <span class="color-text">Chọn màu sắc:</span>
+                            <br>
+                            <div class="color-options" style="margin-bottom: 30px; margin-top: 10px">
+                                <div class="color-option" style="background-color: #dbbfbf;" data-color="green"></div>
+                                <div class="color-option" style="background-color: #756bc7;" data-color="blue"></div>
+                                <div class="color-option" style="background-color: #ff4d4f;" data-color="red"></div>
+                                <div class="color-option" style="background-color: #52c41a;" data-color="green"></div>
+                                <div class="color-option" style="background-color: #fadb14;" data-color="yellow"></div>
+                                <div class="color-option" style="background-color: #fa8c16;" data-color="orange"></div>
+                                <div class="color-option" style="background-color: #000000;" data-color="black"></div>
+                            </div>
+                        </div>
+
                         <div class="buy-btn">
-                            <button class="btn btn-primary buy red-btn add-to-cart-btn" th:classappend="${canBuy} == true ? '' : 'not-buy'"
+                            <button class="btn btn-primary buy red-btn add-to-cart-btn"
+                                    th:classappend="${canBuy} == true ? '' : 'not-buy'"
                                     data-product-id="${product.id}"
                                     data-product-name="${product.name}"
                                     data-product-price="${product.price}"
@@ -148,15 +192,15 @@
                                     </th:block>
                                 </div>
                                 <div class="buy-text right-content">
-                                    <div class="buy-now">Mua ngay</div>
+                                    <div class="buy-now">Xem chi tiết</div>
                                 </div>
                                 <div class="buy-text right-content">
                                     <div class="gio-hang">Giỏ hàng</div>
                                 </div>
                             </button>
                         </div>
-
                     </div>
+
 
                     <hr class="divider mb-1">
 
@@ -397,8 +441,8 @@
 
 
         // Handle the "Giỏ hàng" button click
-        let cartItems = [];
-        let totalPrice = 0;
+        let cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+        let totalPrice = parseFloat(localStorage.getItem('totalPrice')) || 0;
         const defaultImage = 'default-image.jpg'; // Đường dẫn đến hình ảnh mặc định
 
         $('.gio-hang').click(function () {
@@ -408,19 +452,32 @@
                     toastr.warning("Sản phẩm tạm hết hàng. Vui lòng đặt hàng sau.");
                 } else {
                     let product = {
-                        id: [[${product.id}]],
+                        id: [[${product.id}]],  // Sử dụng biến từ JSP
                         name: '[[${product.name}]]',
                         price: [[${product.price}]],
-                        image: [[${product.productImages != null && product.productImages.size() > 0 ? product.productImages[0] : defaultImage}]], // Kiểm tra và sử dụng hình ảnh mặc định
-                        size: size
+                        promotionPrice: [[${product.promotionPrice}]],
+                        image: '[[${product.productImages != null && product.productImages.size() > 0 ? product.productImages[0] : defaultImage}]]',
+                        size: size,
+                        quantity: 1
                     };
 
-                    // Thêm sản phẩm vào giỏ hàng
-                    cartItems.push(product);
-                    totalPrice += product.price; // Cập nhật tổng giá trị
+                    // Kiểm tra xem sản phẩm đã có trong giỏ hàng chưa
+                    let existingProduct = cartItems.find(item => item.id === product.id && item.size === product.size);
+                    if (existingProduct) {
+                        existingProduct.quantity++; // Tăng số lượng sản phẩm nếu đã tồn tại
+                        totalPrice += product.price; // Cập nhật tổng giá
+                    } else {
+                        cartItems.push(product); // Thêm sản phẩm mới vào giỏ hàng
+                        totalPrice += product.price; // Cập nhật tổng giá
+                    }
 
-                    // Cập nhật dropdown giỏ hàng
+                    // Lưu lại giỏ hàng vào localStorage
+                    localStorage.setItem('cartItems', JSON.stringify(cartItems));
+                    localStorage.setItem('totalPrice', totalPrice.toString());
+
+                    // Cập nhật dropdown giỏ hàng ngay lập tức
                     updateCartDropdown();
+
                     toastr.success("Sản phẩm đã được thêm vào giỏ hàng.");
                 }
             } else {
@@ -431,41 +488,50 @@
             }
         });
 
+
+
+
         function updateCartDropdown() {
-            $('.cart-count').text(cartItems.length);
-            $('.cart-items').empty();
+            $('.cart-count').text(cartItems.length); // Cập nhật số lượng sản phẩm trong giỏ hàng
+            $('.cart-items').empty(); // Xóa các sản phẩm cũ trong dropdown trước khi cập nhật
 
             cartItems.forEach(function (item) {
-                console.log(item.image);
                 $('.cart-items').append(`
             <div class="cart-item d-flex justify-content-between align-items-center mb-2">
                 <div class="cart-item-image">
                     <img src="${item.image}" alt="${item.name}" width="50" height="50">
                 </div>
-                <div class="cart-item-details">
-                    <span class="product-name">${item.name}</span><br>
-                    <span class="product-price">${new Intl.NumberFormat('vi-VN').format(item.price)} &#x20AB;</span><br> <!-- Thêm mã quốc gia cho định dạng -->
-                    <span class="product-size">Size: ${item.size}</span>
-                </div>
+                    <div class="cart-item-details">
+                        <span class="product-name">${item.name}</span><br>
+                        <span class="product-price">${new Intl.NumberFormat('vi-VN').format(item.price)} &#x20AB;</span><br>
+                        <span class="product-size">Size: ${item.size}</span><br>
+                        <span class="product-quantity">Số lượng: ${item.quantity}</span>
+                    </div>
             </div>
         `);
             });
 
             // Cập nhật tổng giá trị trong giỏ hàng
             $('#cartTotalAmount').text(new Intl.NumberFormat('vi-VN').format(totalPrice) + ' ');
+
+            // Lưu lại giỏ hàng sau khi cập nhật (nếu cần)
+            localStorage.setItem('cartItems', JSON.stringify(cartItems));
+            localStorage.setItem('totalPrice', totalPrice.toString());
         }
 
+        // Gọi hàm cập nhật khi trang được tải
+        window.onload = function() {
+            updateCartDropdown(); // Tự động cập nhật giỏ hàng khi tải trang
+        };
 
 
 
-
-
-            // Function to update cart total
-        function updateCartTotal(amount) {
-            const cartTotalElement = document.getElementById('cartTotal');
-            let currentTotal = parseInt(cartTotalElement.textContent.replace(/[^\d]/g, '')) || 0;
-            cartTotalElement.innerHTML = `Total: ${(currentTotal + amount).toLocaleString()} &#x20AB;`;
-        }
+        // Function to update cart total
+        // function updateCartTotal(amount) {
+        //     const cartTotalElement = document.getElementById('cartTotal');
+        //     let currentTotal = parseInt(cartTotalElement.textContent.replace(/[^\d]/g, '')) || 0;
+        //     cartTotalElement.innerHTML = `Total: ${(currentTotal + amount).toLocaleString()} &#x20AB;`;
+        // }
 
 
 
