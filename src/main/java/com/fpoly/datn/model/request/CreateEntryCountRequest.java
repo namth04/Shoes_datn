@@ -14,8 +14,11 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @Setter
 @Getter
-public class CreateSizeCountRequest {
+public class CreateEntryCountRequest {
+    @NotNull(message = "Size không được để trống")
     private int size;
+    @NotNull(message = "Màu sắc không được để trống")
+    private String color;
 
     @Min(0)
     private int count;

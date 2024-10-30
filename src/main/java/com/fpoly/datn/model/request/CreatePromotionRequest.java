@@ -39,7 +39,6 @@ public class CreatePromotionRequest {
 
     private boolean active;
 
-    private int quantity;
 
     @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
     @JsonProperty("expired_date")

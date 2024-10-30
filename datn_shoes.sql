@@ -62,52 +62,13 @@ INSERT INTO `sole` (`created_at`, `description`, `modified_at`, `name`, `status`
 (NOW(), 'Sole material for shoes', NOW(), 'PVC', 1);
 
 
-CREATE TABLE `product_size` (
+CREATE TABLE `product_entry` (
   `product_id` varchar(255) NOT NULL,
   `size` int NOT NULL,
+  `color` varchar(25) NOT NULL,
   `quantity` int DEFAULT NULL,
-  PRIMARY KEY (`product_id`,`size`)
+  PRIMARY KEY (`product_id`,`size`,`color`)
 );
-INSERT INTO `product_size` (`product_id`, `size`, `quantity`) 
-VALUES
-('FJWheJ015', 36, 50),
-('FJWheJ015', 37, 45),
-('FJWheJ014', 38, 40),
-('FJWheJ014', 39, 35),
-('FJWheJ013', 40, 30),
-('FJWheJ013', 41, 25),
-('FJWheJ012', 42, 20),
-('FJWheJ012', 36, 55),  
-('FJWheJ011', 37, 60),
-('FJWheJ010', 38, 50),
-('FJWheJ009', 39, 45),
-('FJWheJ008', 40, 40),
-('FJWheJ007', 41, 35),
-('FJWheJ006', 42, 30),
-('FJWheJ005', 36, 65);
-CREATE TABLE `product_color`(
-  `product_id` varchar(255) NOT NULL,
-  `color` varchar(255) NOT NULL,
-  `quantity` int DEFAULT NULL,
-  PRIMARY KEY (`product_id`,`color`)
-);
-INSERT INTO `product_color` (`product_id`, `color`, `quantity`)
-VALUES
-('FJWheJ015', 'Trắng', 100),
-('FJWheJ015', 'Đen', 80),
-('FJWheJ014', 'Xanh', 90),
-('FJWheJ014', 'Đỏ', 70),
-('FJWheJ013', 'Vàng', 60),
-('FJWheJ013', 'Cam', 50),
-('FJWheJ012', 'Tím', 40),
-('FJWheJ012', 'Hồng', 30), 
-('FJWheJ011', 'Nâu', 20),
-('FJWheJ010', 'Xám', 15),
-('FJWheJ009', 'Lam', 10),
-('FJWheJ008', 'Bạc', 25),
-('FJWheJ007', 'Vàng nhạt', 35),
-('FJWheJ006', 'Mận', 5),
-('FJWheJ005', 'Trắng', 50);
 CREATE TABLE `product` (
   `id` varchar(255) NOT NULL,
   `created_at` datetime(6) DEFAULT NULL,

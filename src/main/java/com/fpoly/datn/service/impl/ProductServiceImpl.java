@@ -1,14 +1,11 @@
 package com.fpoly.datn.service.impl;
 
-import com.fpoly.datn.entity.ProductColor;
 import com.fpoly.datn.exception.BadRequestException;
 import com.fpoly.datn.exception.InternalServerException;
 import com.fpoly.datn.exception.NotFoundException;
-import com.fpoly.datn.model.request.CreateColorCountRequest;
-import com.fpoly.datn.repository.ProductColorRepository;
 import com.fpoly.datn.repository.ProductRepository;
 import com.fpoly.datn.entity.Product;
-import com.fpoly.datn.entity.ProductSize;
+import com.fpoly.datn.entity.ProductEntry;
 import com.fpoly.datn.entity.Promotion;
 import com.fpoly.datn.model.dto.DetailProductInfoDTO;
 import com.fpoly.datn.model.dto.PageableDTO;
@@ -16,11 +13,11 @@ import com.fpoly.datn.model.dto.ProductInfoDTO;
 import com.fpoly.datn.model.dto.ShortProductInfoDTO;
 import com.fpoly.datn.model.mapper.ProductMapper;
 import com.fpoly.datn.model.request.CreateProductRequest;
-import com.fpoly.datn.model.request.CreateSizeCountRequest;
+import com.fpoly.datn.model.request.CreateEntryCountRequest;
 import com.fpoly.datn.model.request.FilterProductRequest;
 import com.fpoly.datn.model.request.UpdateFeedBackRequest;
 import com.fpoly.datn.repository.OrderRepository;
-import com.fpoly.datn.repository.ProductSizeRepository;
+import com.fpoly.datn.repository.ProductEntryRepository;
 import com.fpoly.datn.repository.PromotionRepository;
 import com.fpoly.datn.service.ProductService;
 import com.fpoly.datn.service.PromotionService;
@@ -35,6 +32,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.sql.Timestamp;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,10 +45,9 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private ProductRepository productRepository;
 
+
     @Autowired
-    private ProductColorRepository productColorRepository;
-    @Autowired
-    private ProductSizeRepository productSizeRepository;
+    private ProductEntryRepository productEntryRepository;
 
     @Autowired
     private PromotionService promotionService;
@@ -168,8 +166,7 @@ public class ProductServiceImpl implements ProductService {
 
         try {
             // Delete product size
-            productSizeRepository.deleteByProductId(id);
-            productColorRepository.deleteByProductId(id);
+            productEntryRepository.deleteByProductId(id);
 
             productRepository.deleteById(id);
         } catch (Exception ex) {
@@ -251,79 +248,61 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<Integer> getListAvailableSize(String id) {
-        return productSizeRepository.findAllSizeOfProduct(id);
-    }
-    @Override
-    public List<String> getListAvailableColor(String id) {
-        return productColorRepository.findAllColorOfProduct(id);
+        return productEntryRepository.findAllSizeOfProduct(id);
     }
 
     @Override
-    public void createSizeCount(CreateSizeCountRequest createSizeCountRequest) {
+    public void createEntryCount(CreateEntryCountRequest createEntryCountRequest) {
 
-        //Kiểm trả size
-        boolean isValid = false;
-        for (int size : SIZE_VN) {
-            if (size == createSizeCountRequest.getSize()) {
-                isValid = true;
-                break;
-            }
-        }
-        if (!isValid) {
-            throw new BadRequestException("Size không hợp lệ");
+        // Kiểm tra kích cỡ hợp lệ
+        boolean isValidSize = SIZE_VN.contains(createEntryCountRequest.getSize());
+        if (!isValidSize) {
+            throw new BadRequestException("Kích cỡ không hợp lệ");
         }
 
-        //Kiểm trả sản phẩm có tồn tại
-        Optional<Product> product = productRepository.findById(createSizeCountRequest.getProductId());
+        // Kiểm tra màu sắc hợp lệ
+        boolean isValidColor = COlOR_VN.contains(createEntryCountRequest.getColor());
+        if (!isValidColor) {
+            throw new BadRequestException("Màu sắc không hợp lệ");
+        }
+
+        // Kiểm tra sản phẩm có tồn tại
+        Optional<Product> product = productRepository.findById(createEntryCountRequest.getProductId());
         if (product.isEmpty()) {
             throw new NotFoundException("Không tìm thấy sản phẩm trong hệ thống!");
         }
 
-//        Optional<ProductSize> productSizeOld = productSizeRepository.getProductSizeBySize(createSizeCountRequest.getSize(),createSizeCountRequest.getProductId());
+        // Tạo hoặc cập nhật số lượng sản phẩm
+        Optional<ProductEntry> existingEntry = productEntryRepository.findByProductIdAndSizeAndColor(
+                createEntryCountRequest.getProductId(),
+                createEntryCountRequest.getSize(),
+                createEntryCountRequest.getColor());
 
-        ProductSize productSize = new ProductSize();
-        productSize.setProductId(createSizeCountRequest.getProductId());
-        productSize.setSize(createSizeCountRequest.getSize());
-        productSize.setQuantity(createSizeCountRequest.getCount());
-
-        productSizeRepository.save(productSize);
-    }
-    @Override
-    public void createColorCount(CreateColorCountRequest createColorCountRequest) {
-
-        // Kiểm tra color
-        if (!COlOR_VN.contains(createColorCountRequest.getColor())) {
-            throw new BadRequestException("Color không hợp lệ");
+        if (existingEntry.isPresent()) {
+            // Cập nhật số lượng nếu bản ghi đã tồn tại
+            ProductEntry productEntry = existingEntry.get();
+            productEntry.setQuantity(createEntryCountRequest.getCount());
+            productEntryRepository.save(productEntry);
+        } else {
+            // Tạo mới nếu chưa có bản ghi
+            ProductEntry newEntry = new ProductEntry();
+            newEntry.setProductId(createEntryCountRequest.getProductId());
+            newEntry.setSize(createEntryCountRequest.getSize());
+            newEntry.setColor(createEntryCountRequest.getColor());
+            newEntry.setQuantity(createEntryCountRequest.getCount());
+            productEntryRepository.save(newEntry);
         }
-
-        // Kiểm tra sản phẩm có tồn tại
-        Product product = productRepository.findById(createColorCountRequest.getProductId())
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy sản phẩm trong hệ thống!"));
-
-        // Kiểm tra xem màu đã tồn tại cho sản phẩm chưa
-        Optional<ProductColor> existingProductColor = productColorRepository
-                .findByProductIdAndColor(createColorCountRequest.getProductId(), createColorCountRequest.getColor());
-
-        if (existingProductColor.isPresent()) {
-            throw new BadRequestException("Màu sắc cho sản phẩm đã tồn tại!");
-        }
-
-        // Tạo mới ProductColor
-        ProductColor productColor = new ProductColor();
-        productColor.setProductId(createColorCountRequest.getProductId());
-        productColor.setColor(createColorCountRequest.getColor());
-        productColor.setQuantity(createColorCountRequest.getColorCount());
-
-        productColorRepository.save(productColor);
     }
 
+
     @Override
-    public List<ProductSize> getListSizeOfProduct(String id) {
-        return productSizeRepository.findByProductId(id);
-    }
-    @Override
-    public List<ProductColor> getListColorOfProduct(String id) {
-        return productColorRepository.findByProductId(id);
+    public List<ProductEntry> getListEntryOfProduct(String id) {
+
+        List<ProductEntry> entries = productEntryRepository.findByProductId(id);
+
+        entries.sort(Comparator.comparing(ProductEntry::getSize).thenComparing(ProductEntry::getColor));
+
+        return entries;
     }
 
     @Override
@@ -337,21 +316,14 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public boolean checkProductSizeAvailable(String id, int size) {
-        ProductSize productSize = productSizeRepository.checkProductAndSizeAvailable(id, size);
-        if (productSize != null) {
+    public boolean checkProductEntryAvailable(String id, int size,String color) {
+        ProductEntry productEntry = productEntryRepository.checkProductEntryAvailable(id, size,color);
+        if (productEntry != null) {
             return true;
         }
         return false;
     }
-    @Override
-    public boolean checkProductColorAvailable(String id, String color) {
-        ProductColor productColor = productColorRepository.checkProductAndColorAvailable(id, color);
-        if (productColor != null) {
-            return true;
-        }
-        return false;
-    }
+
 
     @Override
     public List<ProductInfoDTO> checkPublicPromotion(List<ProductInfoDTO> products) {
@@ -440,7 +412,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void updatefeedBackImages(String id, UpdateFeedBackRequest req) {
+    public void updateFeedBackImages(String id, UpdateFeedBackRequest req) {
         // Check product exist
         Optional<Product> rs = productRepository.findById(id);
         if (rs.isEmpty()) {

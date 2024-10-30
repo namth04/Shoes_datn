@@ -96,13 +96,6 @@
                     <tr data-item-id="1" th:data-id="${material.id}">
                         <td th:text="${material.id}"></td>
                         <td class="material-name" th:data-id="${material.id}" th:text="${material.name}"></td>
-
-                        <!--                        <td>-->
-                        <!--                            <div class="logo-div">-->
-                        <!--                                <img th:src="${brand.thumbnail}" th:alt="${brand.name}" class="brand-thumbnail"-->
-                        <!--                                     th:data-id="${brand.id}"/>-->
-                        <!--                            </div>-->
-                        <!--                        </td>-->
                         <th:block th:if="${material.status} == true">
                             <td><label class="switch" style="margin-left: 60px;">
                                 <input type="checkbox" checked disabled th:data-id="${material.id}" class="material-status">
@@ -491,7 +484,7 @@
         let materialId;
         $('.edit-material').click(function () {
             materialId = $(this).data('id');
-            brandId = $(this).data('id');
+            materialId = $(this).data('id');
             $.ajax({
                 url: "/api/admin/materials/" + materialId,
                 type: "GET",

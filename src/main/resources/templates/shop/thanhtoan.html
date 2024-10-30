@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>GPay Payment</title>
+</head>
+<body>
+<h1>GPay Payment</h1>
+
+<form action="#" th:action="@{/api/gpay/init-bill}" method="post">
+    <div>
+        <label>Merchant Code:</label>
+        <input type="text" name="merchantCode" required>
+    </div>
+    <div>
+        <label>Request ID:</label>
+        <input type="text" name="requestId" required>
+    </div>
+    <div>
+        <label>Amount:</label>
+        <input type="number" name="amount" required>
+    </div>
+    <div>
+        <label>Customer ID:</label>
+        <input type="text" name="customerId" required>
+    </div>
+    <div>
+        <label>Callback URL:</label>
+        <input type="text" name="callbackUrl" value="http://localhost/" required>
+    </div>
+    <div>
+        <label>Webhook URL:</label>
+        <input type="text" name="webhookUrl" value="http://localhost/webhook" required>
+    </div>
+    <div>
+        <label>Embed Data:</label>
+        <input type="text" name="embedData">
+    </div>
+    <div>
+        <label>Payment Type:</label>
+        <input type="text" name="paymentType">
+    </div>
+    <div>
+        <label>Payment Method:</label>
+        <input type="text" name="paymentMethod">
+    </div>
+    <div>
+        <button type="submit">Pay Now</button>
+    </div>
+</form>
+</body>
+</html>
