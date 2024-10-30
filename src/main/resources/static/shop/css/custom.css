@@ -11,6 +11,10 @@
     line-height: 2.9375rem;
     margin-bottom: 0.9375rem;
 }
+input[type="radio"] {
+    width: 20px;
+    height: 20px;
+}
 
 .img-zoom-container {
     cursor: zoom-in;
@@ -170,8 +174,8 @@ body.modal2-on {
 }
 
 .size-choose {
-    background-color: #08C;
-    color: #ffffff;
+    background-color: rgb(69, 99, 113);
+    color: #ad9e9e;
     border: none !important;
 }
 
@@ -182,7 +186,7 @@ body.modal2-on {
 .cross {
     position: relative;
     background-color: #fff;
-    color: #333333;
+    color: #2b1616;
     pointer-events: none;
 }
 .cross:after, .cross:before {
@@ -243,7 +247,7 @@ body.modal2-on {
     line-height: 1.75rem;
 }
 .pricing .size-details {
-    color: #333333;
+    color: #5d5050;
     font-weight: bold;
 }
 
@@ -361,11 +365,11 @@ body.modal2-on {
 
 .break-line {
     height: 0.0625rem;
-    background-color: #D5D6D6;
+    background-color: #5f8c8c;
 }
 
 .edit-profile {
-    color: #ABACAD;
+    color: #547393;
     font-size: 0.75rem;
 }
 

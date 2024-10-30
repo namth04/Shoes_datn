@@ -13,6 +13,7 @@ import java.util.List;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
+    Order findByIdAndBuyerId(Long orderId, Long buyerId);
     @Query(value = "SELECT * FROM orders " +
             "WHERE id LIKE CONCAT('%',?1,'%') " +
             "AND receiver_name LIKE CONCAT('%',?2,'%') " +

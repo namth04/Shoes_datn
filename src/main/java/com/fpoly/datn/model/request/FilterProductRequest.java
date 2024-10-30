@@ -18,6 +18,7 @@ public class FilterProductRequest {
     private List<Long> categories;
 
     private List<Integer> sizes;
+    private List<Long> colors;
 
     @JsonProperty("min_price")
     private Long minPrice;

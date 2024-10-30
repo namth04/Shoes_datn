@@ -208,9 +208,11 @@ public class HomeController {
 
         //Danh sách size của sản phẩm
         model.addAttribute("sizeVn", SIZE_VN);
+        model.addAttribute("colorVn", COlOR_VN);
+
 
         //Lấy danh sách sản phẩm
-        FilterProductRequest req = new FilterProductRequest(brandIds,materialIds, categoryIds,soleIds, new ArrayList<>(), (long) 0, Long.MAX_VALUE, 1);
+        FilterProductRequest req = new FilterProductRequest(brandIds,materialIds, categoryIds,soleIds, new ArrayList<>(),new ArrayList<>(), (long) 0, Long.MAX_VALUE, 1);
         PageableDTO result = productService.filterProduct(req);
         model.addAttribute("totalPages", result.getTotalPages());
         model.addAttribute("currentPage", result.getCurrentPage());

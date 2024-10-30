@@ -80,24 +80,38 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
     @Column(name = "receiver_name")
     private String receiverName;
+
     @Column(name = "receiver_phone")
     private String receiverPhone;
+
     @Column(name = "receiver_address")
     private String receiverAddress;
+
     @Column(name = "note")
     private String note;
+
     @Column(name = "price")
     private long price;
+
     @Column(name = "total_price")
     private long totalPrice;
+
     @Column(name = "size")
     private int size;
+
     @Column(name="color")
     private String color;
+
     @Column(name = "quantity")
     private int quantity;
+
+    @Column(name = "payment_method")
+    private int paymentMethod;
+    @Column(name = "payment_status")
+    private String paymentStatus;
 
     @ManyToOne
     @JoinColumn(name = "buyer")
@@ -141,5 +155,4 @@ public class Order {
 
         private long maximumDiscountValue;
     }
-
 }

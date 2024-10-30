@@ -2,29 +2,33 @@
     <div class="modal fade" id="sizeGuideModal" tabindex="-1" role="dialog" aria-labelledby="sizeGuideModalTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-scrollable" role="document">
             <div class="modal-content">
-                <div class="modal-header"><a class="go-back-size-choose text-btn" data-toggle="modal" href="#modal-size-Choose" data-dismiss="modal"><i class="fas fa-chevron-left"></i> Trở lại</a>
+                <div class="modal-header">
+                    <a class="go-back-size-choose text-btn" data-toggle="modal" href="#modal-size-Choose" data-dismiss="modal">
+                        <i class="fas fa-chevron-left"></i> Trở lại
+                    </a>
                     <h5 class="modal-title" id="sizeGuideModalTitle">Bảng size</h5>
                 </div>
                 <div class="modal-body">
                     <table class="side-guide-table table">
                         <thead>
-                        <tr>
-                            <th>CM</th>
-                            <th>VN/EU</th>
-                            <th>US</th>
-                        </tr>
+                            <tr>
+                                <th>CM</th>
+                                <th>VN/EU</th>
+                                <th>US</th>
+                            </tr>
                         </thead>
                         <tbody>
-                        <tr>
-                            <td>23.7</td>
-                            <td>38.5</td>
-                            <td>6</td>
-                        </tr>
-                        <tr>
-                            <td>23.7</td>
-                            <td>38.5</td>
-                            <td>6</td>
-                        </tr>
+                            <tr>
+                                <td>23.7</td>
+                                <td>38.5</td>
+                                <td>6</td>
+                            </tr>
+                            <tr>
+                                <td>24.1</td>
+                                <td>39</td>
+                                <td>6.5</td>
+                            </tr>
+                            <!-- Thêm các size khác -->
                         </tbody>
                     </table>
                 </div>
@@ -36,14 +40,151 @@
         <div class="modal-dialog modal-dialog-scrollable modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="sizeChooseModalTitle">Chọn size</h5><a class="size-guide text-btn" data-toggle="modal" href="#sizeGuideModal" data-dismiss="modal">Bảng size</a>
+                    <h5 class="modal-title" id="sizeChooseModalTitle">Chọn size</h5>
+                    <a class="size-guide text-btn" data-toggle="modal" href="#sizeGuideModal" data-dismiss="modal">Bảng size</a>
                 </div>
                 <div class="modal-body">
+                    <!-- Size Selection -->
                     <div class="size content">
-                        <div class="select-filter"></div>
+                        <h6>Size giày</h6>
+                        <div class="select-filter">
+                            <th:block th:each="size : ${sizeVN}">
+                                <div class="item" th:data-id="${size}" th:text="${size}"></div>
+                            </th:block>
+                        </div>
                     </div>
+
+                    <!-- Color Selection -->
+                    <div class="size content mt-3">
+                        <h6>Màu sắc</h6>
+                        <div class="select-filter">
+                            <div class="item" data-id="Đen" style="background-color: black; color: white;">Đen</div>
+                            <div class="item" data-id="Trắng" style="background-color: white; border: 1px solid #ddd;">Trắng</div>
+                            <div class="item" data-id="Xám" style="background-color: gray; color: white;">Xám</div>
+                            <div class="item" data-id="Nâu" style="background-color: brown; color: white;">Nâu</div>
+                            <!-- Thêm các màu khác nếu cần -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="confirmSizeColor">Xác nhận</button>
                 </div>
             </div>
         </div>
     </div>
+
+    <style>
+        .select-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .select-filter .item {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .select-filter .item:hover {
+            border-color: #007bff;
+        }
+
+        .select-filter .item.size-choose {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .select-filter .item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+
+    <script th:inline="javascript">
+        $(document).ready(function() {
+            let selectedSize = null;
+            let selectedColor = null;
+            let productId = /*[[${productId}]]*/ null;
+
+            // Xử lý chọn size
+            $('.size .select-filter .item').click(function() {
+                selectedSize = $(this).data('id');
+                $('.size .select-filter .item').removeClass('size-choose');
+                $(this).addClass('size-choose');
+                checkAvailableColors(selectedSize);
+            });
+
+            // Xử lý chọn màu
+            $('.content:last .select-filter .item').click(function() {
+                if ($(this).hasClass('disabled')) return;
+                selectedColor = $(this).data('id');
+                $('.content:last .select-filter .item').removeClass('size-choose');
+                $(this).addClass('size-choose');
+            });
+
+            // Kiểm tra màu có sẵn cho size đã chọn
+            function checkAvailableColors(size) {
+                if (!productId || !size) return;
+                
+                $.ajax({
+                    url: `/api/products/${productId}/entries`,
+                    method: 'GET',
+                    data: { size: size },
+                    success: function(availableColors) {
+                        $('.content:last .select-filter .item').each(function() {
+                            const color = $(this).data('id');
+                            if (availableColors.includes(color)) {
+                                $(this).removeClass('disabled');
+                            } else {
+                                $(this).addClass('disabled');
+                                if ($(this).hasClass('size-choose')) {
+                                    $(this).removeClass('size-choose');
+                                    selectedColor = null;
+                                }
+                            }
+                        });
+                    },
+                    error: function(error) {
+                        console.error('Error checking available colors:', error);
+                        toastr.error('Có lỗi xảy ra khi kiểm tra màu sắc có sẵn');
+                    }
+                });
+            }
+
+            // Xử lý nút xác nhận
+            $('#confirmSizeColor').click(function() {
+                if (!selectedSize || !selectedColor) {
+                    toastr.warning('Vui lòng chọn cả size và màu sắc');
+                    return;
+                }
+
+                // Kiểm tra tình trạng còn hàng
+                $.ajax({
+                    url: `/api/products/${productId}/check-availability`,
+                    method: 'GET',
+                    data: {
+                        size: selectedSize,
+                        color: selectedColor
+                    },
+                    success: function(response) {
+                        if (response.available) {
+                            $('#modal-size-Choose').modal('hide');
+                            // Thêm vào giỏ hàng hoặc xử lý tiếp theo
+                            // Có thể emit một event hoặc gọi callback function
+                        } else {
+                            toastr. warning('Sản phẩm đã hết hàng');
+                        }
+                    },
+                    error: function(error) {
+                        console.error('Error checking availability:', error);
+                        toastr.error('Có lỗi xảy ra khi kiểm tra tình trạng còn hàng');
+                    }
+                });
+            });
+        });
+    </script>
 </th:block>

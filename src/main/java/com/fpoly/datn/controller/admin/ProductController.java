@@ -1,9 +1,8 @@
 package com.fpoly.datn.controller.admin;
 
 import com.fpoly.datn.entity.*;
-import com.fpoly.datn.model.request.CreateColorCountRequest;
 import com.fpoly.datn.model.request.CreateProductRequest;
-import com.fpoly.datn.model.request.CreateSizeCountRequest;
+import com.fpoly.datn.model.request.CreateEntryCountRequest;
 import com.fpoly.datn.model.request.UpdateFeedBackRequest;
 import com.fpoly.datn.security.CustomUserDetails;
 import com.fpoly.datn.service.BrandService;
@@ -154,11 +153,9 @@ public class ProductController {
         model.addAttribute("colorVN", COlOR_VN);
 
         //Lấy size của sản phẩm
-        List<ProductSize> productSizes = productService.getListSizeOfProduct(id);
-        model.addAttribute("productSizes", productSizes);
+        List<ProductEntry> productEntry = productService.getListEntryOfProduct(id);
+        model.addAttribute("productEntry", productEntry);
 
-        List<ProductColor> productColors = productService.getListColorOfProduct(id);
-        model.addAttribute("productColors", productColors);
 
         return "admin/product/edit";
     }
@@ -206,22 +203,16 @@ public class ProductController {
         return ResponseEntity.ok("Xóa sản phẩm thành công!");
     }
 
-    @PutMapping("/api/admin/products/sizes")
-    public ResponseEntity<?> updateSizeCount(@Valid @RequestBody CreateSizeCountRequest createSizeCountRequest) {
-        productService.createSizeCount(createSizeCountRequest);
-
-        return ResponseEntity.ok("Cập nhật thành công!");
-    }
-    @PutMapping("/api/admin/products/colors")
-    public ResponseEntity<?> updateColorCount(@Valid @RequestBody CreateColorCountRequest createColorCountRequest) {
-        productService.createColorCount(createColorCountRequest);
+    @PutMapping("/api/admin/products/entries")
+    public ResponseEntity<?> updateEntryCount(@Valid @RequestBody CreateEntryCountRequest createEntryCountRequest) {
+        productService.createEntryCount(createEntryCountRequest);
 
         return ResponseEntity.ok("Cập nhật thành công!");
     }
 
     @PutMapping("/api/admin/products/{id}/update-feedback-image")
     public ResponseEntity<?> updatefeedBackImages(@PathVariable String id, @Valid @RequestBody UpdateFeedBackRequest req) {
-        productService.updatefeedBackImages(id, req);
+        productService.updateFeedBackImages(id, req);
 
         return ResponseEntity.ok("Cập nhật thành công");
     }

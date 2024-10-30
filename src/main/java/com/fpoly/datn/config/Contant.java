@@ -38,7 +38,7 @@ public class Contant {
     public static final double[] SIZE_CM = {21.3, 22.2, 23, 23.8, 24.6, 25.4, 26.2, 27.1};
 
     //
-    public static final List<String> COlOR_VN = new ArrayList<>(Arrays.asList("Black", "Red", "Pink", "Purple", "Gray", "Blue", "Silver", "Brown", "Olive Green", "White","Yellow"));
+    public static final List<String> COlOR_VN = new ArrayList<>(Arrays.asList("Black", "Red", "Pink", "Blue", "Silver", "Green", "White","Yellow"));
 
 
     //Trạng thái post

@@ -45,6 +45,16 @@ public class CreateOrderRequest {
 
     @JsonProperty("product_price")
     private long productPrice;
+    @JsonProperty("payment_method")
+    private int paymentMethod;
+
+    @JsonProperty("payment_status")
+    private String paymentStatus;
+
+
+
+
+
 
     private String note;
 
