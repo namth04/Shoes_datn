@@ -35,7 +35,6 @@ public class CreateProductRequest {
     @JsonProperty("sole_id")
     private Long soleId;
 
-
     @NotNull(message = "Danh mục trống!")
     @JsonProperty("category_ids")
     private ArrayList<Integer> categoryIds;

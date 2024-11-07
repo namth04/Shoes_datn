@@ -1,9 +1,9 @@
 package com.fpoly.datn.service.impl;
 
+import com.fpoly.datn.entity.Brand;
 import com.fpoly.datn.exception.BadRequestException;
 import com.fpoly.datn.exception.InternalServerException;
 import com.fpoly.datn.exception.NotFoundException;
-import com.fpoly.datn.entity.Brand;
 import com.fpoly.datn.model.mapper.BrandMapper;
 import com.fpoly.datn.model.request.CreateBrandRequest;
 import com.fpoly.datn.repository.BrandRepository;

@@ -1,9 +1,9 @@
 package com.fpoly.datn.service.impl;
 
+import com.fpoly.datn.entity.Image;
 import com.fpoly.datn.exception.BadRequestException;
 import com.fpoly.datn.exception.InternalServerException;
 import com.fpoly.datn.repository.ImageRepository;
-import com.fpoly.datn.entity.Image;
 import com.fpoly.datn.service.ImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
