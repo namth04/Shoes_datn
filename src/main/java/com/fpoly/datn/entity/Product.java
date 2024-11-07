@@ -55,19 +55,6 @@ import java.util.List;
                         )
                 ),
                 @SqlResultSetMapping(
-                        name = "productInfoAndAvailableColor",
-                        classes = @ConstructorResult(
-                                targetClass = ShortProductInfoDTO.class,
-                                columns = {
-                                        @ColumnResult(name = "id", type = String.class),
-                                        @ColumnResult(name = "name", type = String.class),
-                                        @ColumnResult(name = "price", type = Long.class),
-                                        @ColumnResult(name = "colors", type = String.class),
-
-                                }
-                        )
-                ),
-                @SqlResultSetMapping(
                         name = "chartProductDTO",
                         classes = @ConstructorResult(
                                 targetClass = ChartDTO.class,
@@ -128,13 +115,6 @@ import java.util.List;
                 "FROM product p"
 )
 @NamedNativeQuery(
-        name = "getAllByColorAvailable",
-        resultSetMapping = "productInfoAndAvailableColor",
-        query = "SELECT p.id, p.name, p.sale_price as price, " +
-                "(SELECT JSON_ARRAYAGG(ps.color) FROM product_color ps WHERE ps.product_id = p.id AND ps.quantity > 0) AS colors " +
-                "FROM product p"
-)
-@NamedNativeQuery(
         name = "searchProductBySize",
         resultSetMapping = "productInfoDto",
         query = "SELECT DISTINCT d.* " +
@@ -143,33 +123,13 @@ import java.util.List;
                 "FROM product " +
                 "INNER JOIN product_category " +
                 "ON product.id = product_category.product_id " +
-                "WHERE product.status = 1 AND product.brand_id IN (?1)  AND product.material_id IN (?2)" +
-                "AND product.sole_id IN(?3) AND product_category.category_id IN (?4) " +
-                "AND product.price > ?5 AND product.price < ?6) as d " +
+                "WHERE product.status = 1 AND product.brand_id IN (?1) AND product_category.category_id IN (?2) " +
+                "AND product.price > ?3 AND product.price < ?4) as d " +
                 "INNER JOIN product_size " +
                 "ON product_size.product_id = d.id " +
-                "WHERE product_size.size IN (?7) " +
-                "LIMIT ?8 "+
-                "OFFSET ?9"
-)
-
-@NamedNativeQuery(
-        name = "searchProductByColor",
-        resultSetMapping = "productInfoDto",
-        query = "SELECT DISTINCT d.* " +
-                "FROM (" +
-                "SELECT DISTINCT product.id, product.name, product.slug, product.sale_price as price, product.product_view as views, product.total_sold, product.images ->> '$[0]' AS images " +
-                "FROM product " +
-                "INNER JOIN product_category " +
-                "ON product.id = product_category.product_id " +
-                "WHERE product.status = 1 AND product.brand_id IN (?1) AND product.material_id IN (?2)" +
-                "AND product.sole_id IN(?3) AND product_category.category_id IN (?4) " +
-                "AND product.price > ?5 AND product.price < ?6) as d " +
-                "INNER JOIN product_color " +
-                "ON product_color.product_id = d.id " +
-                "WHERE product_color.color IN (?7) " +
-                "LIMIT ?8 "+
-                "OFFSET ? 9"
+                "WHERE product_size.size IN (?5) " +
+                "LIMIT ?6 "+
+                "OFFSET ?7"
 )
 @NamedNativeQuery(
         name = "searchProductAllSize",
@@ -178,10 +138,10 @@ import java.util.List;
                 "FROM product " +
                 "INNER JOIN product_category " +
                 "ON product.id = product_category.product_id " +
-                "WHERE product.status = 1 AND product.brand_id IN (?1) AND product.material_id IN (?2) AND product.sole_id IN (?3)AND product_category.category_id IN (?4) " +
-                "AND product.price > ?5 AND product.price < ?6 " +
-                "LIMIT ?7 " +
-                "OFFSET ?8"
+                "WHERE product.status = 1 AND product.brand_id IN (?1) AND product_category.category_id IN (?2) " +
+                "AND product.price > ?3 AND product.price < ?4 " +
+                "LIMIT ?5 " +
+                "OFFSET ?6"
 )
 @NamedNativeQuery(
         name = "searchProductByKeyword",
@@ -192,7 +152,7 @@ import java.util.List;
                 "ON p.id = pc.product_id " +
                 "INNER JOIN category c " +
                 "ON c.id = pc.category_id " +
-                "WHERE p.status = 1 AND (p.name LIKE CONCAT('%',:keyword,'%') OR c.name LIKE CONCAT('%',:keyword,'%')) " +
+                "WHERE p.status = 1 AND (p.name LIKE CONCAT('%',:keyword,'%') OR p.description LIKE CONCAT('%',:keyword,'%') OR c.name LIKE CONCAT('%',:keyword,'%')) " +
                 "LIMIT :limit " +
                 "OFFSET :offset "
 )
@@ -250,6 +210,7 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "material_id")
     private Material material;
+
     @ManyToOne
     @JoinColumn(name = "sole_id")
     private Sole sole;

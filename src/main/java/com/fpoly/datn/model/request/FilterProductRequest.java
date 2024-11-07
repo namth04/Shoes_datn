@@ -12,13 +12,10 @@ import java.util.List;
 @ToString
 public class FilterProductRequest {
     private List<Long> brands;
-    private List<Long> materials;
-    private List<Long> soles;
 
     private List<Long> categories;
 
     private List<Integer> sizes;
-    private List<Long> colors;
 
     @JsonProperty("min_price")
     private Long minPrice;

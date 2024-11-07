@@ -71,9 +71,6 @@ public class OrderController {
 
         // Get list size
         model.addAttribute("sizeVn", SIZE_VN);
-        //
-        model.addAttribute("colorVn", COlOR_VN);
-
 
 //        //Get list valid promotion
         List<Promotion> promotions = promotionService.getAllValidPromotion();
@@ -116,7 +113,7 @@ public class OrderController {
             }
 
             // Check size available
-            boolean sizeIsAvailable = productService.checkProductEntryAvailable(order.getProduct().getId(), order.getSize(),order.getColor());
+            boolean sizeIsAvailable = productService.checkProductSizeAvailable(order.getProduct().getId(), order.getSize());
             model.addAttribute("sizeIsAvailable", sizeIsAvailable);
         }
 

@@ -21,15 +21,13 @@ public class CreateOrderRequest {
     @Min(value = 35)
     @Max(value = 42)
     private int size;
-    @JsonProperty("color")
-    private String color;
 
     @NotBlank(message = "Họ tên trống")
     @JsonProperty("receiver_name")
     private String receiverName;
 
     @Pattern(regexp="(09|03|07|08|05)+([0-9]{8})\\b", message = "Điện thoại không hợp lệ")
-
+    @JsonProperty("receiver_phone")
     private String receiverPhone;
 
     @NotNull(message = "Địa chỉ trống")
@@ -45,16 +43,6 @@ public class CreateOrderRequest {
 
     @JsonProperty("product_price")
     private long productPrice;
-    @JsonProperty("payment_method")
-    private int paymentMethod;
-
-    @JsonProperty("payment_status")
-    private String paymentStatus;
-
-
-
-
-
 
     private String note;
 

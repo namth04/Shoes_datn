@@ -12,30 +12,28 @@ import java.util.List;
 @Getter
 public class ShortProductInfoDTO {
     private String id;
+
     private String name;
+
     private long price;
 
-    List<Integer> availableEntry;
-
+    List<Integer> availableSizes;
 
     public ShortProductInfoDTO(String id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    public ShortProductInfoDTO(String id, String name, long price, Object availableEntry) {
+    public ShortProductInfoDTO(String id, String name, long price, Object availableSizes) {
         this.id = id;
         this.name = name;
         this.price = price;
-
-        // Xử lý danh sách entry có sẵn
-        if (availableEntry != null) {
+        if (availableSizes != null) {
             ObjectMapper mapper = new ObjectMapper();
             try {
-                this.availableEntry = mapper.readValue((String) availableEntry, new TypeReference<List<Integer>>() {
-                });
+                this.availableSizes = mapper.readValue((String) availableSizes, new TypeReference<List<Integer>>(){});
             } catch (IOException e) {
-                this.availableEntry = null;
+                this.availableSizes = null;
             }
         }
     }

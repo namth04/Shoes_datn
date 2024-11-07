@@ -1,8 +1,8 @@
 package com.fpoly.datn.model.mapper;
 
 import com.fpoly.datn.entity.User;
-import com.fpoly.datn.model.request.CreateUserRequest;
 import com.fpoly.datn.model.dto.UserDTO;
+import com.fpoly.datn.model.request.CreateUserRequest;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
 import java.sql.Timestamp;

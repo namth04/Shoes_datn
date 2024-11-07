@@ -1,9 +1,19 @@
 package com.fpoly.datn.controller.shop;
 
-import com.fpoly.datn.entity.*;
-import com.fpoly.datn.exception.NotFoundException;
-import com.fpoly.datn.service.*;
+import com.fpoly.datn.entity.Brand;
+import com.fpoly.datn.entity.Category;
+import com.fpoly.datn.entity.Order;
+import com.fpoly.datn.entity.Post;
+import com.fpoly.datn.entity.Promotion;
+import com.fpoly.datn.entity.User;
+import com.fpoly.datn.service.BrandService;
+import com.fpoly.datn.service.CategoryService;
+import com.fpoly.datn.service.OrderService;
+import com.fpoly.datn.service.PostService;
+import com.fpoly.datn.service.ProductService;
+import com.fpoly.datn.service.PromotionService;
 import com.fpoly.datn.exception.BadRequestException;
+import com.fpoly.datn.exception.NotFoundException;
 import com.fpoly.datn.model.dto.CheckPromotion;
 import com.fpoly.datn.model.dto.DetailProductInfoDTO;
 import com.fpoly.datn.model.dto.PageableDTO;
@@ -34,11 +44,6 @@ public class HomeController {
     @Autowired
     private BrandService brandService;
 
-    @Autowired
-    private MaterialService materialService;
-
-    @Autowired
-    private SoleService soleService;
     @Autowired
     private PostService postService;
 
@@ -181,22 +186,7 @@ public class HomeController {
             brandIds.add(brand.getId());
         }
         model.addAttribute("brandIds", brandIds);
-  //
-        List<Material> materials = materialService.getListMaterial();
-        model.addAttribute("materials",materials);
-        List<Long> materialIds = new ArrayList<>();
-        for (Material material : materials) {
-            materialIds.add(material.getId());
-        }
-        model.addAttribute("materialIds", materialIds);
-        // danh sách đế giày
-        List<Sole> soles = soleService.getListSole();
-        model.addAttribute("soles",soles);
-        List<Long> soleIds = new ArrayList<>();
-        for (Sole sole : soles) {
-            soleIds.add(sole.getId());
-        }
-        model.addAttribute("soleIds", soleIds);
+
         //Lấy danh sách danh mục
         List<Category> categories = categoryService.getListCategories();
         model.addAttribute("categories",categories);
@@ -208,11 +198,9 @@ public class HomeController {
 
         //Danh sách size của sản phẩm
         model.addAttribute("sizeVn", SIZE_VN);
-        model.addAttribute("colorVn", COlOR_VN);
-
 
         //Lấy danh sách sản phẩm
-        FilterProductRequest req = new FilterProductRequest(brandIds,materialIds, categoryIds,soleIds, new ArrayList<>(),new ArrayList<>(), (long) 0, Long.MAX_VALUE, 1);
+        FilterProductRequest req = new FilterProductRequest(brandIds, categoryIds, new ArrayList<>(), (long) 0, Long.MAX_VALUE, 1);
         PageableDTO result = productService.filterProduct(req);
         model.addAttribute("totalPages", result.getTotalPages());
         model.addAttribute("currentPage", result.getCurrentPage());

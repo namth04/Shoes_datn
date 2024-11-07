@@ -1,14 +1,14 @@
 package com.fpoly.datn.service;
 
 import com.fpoly.datn.entity.Product;
-import com.fpoly.datn.entity.ProductEntry;
+import com.fpoly.datn.entity.ProductSize;
 import com.fpoly.datn.entity.Promotion;
 import com.fpoly.datn.model.dto.DetailProductInfoDTO;
 import com.fpoly.datn.model.dto.PageableDTO;
 import com.fpoly.datn.model.dto.ProductInfoDTO;
 import com.fpoly.datn.model.dto.ShortProductInfoDTO;
 import com.fpoly.datn.model.request.CreateProductRequest;
-import com.fpoly.datn.model.request.CreateEntryCountRequest;
+import com.fpoly.datn.model.request.CreateSizeCountRequest;
 import com.fpoly.datn.model.request.FilterProductRequest;
 import com.fpoly.datn.model.request.UpdateFeedBackRequest;
 import org.springframework.data.domain.Page;
@@ -19,75 +19,75 @@ import java.util.List;
 @Service
 public interface ProductService {
 
-    // Lấy sản phẩm
-    Page<Product> adminGetListProduct(String id, String name, String category, String brand, String material, String sole, Integer page);
+    //Lấy sản phẩm
+    Page<Product> adminGetListProduct(String id, String name, String category, String brand,String material,String sole, Integer page);
 
-    // Tạo sản phẩm
+    //Tạo sản phẩm
     Product createProduct(CreateProductRequest createProductRequest);
 
-    // Sửa sản phẩm
+    //Sửa sản phẩm
     void updateProduct(CreateProductRequest createProductRequest, String id);
 
-    // Lấy chi tiết sản phẩm
+    //Lấy chi tiết sản phẩm
     Product getProductById(String id);
 
-    // Xóa sản phẩm theo id
+    //Xóa sản phẩm theo id
     void deleteProduct(String[] ids);
 
-    // Xóa sản phẩm theo id
+    //Xóa sản phẩm theo id
     void deleteProductById(String id);
 
-    // Lấy sản phẩm bán nhiều nhất
+    //Lấy sản phẩm bán nhiều nhất
     List<ProductInfoDTO> getListBestSellProducts();
 
-    // Lấy sản phẩm mới nhất
+    //Lấy sản phẩm mới nhất
     List<ProductInfoDTO> getListNewProducts();
 
-    // Lấy sản phẩm xem nhiều
+    //Lấy sản phẩm xem nhiều
     List<ProductInfoDTO> getListViewProducts();
 
-    // Lấy chi tiết sản phẩm theo id
+    //Lấy chi tiết sản phẩm theo id
     DetailProductInfoDTO getDetailProductById(String id);
 
-    // Lấy sản phẩm liên quan
+    //Lấy sản phẩm liên quan
     List<ProductInfoDTO> getRelatedProducts(String id);
 
-    // Lấy size có sẵn
+    //Lấy size có sẵn
     List<Integer> getListAvailableSize(String id);
 
-    // Nhập số lượng theo size, color
-    void createEntryCount(CreateEntryCountRequest createEntryCountRequest);
+    //Nhập số lượng theo size
+    void createSizeCount(CreateSizeCountRequest createSizeCountRequest);
 
-    // Lấy size, màu của sản phẩm
-    List<ProductEntry> getListEntryOfProduct(String id);
+    //Lấy size của sản phẩm
+    List<ProductSize> getListSizeOfProduct(String id);
 
-    // Lấy danh sách sản phẩm ngắn
     List<ShortProductInfoDTO> getListProduct();
 
-    // Lấy sản phẩm có sẵn size và color
+    //Lấy sản phẩm có sẵn size
     List<ShortProductInfoDTO> getAvailableProducts();
 
-    // Check size sản phẩm
-    boolean checkProductEntryAvailable(String id, int size, String color);
+    //Check size sản phẩm
+    boolean checkProductSizeAvailable(String id, int size);
 
-    // Kiểm tra sản phẩm có khuyến mại
+    //Kiểm tra sản phẩm có khuyến mại
     List<ProductInfoDTO> checkPublicPromotion(List<ProductInfoDTO> products);
 
-    // Tìm kiếm sản phẩm theo danh mục, nhãn hiệu, giá
+    //Tìm kiếm sản phẩm theo danh mục, nhãn hiệu, giá
     PageableDTO filterProduct(FilterProductRequest req);
 
-    // Tìm kiếm sản phẩm theo tên sản phẩm
+    //Tìm kiếm sản phẩm theo tên sản phẩm
     PageableDTO searchProductByKeyword(String keyword, Integer page);
 
-    // Kiểm tra khuyến mại
+    //Kiểm tra khuyến mại
     Promotion checkPromotion(String code);
 
-    // Đếm số lượng sản phẩm
+    //Đếm số lượng sản phẩm
     long getCountProduct();
 
-    // Thêm ảnh feedBack
-    void updateFeedBackImages(String id, UpdateFeedBackRequest req);
+    //Thêm ảnh feedBack
+    void updatefeedBackImages(String id, UpdateFeedBackRequest req);
 
-    // Lấy tất cả sản phẩm
+    //Lấy tất cả sản phẩm
     List<Product> getAllProduct();
+
 }

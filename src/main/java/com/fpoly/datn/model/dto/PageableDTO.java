@@ -11,6 +11,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class PageableDTO {
     private Object items;
+
     private int totalPages;
+
     private int currentPage;
 }

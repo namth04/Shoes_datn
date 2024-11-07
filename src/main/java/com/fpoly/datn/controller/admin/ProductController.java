@@ -1,8 +1,14 @@
 package com.fpoly.datn.controller.admin;
 
-import com.fpoly.datn.entity.*;
+import com.fpoly.datn.entity.Brand;
+import com.fpoly.datn.entity.Category;
+import com.fpoly.datn.entity.Material;
+import com.fpoly.datn.entity.Product;
+import com.fpoly.datn.entity.ProductSize;
+import com.fpoly.datn.entity.Sole;
+import com.fpoly.datn.entity.User;
 import com.fpoly.datn.model.request.CreateProductRequest;
-import com.fpoly.datn.model.request.CreateEntryCountRequest;
+import com.fpoly.datn.model.request.CreateSizeCountRequest;
 import com.fpoly.datn.model.request.UpdateFeedBackRequest;
 import com.fpoly.datn.security.CustomUserDetails;
 import com.fpoly.datn.service.BrandService;
@@ -31,8 +37,6 @@ import java.io.*;
 import java.nio.file.Files;
 import java.util.List;
 
-
-import static com.fpoly.datn.config.Contant.COlOR_VN;
 import static com.fpoly.datn.config.Contant.SIZE_VN;
 
 @Slf4j
@@ -42,7 +46,7 @@ public class ProductController {
     private String xlsx = ".xlsx";
     private static final int BUFFER_SIZE = 4096;
     private static final String TEMP_EXPORT_DATA_DIRECTORY = "\\resources\\reports";
-    private static final String EXPORT_DATA_REPORT_FILE_NAME = "Danh_Sach_San_pham";
+    private static final String EXPORT_DATA_REPORT_FILE_NAME = "San_pham";
 
     @Autowired
     private ServletContext context;
@@ -54,10 +58,10 @@ public class ProductController {
     private BrandService brandService;
 
     @Autowired
-    private SoleService soleService;
+    private MaterialService materialService;
 
     @Autowired
-    private MaterialService materialService;
+    private SoleService soleService;
 
     @Autowired
     private CategoryService categoryService;
@@ -78,18 +82,17 @@ public class ProductController {
         //Lấy danh sách nhãn hiệu
         List<Brand> brands = brandService.getListBrand();
         model.addAttribute("brands", brands);
-        // lấy danh sách chất liệu
+        // Lấy danh sách chất liệu
         List<Material> materials = materialService.getListMaterial();
         model.addAttribute("materials", materials);
-        // lấy danh sách đế giày
+        // Lấy danh sách đế giày
         List<Sole> soles = soleService.getListSole();
         model.addAttribute("soles", soles);
         //Lấy danh sách danh mục
         List<Category> categories = categoryService.getListCategories();
         model.addAttribute("categories", categories);
-
         //Lấy danh sách sản phẩm
-        Page<Product> products = productService.adminGetListProduct(id, name, category, brand, material, sole, page);
+        Page<Product> products = productService.adminGetListProduct(id, name, category, brand,material,sole, page);
         model.addAttribute("products", products.getContent());
         model.addAttribute("totalPages", products.getTotalPages());
         model.addAttribute("currentPage", products.getPageable().getPageNumber() + 1);
@@ -107,13 +110,12 @@ public class ProductController {
         //Lấy danh sách nhãn hiệu
         List<Brand> brands = brandService.getListBrand();
         model.addAttribute("brands", brands);
-        // lấy danh sách chất liệu
+        //Lấy danh sách chất liệu
         List<Material> materials = materialService.getListMaterial();
         model.addAttribute("materials", materials);
-        // lấy danh sách đế giày
+        //Lấy danh sách đế giày
         List<Sole> soles = soleService.getListSole();
         model.addAttribute("soles", soles);
-
         //Lấy danh sách danh mục
         List<Category> categories = categoryService.getListCategories();
         model.addAttribute("categories", categories);
@@ -140,22 +142,18 @@ public class ProductController {
         // Lấy danh sách nhãn hiệu
         List<Brand> brands = brandService.getListBrand();
         model.addAttribute("brands", brands);
-        // lấy danh sách chất liệu
+        //Lấy danh sách chất liệu
         List<Material> materials = materialService.getListMaterial();
         model.addAttribute("materials", materials);
-        // lấy danh sách đế giày
+        // Lấy danh sách đế giày
         List<Sole> soles = soleService.getListSole();
         model.addAttribute("soles", soles);
-
         //Lấy danh sách size
         model.addAttribute("sizeVN", SIZE_VN);
 
-        model.addAttribute("colorVN", COlOR_VN);
-
         //Lấy size của sản phẩm
-        List<ProductEntry> productEntry = productService.getListEntryOfProduct(id);
-        model.addAttribute("productEntry", productEntry);
-
+        List<ProductSize> productSizes = productService.getListSizeOfProduct(id);
+        model.addAttribute("productSizes", productSizes);
 
         return "admin/product/edit";
     }
@@ -167,9 +165,8 @@ public class ProductController {
                                                   @RequestParam(defaultValue = "", required = false) String brand,
                                                   @RequestParam(defaultValue = "", required = false) String material,
                                                   @RequestParam(defaultValue = "", required = false) String sole,
-
                                                   @RequestParam(defaultValue = "1", required = false) Integer page) {
-        Page<Product> products = productService.adminGetListProduct(id, name, category, brand, material, sole, page);
+        Page<Product> products = productService.adminGetListProduct(id, name, category, brand,material,sole, page);
         return ResponseEntity.ok(products);
     }
 
@@ -203,16 +200,16 @@ public class ProductController {
         return ResponseEntity.ok("Xóa sản phẩm thành công!");
     }
 
-    @PutMapping("/api/admin/products/entries")
-    public ResponseEntity<?> updateEntryCount(@Valid @RequestBody CreateEntryCountRequest createEntryCountRequest) {
-        productService.createEntryCount(createEntryCountRequest);
+    @PutMapping("/api/admin/products/sizes")
+    public ResponseEntity<?> updateSizeCount(@Valid @RequestBody CreateSizeCountRequest createSizeCountRequest) {
+        productService.createSizeCount(createSizeCountRequest);
 
         return ResponseEntity.ok("Cập nhật thành công!");
     }
 
     @PutMapping("/api/admin/products/{id}/update-feedback-image")
     public ResponseEntity<?> updatefeedBackImages(@PathVariable String id, @Valid @RequestBody UpdateFeedBackRequest req) {
-        productService.updateFeedBackImages(id, req);
+        productService.updatefeedBackImages(id, req);
 
         return ResponseEntity.ok("Cập nhật thành công");
     }
@@ -261,11 +258,11 @@ public class ProductController {
             productBrand.setCellStyle(headerCellStyle);
 
             XSSFCell productMaterial = headerRow.createCell(3);
-            productMaterial.setCellValue("Chất Liệu");
+            productMaterial.setCellValue("Chất liệu");
             productMaterial.setCellStyle(headerCellStyle);
 
             XSSFCell productSole = headerRow.createCell(4);
-            productSole.setCellValue("Đế Giày");
+            productSole.setCellValue("Đế giày");
             productSole.setCellStyle(headerCellStyle);
 
             XSSFCell price = headerRow.createCell(5);
@@ -308,13 +305,12 @@ public class ProductController {
                     productBrandValue.setCellStyle(bodyCellStyle);
 
                     XSSFCell productMaterialValue = bodyRow.createCell(3);
-                    productMaterialValue.setCellValue(product.getMaterial().getName());
+                    productMaterialValue.setCellValue(product.getBrand().getName());
                     productMaterialValue.setCellStyle(bodyCellStyle);
 
                     XSSFCell productSoleValue = bodyRow.createCell(4);
-                    productSoleValue.setCellValue(product.getSole().getName());
+                    productSoleValue.setCellValue(product.getBrand().getName());
                     productSoleValue.setCellStyle(bodyCellStyle);
-
 
                     XSSFCell priceValue = bodyRow.createCell(5);
                     priceValue.setCellValue(product.getPrice());
@@ -352,7 +348,7 @@ public class ProductController {
         File file = new File(fullPath);
         if (file.exists()) {
             OutputStream os = null;
-            try (FileInputStream fis = new FileInputStream(file);) {
+            try(FileInputStream fis = new FileInputStream(file);) {
                 String mimeType = context.getMimeType(fullPath);
                 response.setContentType(mimeType);
                 response.setHeader("content-disposition", "attachment; filename=" + fileName + "." + type);
@@ -366,7 +362,7 @@ public class ProductController {
             } catch (Exception e) {
                 log.error("Can't download file, detail: {}", e.getMessage());
             } finally {
-                if (os != null) {
+                if(os != null) {
                     try {
                         os.close();
                     } catch (IOException e) {
