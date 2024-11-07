@@ -52,15 +52,15 @@
                                 class="fas fa-search"></i></button>
                         <button class="btn btn-warning btn_export"><a th:href="@{/api/products/export/excel}">Xuất dữ liệu</a>
                             <i class="fas fa-file-export"></i></button>
-<!--                        <button id="btn-delete" onclick="warningBeforeDelete()" type="button" class="btn btn-danger" disabled>Xóa sản phẩm  <i-->
-<!--                                class="fas fa-trash-alt"></i></button>-->
+                        <!--                        <button id="btn-delete" onclick="warningBeforeDelete()" type="button" class="btn btn-danger" disabled>Xóa sản phẩm  <i-->
+                        <!--                                class="fas fa-trash-alt"></i></button>-->
                     </div>
                 </div>
             </div>
             <table class="table table-bordered table-striped mb-0" id="datatable-editable">
                 <thead>
                 <tr>
-<!--                    <th><input type="checkbox" id="checkAll"></th>-->
+                    <!--                    <th><input type="checkbox" id="checkAll"></th>-->
                     <th width="8%">Mã sản phẩm</th>
                     <th>Tên sản phẩm</th>
                     <th>Ảnh</th>
@@ -75,7 +75,7 @@
                 </tr>
                 <tr>
                     <form method="GET" id="search-form">
-<!--                        <th></th>-->
+                        <!--                        <th></th>-->
                         <th>
                             <input type="text" name="id" id="id" class="form-control search-input">
                         </th>
@@ -101,12 +101,12 @@
                             </select>
                         </th>
                         <th>
-                             <select  name="sole" class="form-control search-select" id="sole">
-                                 <option value="">Tất Cả </option>
-                                 <th:block th:each="sole : ${soles}">
-                                     <option th:value="${sole.id}" th:text="${sole.name}"></option>
-                                 </th:block>
-                             </select>
+                            <select  name="sole" class="form-control search-select" id="sole">
+                                <option value="">Tất Cả </option>
+                                <th:block th:each="sole : ${soles}">
+                                    <option th:value="${sole.id}" th:text="${sole.name}"></option>
+                                </th:block>
+                            </select>
                         </th>
                         <th></th>
                         <th></th>

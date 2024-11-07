@@ -61,7 +61,7 @@
                         <a class="nav-link active" data-toggle="tab" href="#tabs-1" role="tab">Thông tin sản phẩm</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" data-toggle="tab" href="#tabs-2" role="tab">Thuộc Tính Sản Phẩm</a>
+                        <a class="nav-link" data-toggle="tab" href="#tabs-2" role="tab">Nhập số lượng sản phẩm</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" data-toggle="tab" href="#tabs-3" role="tab">Thêm ảnh feedback cho sản
@@ -120,34 +120,15 @@
                                                     </select>
                                                 </div>
                                                 <div class="form-group">
-                                                    <label for="brand" class="required-label">Chất liệu sản phẩm
-                                                        <span
-                                                                class="required">*</span></label>
-                                                    <select class="form-control" id="material">
-                                                        <th:block th:each="material : ${materials}">
-                                                            <option th:value="${material.id}" th:text="${material.name}"
-                                                                    th:selected="${product.material.id == material.id}"></option>
-                                                        </th:block>
-                                                    </select>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="brand" class="required-label">Đế giày sản phẩm
-                                                        <span
-                                                                class="required">*</span></label>
-                                                    <select class="form-control" id="sole">
-                                                        <th:block th:each="sole : ${soles}">
-                                                            <option th:value="${sole.id}" th:text="${sole.name}"
-                                                                    th:selected="${product.sole.id == sole.id}"></option>
-                                                        </th:block>
-                                                    </select>
-                                                </div>
-                                                <div class="form-group">
                                                     <div>
                                                         <label class="control-label text-lg-right pt-2">Danh mục sản
                                                             phẩm
-                                                            <span class="required">*</span></label>
+                                                            <span
+                                                                    class="required">*</span></label>
                                                     </div>
-                                                    <select multiple data-plugin-selectTwo class="form-control populate" name="category[]" id="category">
+                                                    <select multiple data-plugin-selectTwo
+                                                            class="form-control populate"
+                                                            name="category[]" id="category">
                                                         <th:block th:each="category : ${categories}">
                                                             <option th:value="${category.id}"
                                                                     th:text="${category.name}"></option>
@@ -167,7 +148,10 @@
                                                 </div>
                                                 <div class="form-group">
                                                     <div>
-                                                        <label class="required-label" for="salePrice">Giá bán ra của sản phẩm (VNĐ)
+                                                        <label class="required-label" for="salePrice">Giá bán ra của
+                                                            sản
+                                                            phẩm
+                                                            (VNĐ)
                                                             <span class="required">*</span></label>
                                                     </div>
                                                     <input type="text" class="form-control text-price-input money"
@@ -215,67 +199,52 @@
 
                     <!-- Tab product size -->
                     <div class="tab-pane" id="tabs-2" role="tabpanel">
-                        <div class="container-fluid py-3">
-                            <div class="row justify-content-between">
-                                <!-- Form bắt đầu -->
-                                <form class="col-12">
-                                    <div class="row">
-                                        <!-- Cột Size -->
-                                        <div class="form-group col-lg-3 col-md-6 mb-3">
-                                            <label for="size">Size giày</label>
-                                            <select class="form-control" id="size">
-                                                <th:block th:each="size : ${sizeVN}">
-                                                    <option th:value="${size}" th:text="${size}"></option>
-                                                </th:block>
-                                            </select>
-                                        </div>
-
-                                        <!-- Cột Color -->
-
-
-                                        <!-- Cột Quantity -->
-                                        <div class="form-group col-lg-3 col-md-6 mb-3">
-                                            <label for="count">Số lượng có sẵn</label>
-                                            <input type="number" class="form-control" id="count" min="0" value="0">
-                                        </div>
-
-                                        <!-- Cột nút Action -->
-                                        <div class="form-group col-lg-3 col-md-6 mb-3">
-                                            <label>Thực hiện</label>
-                                            <button type="button" class="btn btn-primary btn-block btn-update-entry-count">
-                                                Cập nhật số lượng <i class="fas fa-plus"></i>
-                                            </button>
-                                            <span class="invalid-feedback" id="invalid-feedback-entry" style="display: none;">
-                            Vui lòng nhập số lượng
-                        </span>
-                                        </div>
+                        <div>
+                            <div class="row">
+                                <form class="form-inline">
+                                    <div class="form-group col-md-2">
+                                        <label for="size">Size giày</label>&emsp;
+                                        <select class="form-control" id="size">
+                                            <th:block th:each="size : ${sizeVN}">
+                                                <option th:value="${size}" th:text="${size}"></option>
+                                            </th:block>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-2">
+                                        <label for="count">Số lượng có sẵn</label>&emsp;
+                                        <input type="number" class="form-control" id="count" min="0" value="0">
+                                    </div>
+                                    <div class=" form-group col-md-3">
+                                        <label for="">Thực hiện</label>
+                                        <br>
+                                        <button type="button" id="" class="btn btn-primary btn-update-size-count">Cập
+                                            nhật số lượng <i class="fas fa-plus"></i></button>
+                                        <br>
+                                        <span class="invalid-feedback"
+                                              id="invalid-feedback-size">Vui lòng nhập số lượng</span>
                                     </div>
                                 </form>
-
                             </div>
                         </div>
-
-                        <!-- Bảng hiển thị số lượng sản phẩm -->
-                        <div class="container-fluid py-3">
+                        <div>
                             <table class="table table-striped table-bordered table-hover">
                                 <thead>
                                 <tr>
-                                    <th>Thuộc tính</th>
+                                    <th>Size giày</th>
                                     <th>Số lượng có sẵn</th>
                                 </tr>
                                 </thead>
-                                <tbody class="list-product-entry">
-                                <th:block th:each="entry : ${productEntry}">
+                                <tbody class="list-product-size">
+                                <th:block th:each="ps : ${productSizes}">
                                     <tr>
-                                        <td th:text="${entry.size} + ' - ' + ${entry.color}" class="product-size" th:data-size="${entry.size}"></td>
-                                        <td th:text="${entry.quantity}" class="product-count"></td>
+                                        <td th:text="${ps.size}" class="product-size" th:data-size="${ps.size}"></td>
+                                        <td th:text="${ps.quantity}" class="product-count"></td>
                                     </tr>
                                 </th:block>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-
 
                     <!-- Tab onfeet image -->
                     <div class="tab-pane fade" id="tabs-3" role="tabpanel">
@@ -434,12 +403,6 @@
                 brand: {
                     required: true,
                 },
-                material: {
-                    required: true,
-                },
-                sole: {
-                    required: true,
-                },
                 price: {
                     required: true,
                 },
@@ -461,12 +424,6 @@
                 brand: {
                     required: "Nhãn hiệu sản phẩm trống. Vui lòng nhập nhãn hiệu cho sản phẩm!"
                 },
-                material: {
-                    required: "Chất liệu sản phẩm trống. Vui lòng nhập chất liệu cho sản phẩm!"
-                },
-                sole: {
-                    required: "Đế giày sản phẩm trống. Vui lòng nhập đế giày cho sản phẩm!"
-                },
                 price: {
                     required: "Giá sản phẩm trống. Vui lòng nhập giá sản phẩm!",
                 },
@@ -483,8 +440,6 @@
                 let name = $("#name").val();
                 let description = $("#description").val();
                 let brand = $("#brand").val();
-                let material = $("#material").val();
-                let sole = $("#sole").val();
                 let category = $("#category").val();
                 let price = parseInt($("#price").val());
                 let salePrice = parseInt($("#salePrice").val());
@@ -502,8 +457,6 @@
                     name: name,
                     description: description,
                     brand_id: brand,
-                    material_id: material,
-                    sole_id : sole,
                     category_ids: category,
                     price: price,
                     salePrice: salePrice,
@@ -526,60 +479,43 @@
             }
         })
 
-        $('.btn-update-entry-count').click(function (event) {
+        $('.btn-update-size-count').click(function (event) {
             event.preventDefault();
             let size = parseInt($('#size').val());
-            let color = $('#color').val();
             let count = parseInt($('#count').val());
-
-            // Kiểm tra số lượng
-            console.log("Product ID: ", [[${product.id}]]);
-            if (isNaN(count) || count < 0 || !size || !color) {
-                $('#invalid-feedback-entry').show();
+            if (isNaN(count)) {
+                $('#invalid-feedback-size').show();
                 return;
             }
-
-            // Tạo đối tượng yêu cầu với màu sắc
             req = {
                 size: size,
-                color: color,
                 count: count,
-                product_id: [[${product.id}]] // Đảm bảo rằng product.id có giá trị hợp lệ
-            };
-
+                product_id: [[${product.id}]]
+            }
             var myJSON = JSON.stringify(req);
-
             $.ajax({
-                url: '/api/admin/products/entries',
+                url: '/api/admin/products/sizes',
                 type: 'PUT',
                 data: myJSON,
                 contentType: "application/json; charset=utf-8",
                 success: function (data) {
-                    // Tìm dòng sản phẩm theo size và color
-                    let productEntry = $('.product-size[data-size=' + size + '][data-color="' + color + '"]');
-                    if (productEntry.length === 0) {
-                        // Thêm dòng mới nếu không tìm thấy
-                        $('.list-product-entry').append(`<tr>
-                    <td class="product-size" data-size="${size}" data-color="${color}">${size} - ${color}</td>
-                    <td class="product-count">${count}</td>
-                </tr>`);
+                    let productSize = $('.product-size[data-size=' + size + ']')
+                    if (productSize.length === 0) {
+                        $('.list-product-size').append(`<tr><td class="product-size" data-size="${size}">${size}</td><td class="product-count">${count}</td></tr>`);
                     } else {
-                        // Cập nhật số lượng nếu đã có
-                        $(productEntry).parent().find('.product-count').text(count);
+                        $(productSize).parent().find('.product-count').text(count);
                     }
                     toastr.success("Cập nhật thành công");
                 },
                 error: function (data) {
-                    toastr.warning(data.responseJSON.message || "Có lỗi xảy ra. Vui lòng thử lại.");
+                    toastr.warning(data.responseJSON.message);
                 },
                 complete: function () {
-                    $('#invalid-feedback-entry').hide(); // Đảm bảo feedback bị ẩn
+                    $('#invalid-feedback-size').hide();
                 }
             });
-        });
-
+        })
     </script>
-
 </th:block>
 </body>
 </html>
