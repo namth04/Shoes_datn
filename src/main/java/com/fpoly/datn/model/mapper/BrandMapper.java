@@ -1,8 +1,8 @@
 package com.fpoly.datn.model.mapper;
 
 import com.fpoly.datn.entity.Brand;
-import com.fpoly.datn.model.request.CreateBrandRequest;
 import com.fpoly.datn.model.dto.BrandDTO;
+import com.fpoly.datn.model.request.CreateBrandRequest;
 
 import java.sql.Timestamp;
 

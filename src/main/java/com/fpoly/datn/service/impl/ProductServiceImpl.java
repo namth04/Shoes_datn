@@ -1,23 +1,23 @@
 package com.fpoly.datn.service.impl;
 
+import com.fpoly.datn.entity.Product;
+import com.fpoly.datn.entity.ProductSize;
+import com.fpoly.datn.entity.Promotion;
 import com.fpoly.datn.exception.BadRequestException;
 import com.fpoly.datn.exception.InternalServerException;
 import com.fpoly.datn.exception.NotFoundException;
-import com.fpoly.datn.repository.ProductRepository;
-import com.fpoly.datn.entity.Product;
-import com.fpoly.datn.entity.ProductEntry;
-import com.fpoly.datn.entity.Promotion;
 import com.fpoly.datn.model.dto.DetailProductInfoDTO;
 import com.fpoly.datn.model.dto.PageableDTO;
 import com.fpoly.datn.model.dto.ProductInfoDTO;
 import com.fpoly.datn.model.dto.ShortProductInfoDTO;
 import com.fpoly.datn.model.mapper.ProductMapper;
 import com.fpoly.datn.model.request.CreateProductRequest;
-import com.fpoly.datn.model.request.CreateEntryCountRequest;
+import com.fpoly.datn.model.request.CreateSizeCountRequest;
 import com.fpoly.datn.model.request.FilterProductRequest;
 import com.fpoly.datn.model.request.UpdateFeedBackRequest;
 import com.fpoly.datn.repository.OrderRepository;
-import com.fpoly.datn.repository.ProductEntryRepository;
+import com.fpoly.datn.repository.ProductRepository;
+import com.fpoly.datn.repository.ProductSizeRepository;
 import com.fpoly.datn.repository.PromotionRepository;
 import com.fpoly.datn.service.ProductService;
 import com.fpoly.datn.service.PromotionService;
@@ -32,7 +32,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 import static com.fpoly.datn.config.Contant.*;
 
@@ -42,9 +43,8 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private ProductRepository productRepository;
 
-
     @Autowired
-    private ProductEntryRepository productEntryRepository;
+    private ProductSizeRepository productSizeRepository;
 
     @Autowired
     private PromotionService promotionService;
@@ -62,7 +62,7 @@ public class ProductServiceImpl implements ProductService {
             page = 0;
         }
         Pageable pageable = PageRequest.of(page, LIMIT_PRODUCT, Sort.by("created_at").descending());
-        return productRepository.adminGetListProducts(id, name, category, brand, material,sole, pageable);
+        return productRepository.adminGetListProducts(id, name, category, brand,material,sole, pageable);
     }
 
     @Override
@@ -163,7 +163,7 @@ public class ProductServiceImpl implements ProductService {
 
         try {
             // Delete product size
-            productEntryRepository.deleteByProductId(id);
+            productSizeRepository.deleteByProductId(id);
 
             productRepository.deleteById(id);
         } catch (Exception ex) {
@@ -211,8 +211,6 @@ public class ProductServiceImpl implements ProductService {
         dto.setTotalSold(product.getTotalSold());
         dto.setDescription(product.getDescription());
         dto.setBrand(product.getBrand());
-        dto.setMaterial(product.getMaterial());
-        dto.setSole(product.getSole());
         dto.setFeedbackImages(product.getImageFeedBack());
         dto.setProductImages(product.getImages());
         dto.setComments(product.getComments());
@@ -245,61 +243,43 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<Integer> getListAvailableSize(String id) {
-        return productEntryRepository.findAllSizeOfProduct(id);
+        return productSizeRepository.findAllSizeOfProduct(id);
     }
 
     @Override
-    public void createEntryCount(CreateEntryCountRequest createEntryCountRequest) {
+    public void createSizeCount(CreateSizeCountRequest createSizeCountRequest) {
 
-        // Kiểm tra kích cỡ hợp lệ
-        boolean isValidSize = SIZE_VN.contains(createEntryCountRequest.getSize());
-        if (!isValidSize) {
-            throw new BadRequestException("Kích cỡ không hợp lệ");
+        //Kiểm trả size
+        boolean isValid = false;
+        for (int size : SIZE_VN) {
+            if (size == createSizeCountRequest.getSize()) {
+                isValid = true;
+                break;
+            }
+        }
+        if (!isValid) {
+            throw new BadRequestException("Size không hợp lệ");
         }
 
-        // Kiểm tra màu sắc hợp lệ
-        boolean isValidColor = COlOR_VN.contains(createEntryCountRequest.getColor());
-        if (!isValidColor) {
-            throw new BadRequestException("Màu sắc không hợp lệ");
-        }
-
-        // Kiểm tra sản phẩm có tồn tại
-        Optional<Product> product = productRepository.findById(createEntryCountRequest.getProductId());
+        //Kiểm trả sản phẩm có tồn tại
+        Optional<Product> product = productRepository.findById(createSizeCountRequest.getProductId());
         if (product.isEmpty()) {
             throw new NotFoundException("Không tìm thấy sản phẩm trong hệ thống!");
         }
 
-        // Tạo hoặc cập nhật số lượng sản phẩm
-        Optional<ProductEntry> existingEntry = productEntryRepository.findByProductIdAndSizeAndColor(
-                createEntryCountRequest.getProductId(),
-                createEntryCountRequest.getSize(),
-                createEntryCountRequest.getColor());
+//        Optional<ProductSize> productSizeOld = productSizeRepository.getProductSizeBySize(createSizeCountRequest.getSize(),createSizeCountRequest.getProductId());
 
-        if (existingEntry.isPresent()) {
-            // Cập nhật số lượng nếu bản ghi đã tồn tại
-            ProductEntry productEntry = existingEntry.get();
-            productEntry.setQuantity(createEntryCountRequest.getCount());
-            productEntryRepository.save(productEntry);
-        } else {
-            // Tạo mới nếu chưa có bản ghi
-            ProductEntry newEntry = new ProductEntry();
-            newEntry.setProductId(createEntryCountRequest.getProductId());
-            newEntry.setSize(createEntryCountRequest.getSize());
-            newEntry.setColor(createEntryCountRequest.getColor());
-            newEntry.setQuantity(createEntryCountRequest.getCount());
-            productEntryRepository.save(newEntry);
-        }
+        ProductSize productSize = new ProductSize();
+        productSize.setProductId(createSizeCountRequest.getProductId());
+        productSize.setSize(createSizeCountRequest.getSize());
+        productSize.setQuantity(createSizeCountRequest.getCount());
+
+        productSizeRepository.save(productSize);
     }
 
-
     @Override
-    public List<ProductEntry> getListEntryOfProduct(String id) {
-
-        List<ProductEntry> entries = productEntryRepository.findByProductId(id);
-
-        entries.sort(Comparator.comparing(ProductEntry::getSize).thenComparing(ProductEntry::getColor));
-
-        return entries;
+    public List<ProductSize> getListSizeOfProduct(String id) {
+        return productSizeRepository.findByProductId(id);
     }
 
     @Override
@@ -313,14 +293,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public boolean checkProductEntryAvailable(String id, int size,String color) {
-        ProductEntry productEntry = productEntryRepository.checkProductEntryAvailable(id, size,color);
-        if (productEntry != null) {
+    public boolean checkProductSizeAvailable(String id, int size) {
+        ProductSize productSize = productSizeRepository.checkProductAndSizeAvailable(id, size);
+        if (productSize != null) {
             return true;
         }
         return false;
     }
-
 
     @Override
     public List<ProductInfoDTO> checkPublicPromotion(List<ProductInfoDTO> products) {
@@ -410,7 +389,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void updateFeedBackImages(String id, UpdateFeedBackRequest req) {
+    public void updatefeedBackImages(String id, UpdateFeedBackRequest req) {
         // Check product exist
         Optional<Product> rs = productRepository.findById(id);
         if (rs.isEmpty()) {

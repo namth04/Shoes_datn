@@ -1,9 +1,9 @@
 package com.fpoly.datn.model.mapper;
 
-import com.fpoly.datn.entity.Category;
-import com.fpoly.datn.model.request.CreateCategoryRequest;
 import com.github.slugify.Slugify;
+import com.fpoly.datn.entity.Category;
 import com.fpoly.datn.model.dto.CategoryDTO;
+import com.fpoly.datn.model.request.CreateCategoryRequest;
 
 import java.sql.Timestamp;
 

@@ -3,12 +3,9 @@ package com.fpoly.datn.controller.admin;
 
 import com.fpoly.datn.entity.Sole;
 import com.fpoly.datn.entity.User;
-import com.fpoly.datn.model.mapper.BrandMapper;
-
 import com.fpoly.datn.model.mapper.SoleMapper;
 import com.fpoly.datn.model.request.CreateSoleRequest;
 import com.fpoly.datn.security.CustomUserDetails;
-
 import com.fpoly.datn.service.ImageService;
 import com.fpoly.datn.service.SoleService;
 import org.springframework.beans.factory.annotation.Autowired;

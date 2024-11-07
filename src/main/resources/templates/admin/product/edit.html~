@@ -231,7 +231,14 @@
                                         </div>
 
                                         <!-- Cột Color -->
-
+                                        <div class="form-group col-lg-3 col-md-6 mb-3">
+                                            <label for="color">Màu sắc</label>
+                                            <select class="form-control" id="color">
+                                                <th:block th:each="color : ${colorVN}">
+                                                    <option th:value="${color}" th:text="${color}"></option>
+                                                </th:block>
+                                            </select>
+                                        </div>
 
                                         <!-- Cột Quantity -->
                                         <div class="form-group col-lg-3 col-md-6 mb-3">
