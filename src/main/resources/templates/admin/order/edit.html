@@ -142,7 +142,6 @@
                                                     <tr>
                                                         <th>Sản phẩm</th>
                                                         <th>Kích cỡ</th>
-                                                        <th>Màu Sắc</th>
                                                         <th>Giá tiền</th>
                                                         <th>Khuyến mãi</th>
                                                         <th>Mức giảm</th>
@@ -161,11 +160,7 @@
                                                             </th:block>
                                                         </td>
                                                         <td>
-                                                            <span th:text="${order.color}"></span>
-
-                                                        </td>
-                                                        <td>
-                                                            <span class="text-price" th:text="${order.price}"></span> vnđ
+                                                            <span class="text-price" th:text="${order.price}"></span> đ
                                                         </td>
                                                         <td>
                                                             <span th:if="${order.promotion} != null" th:text="${order.promotion.couponCode}"></span>
@@ -251,7 +246,7 @@
                                             <span th:text="${promotion.discountValue}"></span> %
                                         </th:block>
                                         <th:block th:if="${promotion.discountType} == 2">
-                                            <span class="text-price" th:text="${promotion.discountValue}"></span> vnđ
+                                            <span class="text-price" th:text="${promotion.discountValue}"></span> đ
                                         </th:block>
                                     </option>
                                 </th:block>
