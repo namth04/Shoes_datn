@@ -70,13 +70,13 @@
                                     <div class="price-box">
                                         <th:block th:if="${product.promotionPrice}">
                                             <span class="product-price"
-                                                  th:text="${#numbers.formatDecimal(product.promotionPrice, 0, 'COMMA', 0, 'POINT') +'vnđ'}"></span>
+                                                  th:text="${#numbers.formatDecimal(product.promotionPrice, 0, 'COMMA', 0, 'POINT') +' đ'}"></span>
                                             <del class="old-price"
-                                                 th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT') +' vnđ'}"></del>
+                                                 th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT') +' đ'}"></del>
                                         </th:block>
                                         <th:block th:unless="${product.promotionPrice}">
                                             <span class="product-price"
-                                                  th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT') +' vnđ'}"></span>
+                                                  th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT') +' đ'}"></span>
                                         </th:block>
                                     </div><!-- End .price-box -->
                                 </div><!-- End .product-details -->

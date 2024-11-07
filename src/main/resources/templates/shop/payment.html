@@ -54,68 +54,29 @@
                         </table>
                         <!-- Pricing Section-->
                         <div class="pricing childs">
-                            <h6 class="not-found-size" style="margin-top: 5px; color: #dc3545;" th:styleappend="${notFoundSize} == true ? '' : 'display:none'">
-                                Size giày này đã hết. Vui lòng chọn size khác.
-                            </h6>
-
+                            <h6 class="not-found-size" style="margin-top: 5px; color: #dc3545;"  th:styleappend="${notFoundSize} == true ? '' : 'display:none'">Size giày này đã hết. Vui lòng chọn size khác.</h6>
                             <div class="size-btn" data-toggle="modal" data-target="#modal-size-Choose">
-                                <button class="btn btn-primary size trans-btn">
-                                    <span class="size-text">Size</span>
-                                    <span th:data-size="${size}" class="size-details">9US | 42.5VN | 26.2CM</span>
-                                    <i class="fas dropdown-arrow"></i>
-                                </button>
+                                <button class="btn btn-primary size trans-btn"><span class="size-text">Size</span><span th:data-size="${size}" class="size-details">9US | 42.5VN | 26.2CM</span><i class="fas dropdown-arrow"></i></button>
                             </div>
-                            <div class="form-group" id="color-section" style="display: none; margin-top: 10px;">
-                                <label for="color-options">Chọn màu:</label>
-                                <select id="color-options" class="form-control">
-                                    <!-- Màu sắc sẽ được điền vào đây bằng JavaScript -->
-                                </select>
-                            </div>
-                            
-
-                            <div class="input-group" style="margin-top: 30px;">
+                            <div class="input-group" style="margin-top:30px">
                                 <input type="text" class="form-control" placeholder="Nhập mã khuyến mãi" id="in-coupon" th:value="${product.couponCode}">
                                 <div class="input-group-append">
                                     <button class="btn btn-outline-secondary" type="button" id="btn-apply-coupon">Áp dụng</button>
                                 </div>
                             </div>
-
                             <div class="coupon price-include">
                                 <div class="text">Tạm tính</div>
-                                <input class="form-control text-price-input" id="in-price" type="text" th:value="${product.price}" readonly />
+                                <input class="form-control text-price-input" id="in-price" type="text" th:value="${product.price}" readonly/>
                             </div>
-
                             <div class="coupon price-include">
                                 <div class="text">Khuyến mãi</div>
-                                <input class="form-control text-price-input" id="in-promotion-value" type="text" readonly />
+                                <input class="form-control text-price-input" id="in-promotion-value" type="text" readonly/>
                             </div>
-
                             <div class="coupon price-include">
                                 <div class="text">Tổng thanh toán</div>
-                                <input class="form-control text-price-input" id="in-total-price" type="text" readonly />
-                            </div>
-                            <div class="form-group">
-                                <div class="account-title">
-                                    <h4>Chọn phương thức thanh toán</h4>
-                                </div>
-                                <div class="radio">
-                                    <label style="color: #119744;">
-                                        <input type="radio" value="cod" name="payment_method">
-                                        <div class="radio-dot"></div>
-                                        <strong><em>Ship COD (Thanh toán khi nhận hàng)</em></strong>
-                                    </label>
-                                </div>
-                                <div class="radio">
-                                    <label style="color: #119744;">
-                                        <input type="radio" value="gpay" name="payment_method">
-                                        <div class="radio-dot"></div>
-                                        <strong><em>Thanh Toán Với Gpay</em></strong>
-                                    </label>
-                                </div>
+                                <input class="form-control text-price-input" id="in-total-price" type="text" readonly/>
                             </div>
                         </div>
-
-
                         <a th:href="@{/{slug}/{id}(id=${product.id}, slug=${product.slug})}">
                             <button class="btn btn-secondary confirm-btn">Quay lại</button>
                         </a>
@@ -238,7 +199,6 @@
                 $(`.item[data-id='${availableSizes[i]}']`).removeClass('cross');
             }
         }
-        console.log($('input[type="radio"]'));
         $('#btn-apply-coupon').click(function() {
             let coupon = $('#in-coupon').val();
             if (coupon == "") {
@@ -275,74 +235,72 @@
         })
 
         $('#btn-buy-now').click(function() {
-    let receiverName = $('#receiver_name').val();
-    let receiverPhone = $('#receiver_phone').val();
-    let receiverAddress = $('#receiver_address').val();
-    let notes = $('#notes').val();
-    let isValid = true;
-    
-    // Kiểm tra thông tin người nhận hợp lệ
-    if (receiverName.length == 0) {
-        $('#receiver_name').next().css('display', 'block').html('Vui lòng nhập họ tên người nhận hàng');
-        isValid = false;
-    }
-    if (receiverPhone.length == 0) {
-        $('#receiver_phone').next().css('display', 'block').html('Vui lòng nhập số điện thoại người nhận hàng');
-        isValid = false;
-    }
-    let phoneFormat = new RegExp(/((09|03|07|08|05)+([0-9]{8})\b)/g);
-    if (!phoneFormat.test(receiverPhone)) {
-        $('#receiver_phone').next().css('display', 'block').html('Số điện thoại không hợp lệ');
-        isValid = false;
-    }
-    if (receiverAddress.length == 0) {
-        $('#receiver_address').next().css('display', 'block').html('Vui lòng nhập địa chỉ nhận hàng');
-        isValid = false;
-    }
+            let receiverName = $('#receiver_name').val();
+            let receiverPhone = $('#receiver_phone').val();
+            let receiverAddress = $('#receiver_address').val();
+            let notes = $('#notes').val();
+            let isValid = true;
+            if (receiverName.length == 0) {
+                fullNameInvalid = $('#receiver_name').next();
+                fullNameInvalid.css('display', 'block');
+                fullNameInvalid.html('Vui lòng nhập họ tên người nhận hàng');
+                isValid = false;
+            }
+            if (receiverPhone.length == 0) {
+                phoneInvalid = $('#receiver_phone').next();
+                phoneInvalid.css('display', 'block');
+                phoneInvalid.html('Vui lòng nhập số điện thoại người nhận hàng');
+                isValid = false;
+            }
+            let phoneFormat = new RegExp(/((09|03|07|08|05)+([0-9]{8})\b)/g);
+            if (!phoneFormat.test(receiverPhone)) {
+                phoneInvalid = $('#in-user-phone').next();
+                phoneInvalid.css('display', 'block');
+                phoneInvalid.html('Số điện thoại không hợp lệ');
+                isValid = false;
+            }
+            if (receiverAddress.length == 0) {
+                addressInvalid = $('#receiver_address').next();
+                addressInvalid.css('display', 'block');
+                addressInvalid.html('Vui lòng nhập địa chỉ nhận hàng');
+                isValid = false;
+            }
+            let size = $('.size-choose').data("id");
+            if (size == null || size == "") {
+                $('.not-found-size').show();
+                isValid = false;
+            }
 
-    // Lấy size và màu đã chọn
-    let size = $('.size-choose').data("id");
-    let selectedColor = $('#color-options').val();  // Lấy màu đã chọn nếu có
-
-    if (!size || selectedColor == "") {
-        $('.not-found-size').show();
-        isValid = false;
-    }
-
-    if (isValid) {
-        let req = {
-            product_id: [[${product.id}]],  // ID sản phẩm
-            size: size,                    // Size đã chọn
-            color: selectedColor,           // Màu đã chọn
-            receiver_name: receiverName,    // Thông tin người nhận
-            receiver_phone: receiverPhone,
-            receiver_address: receiverAddress,
-            coupon_code: couponCode,        // Mã khuyến mãi
-            total_price: totalPrice,        // Tổng tiền
-            product_price: price,           // Giá sản phẩm ban đầu
-            note: notes                     // Ghi chú
-        };
-        var myJSON = JSON.stringify(req);
-
-        // Gửi dữ liệu đến server
-        $.ajax({
-            url: '/api/orders',
-            type: 'POST',
-            data: myJSON,
-            contentType: "application/json; charset=utf-8",
-            success: function(data) {
-                toastr.success("Đặt hàng thành công");
-                setTimeout(function() {
-                    location.href = "/tai-khoan/lich-su-giao-dich/"+data;
-                }, 1000);
-            },
-            error: function(data) {
-                toastr.warning(data.responseJSON.message);
-            },
-        });
-    }
-});
-
+            if (isValid) {
+                req = {
+                    product_id: [[${product.id}]],
+                    size: size,
+                    receiver_name: receiverName,
+                    receiver_phone: receiverPhone,
+                    receiver_address: receiverAddress,
+                    coupon_code: couponCode,
+                    total_price: totalPrice,
+                    product_price: price,
+                    note:notes
+                }
+                var myJSON = JSON.stringify(req);
+                $.ajax({
+                    url: '/api/orders',
+                    type: 'POST',
+                    data: myJSON,
+                    contentType: "application/json; charset=utf-8",
+                    success: function(data) {
+                        toastr.success("Đặt hàng thành công");
+                        setTimeout(function() {
+                            location.href = "/tai-khoan/lich-su-giao-dich/"+data;
+                        }, 1000)
+                    },
+                    error: function(data) {
+                        toastr.warning(data.responseJSON.message);
+                    },
+                });
+            }
+        })
 
     </script>
 </th:block>
