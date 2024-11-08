@@ -120,6 +120,26 @@
                                                     </select>
                                                 </div>
                                                 <div class="form-group">
+                                                    <label for="material" class="required-label">Chất liệu sản phẩm <span
+                                                            class="required">*</span></label>
+                                                    <select class="form-control" id="material" name="material">
+                                                        <option value="">Chọn chất liệu cho sản phẩm</option>
+                                                        <th:block th:each="material : ${materials}">
+                                                            <option th:value="${material.id}" th:text="${material.name}"></option>
+                                                        </th:block>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="sole" class="required-label">Đế giày sản phẩm <span
+                                                            class="required">*</span></label>
+                                                    <select class="form-control" id="sole" name="sole">
+                                                        <option value="">Chọn đế giày cho sản phẩm</option>
+                                                        <th:block th:each="sole : ${soles}">
+                                                            <option th:value="${sole.id}" th:text="${sole.name}"></option>
+                                                        </th:block>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
                                                     <div>
                                                         <label class="control-label text-lg-right pt-2">Danh mục sản
                                                             phẩm
@@ -403,6 +423,12 @@
                 brand: {
                     required: true,
                 },
+                 material: {
+                    required: true,
+                },
+                 sole: {
+                    required: true,
+                },
                 price: {
                     required: true,
                 },
@@ -424,6 +450,12 @@
                 brand: {
                     required: "Nhãn hiệu sản phẩm trống. Vui lòng nhập nhãn hiệu cho sản phẩm!"
                 },
+                 material: {
+                    required: "Chất liệu sản phẩm trống. Vui lòng nhập chất liệu cho sản phẩm!"
+                },
+                 sole : {
+                    required: "Đế giày sản phẩm trống. Vui lòng nhập đế giày cho sản phẩm!"
+                },
                 price: {
                     required: "Giá sản phẩm trống. Vui lòng nhập giá sản phẩm!",
                 },
@@ -440,6 +472,8 @@
                 let name = $("#name").val();
                 let description = $("#description").val();
                 let brand = $("#brand").val();
+                let material = $("#material").val();
+                let sole = $("#sole").val();
                 let category = $("#category").val();
                 let price = parseInt($("#price").val());
                 let salePrice = parseInt($("#salePrice").val());
@@ -457,6 +491,8 @@
                     name: name,
                     description: description,
                     brand_id: brand,
+                    material_id:material,
+                    sole_id:sole,
                     category_ids: category,
                     price: price,
                     salePrice: salePrice,
