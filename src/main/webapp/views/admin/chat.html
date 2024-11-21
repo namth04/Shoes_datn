@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html class="fixed" lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <head th:replace="fragment/libAdmin :: libheaderadmin"></head>
+    <script src="/webjars/jquery/dist/jquery.min.js"></script>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/chat.js"></script>
+    <script>
+        window.onload = function() {
+            loadListUserChat();
+            loadTinNhan();
+        }
+    </script>
+</head>
+
+<body>
+<section class="body">
+    <th:block th:replace="fragment/sidebarAdmin :: headerAdmin"></th:block>
+    <div class="inner-wrapper">
+        <th:block th:replace="fragment/sidebarAdmin :: sidenavAdmin"></th:block>
+        <section role="main" class="content-body" id="main-content">
+            <th:block th:replace="fragment/sidebarAdmin :: pageHeader"></th:block>
+            <div class="row">
+                <div class="col-sm-3">
+                    <table class="table table-borderless" id="tableuserchat">
+                        <thead>
+                        <tr>
+                            <td colspan="2">
+                                <input onkeyup="loadListUserChat()" id="keysearchuser" class="form-control" type="text" placeholder="Tìm kiếm">
+                            </td>
+                        </tr>
+                        </thead>
+                        <tbody id="listuserchat">
+                        <tr class="pointer trhoverchat">
+                            <td class="col45"><img src="../image/avatar.png" class="imgavatarchat"></td>
+                            <td>Hiếu trần<span class="timechat">9:80 18-08-2024</span></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-sm-9">
+                    <div class="mainchatadmin" id="mainchatadmin">
+                        <div class="header-chat-admin form-control">
+                            Trần Văn Hiếu
+                        </div>
+                        <div class="contentchatadmin" id="listchatadmin">
+                            <!--                                <p class="mychat">hehe admin</p>-->
+                            <!--                                <p class="adminchat">đây là nội dung chat của admin</p>-->
+                            <!--                                <p class="mychat">hehe admin</p>-->
+                            <!--                                <p class="adminchat">đây là nội dung chat của admin</p>-->
+                        </div>
+                        <div style="height: 50px;"></div>
+                        <div class="chat-area-footer">
+                            <input type="text" id="contentmess" class="inputchatadmin" placeholder="write message" />
+                            <button class="btn-send-message" id="sendmess"><i class="fa fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</section>
+<th:block th:replace="fragment/libAdmin :: jdadmin"></th:block>
+</body>
+
+</html>
