@@ -1,30 +1,31 @@
 package com.fpoly.repository;
 
 import com.fpoly.entity.Category;
-import com.fpoly.model.dto.ChartDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
-@Repository
-public interface CategoryRepository extends JpaRepository<Category, Long> {
-    Category findByName(String name);
+public interface CategoryRepository extends JpaRepository<Category,Long> {
 
-    @Query(value = "SELECT count(category_id) FROM product_category WHERE category_id = ?1", nativeQuery = true)
-    int checkProductInCategory(long id);
+    @Query("select c from Category c where c.name = ?1")
+    public Optional<Category> findByName(String name);
 
-    @Query(value = "SELECT * FROM category c " +
-            "WHERE c.id LIKE CONCAT('%',?1,'%') " +
-            "AND c.name LIKE CONCAT('%',?2,'%') " +
-            "AND c.status LIKE CONCAT('%',?3,'%')", nativeQuery = true)
-    Page<Category> adminGetListCategory(String id, String name, String status, Pageable pageable);
+    @Query("select c from Category c where c.name = ?1 and c.id <> ?2")
+    public Optional<Category> findByNameAndId(String name, Long id);
 
-    @Query(name = "getProductOrderCategories",nativeQuery = true)
-    List<ChartDTO> getListProductOrderCategories();
+    @Query("select c from Category c where c.name like ?1")
+    public Page<Category> findByParam(String param, Pageable pageable);
 
-//    List<Category> findByProducts_Name(String name);
+    @Query("select c from Category c where c.isPrimary = true")
+    public List<Category> primaryCategory();
+
+
+    @Query(value = "SELECT c.*,\n" +
+            "(SELECT count(pc.id) from product_category pc where pc.category_id = c.id) as quantity\n" +
+            "from category c group by c.id order by quantity desc limit 4", nativeQuery = true)
+    public List<Category> outstandingCategory();
 }
