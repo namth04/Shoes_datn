@@ -105,7 +105,7 @@ async function regis() {
     if (response.status < 300) {
         swal({
                 title: "Thông báo",
-                text: "đăng ký thành công! hãy check email của bạn!",
+                text: "Đăng ký thành công! Hãy check email của bạn!",
                 type: "success"
             },
             function() {
@@ -151,7 +151,7 @@ async function forgorPassword() {
     if (res.status < 300) {
         swal({
                 title: "",
-                text: "mật khẩu mới đã được gửi về email của bạn",
+                text: "Mật khẩu mới đã được gửi về email của bạn",
                 type: "success"
             },
             function() {
@@ -171,7 +171,7 @@ async function changePassword() {
     var renewpass = document.getElementById("renewpass").value
     var url = 'http://localhost:8080/api/user/change-password';
     if (newpass != renewpass) {
-        alert("mật khẩu mới không trùng khớp");
+        alert("Mật khẩu mới không trùng khớp");
         return;
     }
     var passw = {
@@ -189,7 +189,7 @@ async function changePassword() {
     if (response.status < 300) {
         swal({
                 title: "Thông báo",
-                text: "cập nhật mật khẩu thành công, hãy đăng nhập lại",
+                text: "Cập nhật mật khẩu thành công, hãy đăng nhập lại",
                 type: "success"
             },
             function() {

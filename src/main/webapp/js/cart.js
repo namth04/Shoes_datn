@@ -10,6 +10,12 @@ async function addCart(product) {
         return;
     }
 
+    // Kiểm tra đã chọn màu chưa
+    if (idColorCart === -1) {
+        toastr.error("Bạn chưa chọn màu sản phẩm");
+        return;
+    }
+
     var color = null;
     var size = null;
     var listColor = product.productColors;
@@ -26,30 +32,50 @@ async function addCart(product) {
         }
     }
 
+    var quantity = parseInt(document.getElementById("inputslcart").value);
+
+    // Kiểm tra số lượng hợp lệ
+    if (isNaN(quantity) || quantity <= 0) {
+        toastr.error("Số lượng không hợp lệ");
+        return;
+    }
+
     var obj = {
         "product": product,
         "color": color,
         "size": size,
-        "quantiy": document.getElementById("inputslcart").value
+        "quantiy": quantity
     };
 
     if (localStorage.getItem("product_cart") == null) {
         var listproduct = [];
         listproduct.push(obj);
         window.localStorage.setItem('product_cart', JSON.stringify(listproduct));
+        toastr.success("Thêm giỏ hàng thành công");
+        loadAllCart();
         return;
     } else {
         var list = JSON.parse(localStorage.getItem("product_cart"));
-        console.log(list);
+        var found = false;
+
+        // Kiểm tra sản phẩm trùng (cùng product, color và size)
         for (i = 0; i < list.length; i++) {
-            if (Number(list[i].size.id) == Number(sizeId)) {
-                toastr.success("Thêm giỏ hàng thành công");
-                return;
+            if (list[i].product.id == product.id &&
+                list[i].color.id == color.id &&
+                list[i].size.id == size.id) {
+                list[i].quantiy = parseInt(list[i].quantiy) + quantity;
+                found = true;
+                break;
             }
         }
-        list.push(obj);
+
+        if (!found) {
+            list.push(obj);
+        }
+
         window.localStorage.setItem('product_cart', JSON.stringify(list));
         toastr.success("Thêm giỏ hàng thành công");
+        loadAllCart();
     }
 }
 
@@ -65,7 +91,9 @@ async function loadAllCart() {
     for (i = 0; i < list.length; i++) {
         main += `<tr>
                     <td>
-                        <a href="detail?id=${list[i].product.id}&name=${list[i].product.alias}"><img class="imgprocart" src="${list[i].product.imageBanner}"></a>
+                        <a href="detail?id=${list[i].product.id}&name=${list[i].product.alias}">
+                            <img class="imgprocart" src="${list[i].color.linkImage || list[i].product.imageBanner}">
+                        </a>
                         <div class="divnamecart">
                             <a href="detail?id=${list[i].product.id}&name=${list[i].product.alias}" class="nameprocart">${list[i].product.name}</a>
                             <p class="sizecart">${list[i].color.colorName} / ${list[i].size.sizeName}</p>
@@ -73,14 +101,18 @@ async function loadAllCart() {
                     </td>
                     <td><p class="boldcart">${formatmoney(list[i].product.price)}</p></td>
                     <td>
-                        <div class="clusinp"><button onclick="upDownQuantity(${list[i].size.id},-1)" class="cartbtn"> - </button>
-                        <input value="${list[i].quantiy}" class="inputslcart">
-                        <button onclick="upDownQuantity(${list[i].size.id},1)" class="cartbtn"> + </button></div>
+                        <div class="clusinp">
+                            <button onclick="upDownQuantity(${list[i].size.id},-1)" class="cartbtn"> - </button>
+                            <input value="${list[i].quantiy}" class="inputslcart">
+                            <button onclick="upDownQuantity(${list[i].size.id},1)" class="cartbtn"> + </button>
+                        </div>
                     </td>
                     <td>
                         <div class="tdpricecart">
                             <p class="boldcart">${formatmoney(list[i].quantiy * list[i].product.price)}</p>
-                            <p onclick="remove(${list[i].color.id})" class="delcart"><i class="fa fa-trash-o facartde"></i></p>
+                            <p onclick="remove(${list[i].color.id}, ${list[i].size.id})" class="delcart">
+                                <i class="fa fa-trash-o facartde"></i>
+                            </p>
                         </div>
                     </td>
                 </tr>`;
@@ -98,7 +130,9 @@ async function loadAllCartMobile() {
     for (i = 0; i < list.length; i++) {
         main += `<tr>
         <td>
-            <a href="detail?id=${list[i].product.id}&name=${list[i].product.alias}"><img class="imgprocmobile" src="${list[i].product.imageBanner}"></a>
+            <a href="detail?id=${list[i].product.id}&name=${list[i].product.alias}">
+                <img class="imgprocmobile" src="${list[i].color.linkImage || list[i].product.imageBanner}">
+            </a>
         </td>
         <td class="tdinforcart">
             <a href="detail?id=${list[i].product.id}&name=${list[i].product.alias}" class="nameprocmobile">${list[i].product.name}</a>
@@ -110,7 +144,7 @@ async function loadAllCartMobile() {
             </div>
         </td>
         <td class="tdinforcart">
-            <i onclick="remove(${list[i].color.id})" class="fa fa-trash-o facartde cartdels"></i>
+            <i onclick="remove(${list[i].color.id}, ${list[i].size.id})" class="fa fa-trash-o facartde cartdels"></i>
             <p class="boldcart pricecmobile">${formatmoney(list[i].quantiy * list[i].product.price)}&ThinSpace;</p>
         </td>
     </tr>`;
@@ -118,9 +152,10 @@ async function loadAllCartMobile() {
     document.getElementById("tablemobilecart").innerHTML = main;
 }
 
-async function remove(id) {
+async function remove(colorId, sizeId) {
     var list = JSON.parse(localStorage.getItem("product_cart"));
-    var remainingArr = list.filter(data => data.color.id != id);
+    // Lọc ra các sản phẩm không trùng cả color và size
+    var remainingArr = list.filter(data => !(data.color.id == colorId && data.size.id == sizeId));
     window.localStorage.setItem('product_cart', JSON.stringify(remainingArr));
     toastr.success("Xóa sản phẩm thành công");
     loadAllCart();
@@ -179,12 +214,16 @@ async function productLqCart() {
 
         var listimg = '';
         for (j = 0; j < list[i].productImages.length; j++) {
-            listimg += `<div class="divimgsmpro"><img class="imgsmpro" src="${list[i].productImages[j].linkImage}"></div>`;
+            listimg += `<div class="divimgsmpro">
+                           <img class="imgsmpro" src="${list[i].productImages[j].linkImage}">
+                       </div>`;
         }
         main += `<div class="col-lg-3 col-md-3 col-sm-6 col-6">
                 <a href="detail?id=${list[i].id}&name=${list[i].alias}" class="linkpro">
                     <div class="singlepro">
-                        <div class="productsold"><span class="reviewsp">Đã bán: ${list[i].quantitySold}</span></div>
+                        <div class="productsold">
+                            <span class="reviewsp">Đã bán: ${list[i].quantitySold}</span>
+                        </div>
                         <img src="${list[i].imageBanner}" class="imgpro">
                         <span class="proname">${list[i].name}</span>
                         <span class="proprice">${formatmoney(list[i].price)}</span>
@@ -231,5 +270,5 @@ async function placeOrder() {
 
 function clearCart() {
     window.localStorage.removeItem('product_cart');
-    loadAllCart(); // Refresh the cart display
+    loadAllCart();
 }

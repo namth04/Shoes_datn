@@ -46,7 +46,9 @@ async function loadMenu() {
     document.getElementById("menu").innerHTML = menu
     loadCategoryMenu();
     loadCartMenu();
-    try { loadFooter(); } catch (error) {}
+    try {
+        loadFooter();
+    } catch (error) {}
 }
 
 
