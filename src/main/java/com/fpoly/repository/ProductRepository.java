@@ -6,7 +6,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,14 +32,4 @@ public interface ProductRepository extends JpaRepository<Product,Long>, JpaSpeci
 
     @Query("select distinct p from Product p inner join p.productCategories pc where pc.category.id = ?1")
     public Page<Product> findByCategory(Long category, Pageable pageable);
-
-    @Query(value = "SELECT ps.quantity " +
-            "FROM product_color pc " +
-            "JOIN product_size ps ON pc.id = ps.product_color_id " +
-            "WHERE pc.color_name = :colorName AND ps.size_name = :sizeName", nativeQuery = true)
-    public Optional<Product> findQuantity (@Param("colorName") String colorName, @Param("sizeName") String sizeName);
-
-
-
-
 }

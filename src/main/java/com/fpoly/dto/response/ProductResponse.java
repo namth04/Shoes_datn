@@ -37,8 +37,6 @@ public class ProductResponse {
 
     private Material material;
 
-    private String quantityA;
-
     private Sole sole;
 
     private List<ProductColor> productColors = new ArrayList<>();

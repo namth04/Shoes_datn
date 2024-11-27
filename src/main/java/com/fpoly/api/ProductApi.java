@@ -66,11 +66,6 @@ public class ProductApi {
         ProductResponse response = productService.findByIdForAdmin(id);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
-//    @GetMapping("/public/findById")
-//    public ResponseEntity<?> setQuantity(@RequestParam("id") Long id){
-//        ProductResponse response = productService.findByIdForAdmin(id);
-//        return new ResponseEntity<>(response, HttpStatus.CREATED);
-//    }
 
     @GetMapping("/public/findByParam")
     public ResponseEntity<?> findByParam(@RequestParam("q") String params, Pageable pageable){
