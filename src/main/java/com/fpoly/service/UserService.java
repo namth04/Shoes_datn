@@ -1,25 +1,34 @@
 package com.fpoly.service;
 
-
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.fpoly.dto.request.TokenDto;
+import com.fpoly.dto.response.UserDto;
 import com.fpoly.entity.User;
-import com.fpoly.model.dto.UserDTO;
-import com.fpoly.model.request.ChangePasswordRequest;
-import com.fpoly.model.request.CreateUserRequest;
-import com.fpoly.model.request.UpdateProfileRequest;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Optional;
 
 @Service
 public interface UserService {
-    List<UserDTO> getListUsers();
 
-    Page<User> adminListUserPages(String fullName, String phone, String email, Integer page);
+    public TokenDto login(String username, String password, String tokenFcm)  throws Exception;
 
-    User createUser(CreateUserRequest createUserRequest);
+    public TokenDto loginWithGoogle(GoogleIdToken.Payload payload);
 
-    void changePassword(User user, ChangePasswordRequest changePasswordRequest);
+    public User regisUser(User user);
 
-    User updateProfile(User user, UpdateProfileRequest updateProfileRequest);
+    public User addAccount(User user);
+
+
+    public void activeAccount(String activationKey, String email);
+
+    public Boolean checkUser(Optional<User> users);
+
+    public Page<UserDto> getUserByRole(String search,String role, Pageable pageable);
+
+    public void changePass(String oldPass, String newPass);
+
+    public void forgotPassword(String email);
 }

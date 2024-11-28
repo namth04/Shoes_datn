@@ -1,28 +1,31 @@
 package com.fpoly.service;
 
+import com.fpoly.dto.response.CategoryResponse;
 import com.fpoly.entity.Category;
-import com.fpoly.model.request.CreateCategoryRequest;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public interface CategoryService {
-    List<Category> getListCategories();
 
-    Category getCategoryById(long id);
+    public Category save(Category category);
 
-    Category createCategory(CreateCategoryRequest createCategoryRequest);
+    public Category update(Category category);
 
-    void updateCategory(CreateCategoryRequest createCategoryRequest, long id);
+    public void delete(Long categoryId);
 
-    void deleteCategory(long id);
+    public CategoryResponse findById(Long id);
 
-    Page<Category> adminGetListCategory(String id, String name, String status, int page);
+    public Page<Category> findAll(Pageable pageable);
 
-    void updateOrderCategory(int[] ids);
+    public Page<CategoryResponse> search(String param, Pageable pageable);
 
-    //Đếm số danh mục
-    long getCountCategories();
+    public List<CategoryResponse> findAllList();
+
+    public List<CategoryResponse> findPrimary();
+
+    public List<CategoryResponse> outstanding();
 }

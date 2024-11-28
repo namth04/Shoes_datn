@@ -1,93 +1,42 @@
 package com.fpoly.service;
 
+import com.fpoly.dto.request.ProductRequest;
+import com.fpoly.dto.response.ProductResponse;
 import com.fpoly.entity.Product;
-import com.fpoly.entity.ProductSize;
-import com.fpoly.datn.entity.Promotion;
-import com.fpoly.model.dto.DetailProductInfoDTO;
-import com.fpoly.model.dto.PageableDTO;
-import com.fpoly.model.dto.ProductInfoDTO;
-import com.fpoly.model.dto.ShortProductInfoDTO;
-import com.fpoly.model.request.CreateProductRequest;
-import com.fpoly.model.request.CreateSizeCountRequest;
-import com.fpoly.model.request.FilterProductRequest;
-import com.fpoly.model.request.UpdateFeedBackRequest;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
 public interface ProductService {
 
-    //Lấy sản phẩm
-    Page<Product> adminGetListProduct(String id, String name, String category, String brand,String material,String sole, Integer page);
+    public ProductResponse save(ProductRequest productRequest);
 
-    //Tạo sản phẩm
-    Product createProduct(CreateProductRequest createProductRequest);
+    public ProductResponse update(ProductRequest productRequest);
 
-    //Sửa sản phẩm
-    void updateProduct(CreateProductRequest createProductRequest, String id);
+    public ProductResponse delete(Long idProduct);
 
-    //Lấy chi tiết sản phẩm
-    Product getProductById(String id);
+    public Page<ProductResponse> findAll(Pageable pageable);
 
-    //Xóa sản phẩm theo id
-    void deleteProduct(String[] ids);
+    public List<ProductResponse> findAllList(String search);
 
-    //Xóa sản phẩm theo id
-    void deleteProductById(String id);
+    public Page<ProductResponse> search(String param,Pageable pageable);
 
-    //Lấy sản phẩm bán nhiều nhất
-    List<ProductInfoDTO> getListBestSellProducts();
+    public Page<ProductResponse> findByCategory(Long idCategory,Pageable pageable);
 
-    //Lấy sản phẩm mới nhất
-    List<ProductInfoDTO> getListNewProducts();
+    public Page<ProductResponse> searchFull(Double smallPrice, Double largePrice, List<Long> listIdCategory, Pageable pageable);
 
-    //Lấy sản phẩm xem nhiều
-    List<ProductInfoDTO> getListViewProducts();
+    public Page<ProductResponse> searchFullProduct(Double smallPrice, Double largePrice, List<Long> listIdCategory,List<Long> listTrademark, Pageable pageable);
 
-    //Lấy chi tiết sản phẩm theo id
-    DetailProductInfoDTO getDetailProductById(String id);
+    public ProductResponse findByIdForAdmin(Long id);
 
-    //Lấy sản phẩm liên quan
-    List<ProductInfoDTO> getRelatedProducts(String id);
+    public ProductResponse findByIdForUser(Long id);
 
-    //Lấy size có sẵn
-    List<Integer> getListAvailableSize(String id);
+    public ProductResponse findByAlias(String alias);
 
-    //Nhập số lượng theo size
-    void createSizeCount(CreateSizeCountRequest createSizeCountRequest);
-
-    //Lấy size của sản phẩm
-    List<ProductSize> getListSizeOfProduct(String id);
-
-    List<ShortProductInfoDTO> getListProduct();
-
-    //Lấy sản phẩm có sẵn size
-    List<ShortProductInfoDTO> getAvailableProducts();
-
-    //Check size sản phẩm
-    boolean checkProductSizeAvailable(String id, int size);
-
-    //Kiểm tra sản phẩm có khuyến mại
-    List<ProductInfoDTO> checkPublicPromotion(List<ProductInfoDTO> products);
-
-    //Tìm kiếm sản phẩm theo danh mục, nhãn hiệu, giá
-    PageableDTO filterProduct(FilterProductRequest req);
-
-    //Tìm kiếm sản phẩm theo tên sản phẩm
-    PageableDTO searchProductByKeyword(String keyword, Integer page);
-
-    //Kiểm tra khuyến mại
-    Promotion checkPromotion(String code);
-
-    //Đếm số lượng sản phẩm
-    long getCountProduct();
-
-    //Thêm ảnh feedBack
-    void updatefeedBackImages(String id, UpdateFeedBackRequest req);
-
-    //Lấy tất cả sản phẩm
-    List<Product> getAllProduct();
-
+    public List<Product> findByImage(MultipartFile multipartFile) throws IOException;
 }
