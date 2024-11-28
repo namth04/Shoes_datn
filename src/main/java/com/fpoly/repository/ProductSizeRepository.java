@@ -17,4 +17,10 @@ public interface ProductSizeRepository extends JpaRepository<ProductSize,Long> {
 
     @Query("select p from ProductSize p where p.productColor.id= ?1")
     public List<ProductSize> findByProductColor(Long colorId);
+
+    @Query("select ps.quantity from ProductSize ps " +
+            "join ps.productColor pc " +
+            "where pc.id = ?1 and ps.id = ?2")
+    Integer findQuantityByColorAndSize(Long colorId, Long sizeId);
+
 }

@@ -47,4 +47,13 @@ public class ProductSizeApi {
         ProductSizeResponse result = productSizeService.findById(id);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
+    @GetMapping("/public/find-quantity-by-color-and-size")
+    public ResponseEntity<?> findQuantityByColorAndSize(@RequestParam Long colorId, @RequestParam Long sizeId) {
+        Integer quantity = productSizeRepository.findQuantityByColorAndSize(colorId, sizeId);
+        if (quantity != null) {
+            return new ResponseEntity<>(quantity, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Quantity not found for the given color and size.", HttpStatus.NOT_FOUND);
+        }
+    }
 }
