@@ -81,36 +81,69 @@ async function loadAllCategory() {
     });
 }
 
-
-var linkImage = ''
 async function saveCategory() {
+    // Input validation
+    var catename = document.getElementById("catename").value.trim();
+
+    // Check for empty name
+    if (!catename) {
+        toastr.warning("Tên danh mục không được để trống!");
+        document.getElementById("catename").focus();
+        return;
+    }
+
     var uls = new URL(document.URL)
     var id = uls.searchParams.get("id");
-    var catename = document.getElementById("catename").value
-    var cateparent = document.getElementById("listdpar").value
-    var primaryCate = document.getElementById("primaryCate").checked
+    var cateparent = document.getElementById("listdpar").value;
+    var primaryCate = document.getElementById("primaryCate").checked;
 
-    const filePath = document.getElementById('fileimage')
-    const formData = new FormData()
-    formData.append("file", filePath.files[0])
-    var urlUpload = 'http://localhost:8080/api/public/upload-file';
-    const res = await fetch(urlUpload, {
-        method: 'POST',
-        body: formData
-    });
-    if (res.status < 300) {
-        linkImage = await res.text();
+    // Check for duplicate category name
+    try {
+        const duplicateCheck = await checkDuplicateCategory(catename, id);
+        if (duplicateCheck) {
+            toastr.warning("Tên danh mục đã tồn tại!");
+            document.getElementById("catename").focus();
+            return;
+        }
+    } catch (error) {
+        toastr.error("Lỗi kiểm tra danh mục: " + error.message);
+        return;
     }
-    var url = 'http://localhost:8080/api/category/admin/create';
-    if (id != null) {
-        url = 'http://localhost:8080/api/category/admin/update';
+
+    // Image upload
+    const filePath = document.getElementById('fileimage');
+    const formData = new FormData();
+
+    // Check if file is selected when creating a new category
+    if (!id && (!filePath.files || filePath.files.length === 0)) {
+        toastr.warning("Vui lòng chọn ảnh danh mục!");
+        return;
     }
+
+    // Upload image if a file is selected
+    let linkImage = '';
+    if (filePath.files && filePath.files.length > 0) {
+        formData.append("file", filePath.files[0]);
+        var urlUpload = 'http://localhost:8080/api/public/upload-file';
+        const res = await fetch(urlUpload, {
+            method: 'POST',
+            body: formData
+        });
+        if (res.status < 300) {
+            linkImage = await res.text();
+        } else {
+            toastr.warning("Lỗi tải ảnh!");
+            return;
+        }
+    }
+
+    // Prepare category object
     var category = null;
     if (cateparent != -1) {
         category = {
             "id": id,
             "name": catename,
-            "imageBanner": linkImage,
+            "imageBanner": linkImage || undefined,
             "isPrimary": primaryCate,
             "category": {
                 "id": cateparent
@@ -121,9 +154,12 @@ async function saveCategory() {
             "id": id,
             "name": catename,
             "isPrimary": primaryCate,
-            "imageBanner": linkImage
+            "imageBanner": linkImage || undefined
         }
     }
+
+    // Send request to create/update category
+    var url = id ? 'http://localhost:8080/api/category/admin/update' : 'http://localhost:8080/api/category/admin/create';
     const response = await fetch(url, {
         method: 'POST',
         headers: new Headers({
@@ -132,59 +168,32 @@ async function saveCategory() {
         }),
         body: JSON.stringify(category)
     });
+
+    // Handle response
     if (response.status < 300) {
         swal({
-                title: "Thông báo",
-                text: "thêm/sửa danh mục thành công!",
-                type: "success"
-            },
-            function() {
-                window.location.href = 'danhmuc'
-            });
-    }
-    if (response.status == exceptionCode) {
+            title: "Thông báo",
+            text: "Thêm/sửa danh mục thành công!",
+            type: "success"
+        }, function() {
+            window.location.href = 'danhmuc'
+        });
+    } else if (response.status == exceptionCode) {
         var result = await response.json()
         toastr.warning(result.defaultMessage);
     }
 }
 
-async function deleteCategory(id) {
-    var con = confirm("Bạn chắc chắn muốn xóa danh mục này?");
-    if (con == false) {
-        return;
-    }
-    var url = 'http://localhost:8080/api/category/admin/delete?id=' + id;
-    const response = await fetch(url, {
-        method: 'DELETE',
-        headers: new Headers({
-            'Authorization': 'Bearer ' + token
-        })
-    });
-    if (response.status < 300) {
-        toastr.success("xóa danh mục thành công!");
-        await new Promise(r => setTimeout(r, 1000));
-        window.location.reload();
-    }
-    if (response.status == exceptionCode) {
-        var result = await response.json()
-        toastr.warning(result.defaultMessage);
-    }
-}
-
-
-async function loadAllCategorySelect() {
+async function checkDuplicateCategory(name, currentId = null) {
     var url = 'http://localhost:8080/api/category/public/findAllList';
     const response = await fetch(url, {
         method: 'GET'
     });
     var list = await response.json();
-    var main = '<option value="-1">Tất cả danh mục</option>';
-    for (i = 0; i < list.length; i++) {
-        main += `<option value="${list[i].id}">${list[i].name}</option>`
-    }
-    document.getElementById("listdpar").innerHTML = main
-    const ser = $("#listdpar");
-    ser.select2({
-        placeholder: "Chọn danh mục",
-    });
+
+    // Check for duplicate names, ignoring the current category being edited
+    return list.some(category =>
+        category.name.toLowerCase().trim() === name.toLowerCase().trim() &&
+        category.id != currentId
+    );
 }

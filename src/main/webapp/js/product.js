@@ -163,56 +163,6 @@ async function loadAProduct() {
         document.getElementById("listProductGy").innerHTML = main;
     }
 }
-
-var idColorCart; // Biến lưu trữ idColor
-
-// Hàm khi click vào màu
-async function clickColor(e, name, idColor) {
-    idColorCart = idColor; // Lưu idColor đã chọn
-    var img = document.getElementsByClassName("imgldetail");
-
-    // Bỏ đánh dấu các ảnh khác
-    for (i = 0; i < img.length; i++) {
-        document.getElementsByClassName("imgldetail")[i].classList.remove('imgactive');
-    }
-    e.classList.add('imgactive');
-
-    // Hiển thị tên màu
-    document.getElementById("colorname").innerHTML = name;
-
-    // Gọi API để lấy danh sách size và số lượng theo màu
-    var url = 'http://localhost:8080/api/product-size/public/find-by-product-color?idProColor=' + idColor;
-    const response = await fetch(url, {});
-    var list = await response.json();
-
-    var main = '';
-    var totalQuantity = 0; // Biến để lưu tổng số lượng sản phẩm
-
-    // Duyệt qua các size và hiển thị chúng
-    for (i = 0; i < list.length; i++) {
-        if (list[i].quantity > 0) {
-            main += `<div class="colsize col-lg-2 col-md-2 col-sm-2 col-2">
-                        <label onclick="clickSize(this)" class="radio-custom" for="size${list[i].id}">${list[i].sizeName}
-                            <input value="${list[i].id}" type="radio" name="sizepro" id="size${list[i].id}">
-                        </label>
-                    </div>`;
-            totalQuantity += list[i].quantity; // Cộng dồn số lượng sản phẩm có sẵn
-        } else {
-            main += `<div class="colsize col-lg-2 col-md-2 col-sm-2 col-2">
-                        <label class="radio-custom disablesize" for="size${list[i].id}">${list[i].sizeName}
-                        </label>
-                    </div>`;
-        }
-    }
-
-    // Cập nhật HTML với danh sách size
-    document.getElementById("listsize").innerHTML = main;
-
-    // Hiển thị tổng số lượng sản phẩm cho màu đã chọn
-    document.getElementById("quantityA").innerHTML = `Số lượng: ${totalQuantity}`;
-}
-
-
 async function clickImgdetail(e) {
     var img = document.getElementsByClassName("imgldetail");
     for (i = 0; i < img.length; i++) {
@@ -222,44 +172,180 @@ async function clickImgdetail(e) {
     document.getElementById("imgdetailpro").src = e.src
 }
 
-// Hàm khi click vào kích cỡ
+
+async function clickColor(e, name, idColor) {
+    idColorCart = idColor;
+
+    // Xóa class 'imgactive' khỏi tất cả các ảnh
+    var img = document.getElementsByClassName("imgldetail");
+    for (i = 0; i < img.length; i++) {
+        document.getElementsByClassName("imgldetail")[i].classList.remove('imgactive');
+    }
+
+    // Thêm class 'imgactive' vào ảnh được chọn
+    e.classList.add('imgactive');
+
+    // Hiển thị tên màu
+    document.getElementById("colorname").innerHTML = name;
+
+    try {
+
+        var url = `http://localhost:8080/api/product-size/public/find-by-product-color?idProColor=${idColor}`;
+        const response = await fetch(url, {});
+        var list = await response.json();
+
+        var main = '';
+        var totalQuantity = 0;
+
+        for (i = 0; i < list.length; i++) {
+            if (list[i].quantity > 0) {
+                main += `
+                <div class="colsize col-lg-2 col-md-2 col-sm-2 col-2">
+                    <label onclick="clickSize(this)" class="radio-custom" for="size${list[i].id}">
+                        ${list[i].sizeName}
+                        <input value="${list[i].id}" type="radio" name="sizepro" id="size${list[i].id}">
+                    </label>
+                </div>`;
+                totalQuantity += list[i].quantity;
+            } else {
+                main += `
+                <div class="colsize col-lg-2 col-md-2 col-sm-2 col-2">
+                    <label class="radio-custom disablesize" for="size${list[i].id}">
+                        ${list[i].sizeName}
+                    </label>
+                </div>`;
+            }
+        }
+
+
+        document.getElementById("listsize").innerHTML = main;
+
+        // Hiển thị tổng số lượng của màu sắc
+        document.getElementById("quantityA").innerHTML = `Số lượng: ${totalQuantity}`;
+    } catch (error) {
+        console.error('Error fetching sizes:', error);
+    }
+}
 async function clickSize(e) {
-    // Xóa class 'activesize' cho tất cả các size trước đó
     var size = document.getElementsByClassName("radio-custom");
     for (i = 0; i < size.length; i++) {
         document.getElementsByClassName("radio-custom")[i].classList.remove('activesize');
     }
 
-    // Thêm class 'activesize' cho size được chọn
     e.classList.add('activesize');
 
-    // Lấy input và đánh dấu là checked
     var inp = e.getElementsByTagName('input')[0];
     inp.checked = 'checked';
 
-    // Lấy ID kích cỡ đã chọn
     var idSize = inp.value;
 
-    // Gọi API để lấy số lượng sản phẩm dựa trên màu và kích cỡ
-    var url = `http://localhost:8080/api/product-size/public/find-by-product-color-size?idProColor=${idColorCart}&idSize=${idSize}`;
-    const response = await fetch(url, {});
-    var data = await response.json();
 
-    // Hiển thị số lượng sản phẩm cho kích cỡ và màu đã chọn
-    // if (data && data.quantity > 0) {
-    //     document.getElementById("quantityA").innerHTML = `Số lượng: ${data.quantity}`;
-    // } else {
-    //     document.getElementById("quantityA").innerHTML = "Không có hàng";
-    // }
+    await displayProductQuantity(idColorCart, idSize);
 }
 
+let maxQuantity = 0;
+async function displayProductQuantity(idProColor, idSize) {
+    try {
+        var url = `http://localhost:8080/api/product-size/public/find-quantity-by-color-and-size?colorId=${idProColor}&sizeId=${idSize}`;
+
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        var quantityElement = document.getElementById("quantityA");
+
+        if (response.ok) {
+            var quantity = await response.json();
+
+            // Lưu lại số lượng tối đa
+            maxQuantity = quantity;
+
+            if (quantity > 0) {
+                quantityElement.innerHTML = `Số lượng: ${quantity}`;
+                quantityElement.classList.remove('text-danger');
+                quantityElement.classList.add('text-success');
+            } else {
+                quantityElement.innerHTML = "Hết hàng";
+                quantityElement.classList.remove('text-success');
+                quantityElement.classList.add('text-danger');
+            }
+
+            return quantity;
+        } else {
+            quantityElement.innerHTML = "Không tìm thấy số lượng";
+            quantityElement.classList.remove('text-success');
+            quantityElement.classList.add('text-danger');
+            return 0;
+        }
+    } catch (error) {
+        console.error('Error fetching product quantity:', error);
+        return 0;
+    }
+}
+
+function upAndDownDetail(idsize, quantityChange) {
+    var list = JSON.parse(localStorage.getItem("product_cart"));
+    for (i = 0; i < list.length; i++) {
+        if (list[i].size.id == idsize) {
+            var newQuantity = Number(list[i].quantiy) + Number(quantityChange);
+
+            // Validate new quantity against available stock
+            if (newQuantity <= 0) {
+                toastr.error("Số lượng không thể nhỏ hơn 1");
+                return;
+            }
+
+            if (newQuantity > list[i].size.quantity) {
+                toastr.error(`Số lượng sản phẩm chỉ còn ${list[i].size.quantity}`);
+                return;
+            }
+
+            list[i].quantiy = newQuantity;
+        }
+    }
+
+    window.localStorage.setItem('product_cart', JSON.stringify(list));
+
+    // Remove items with zero quantity
+    var remainingArr = list.filter(data => data.quantiy > 0);
+    window.localStorage.setItem('product_cart', JSON.stringify(remainingArr));
+
+    loadAllCart();
+}
 function upAndDownDetail(val) {
-    var quan = document.getElementById("inputslcart").value;
-    if (val < 0 && quan == 1) {
+    var quantityInput = document.getElementById("inputslcart");
+    var currentQuantity = Number(quantityInput.value);
+
+    if (val < 0 && currentQuantity <= 1) {
+        toastr.error("Số lượng không thể nhỏ hơn 1");
         return;
     }
 
-    document.getElementById("inputslcart").value = Number(quan) + Number(val)
+    var newQuantity = currentQuantity + val;
+
+    if (newQuantity > maxQuantity) {
+        toastr.error(`Số lượng sản phẩm chỉ còn ${maxQuantity}`);
+        return;
+    }
+
+    quantityInput.value = newQuantity;
+}
+function validateQuantityAndAddToCart(product) {
+
+    var quantityInput = document.getElementById('quantityInput');
+    var currentQuantity = parseInt(quantityInput.value) || 1;
+
+    if (currentQuantity > maxQuantity) {
+        alert(`Rất tiếc, chỉ còn ${maxQuantity} sản phẩm trong kho`);
+
+        quantityInput.value = maxQuantity;
+        return;
+    }
+
+    addCart(product, currentQuantity);
 }
 
 
@@ -387,61 +473,61 @@ async function searchFull(page, sort) {
     document.getElementById("pageable").innerHTML = mainpage
 }
 
-async function searchFullmobile(page, sort) {
-    type = 3;
-    $("#modalfilter").modal("hide")
-    var min_price = document.getElementById("min_price_mobile").value;
-    var max_price = document.getElementById("max_price_mobile").value;
-    var listCa = document.getElementById("listsearchCategoryMobile").getElementsByClassName("inputcheck");
-    var listcate = [];
-    for (i = 0; i < listCa.length; i++) {
-        if (listCa[i].checked == true) {
-            listcate.push(listCa[i].value);
-        }
-    }
-    var url = 'http://localhost:8080/api/product/public/searchFull?page=' + page + '&size=' + size + '&smallPrice=' + min_price + '&largePrice=' + max_price;
-    if (sort != null) {
-        url += '&sort=' + sort;
-    }
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: new Headers({
-            'Content-Type': 'application/json'
-        }),
-        body: JSON.stringify(listcate)
-    });
-    var result = await response.json();
-    console.log(result)
-    var list = result.content;
-    var totalPage = result.totalPages;
-
-    var main = '';
-    for (i = 0; i < list.length; i++) {
-        var listimg = ''
-        for (j = 0; j < list[i].productImages.length; j++) {
-            listimg += `<div class="divimgsmpro"><img class="imgsmpro" src="${list[i].productImages[j].linkImage}"></div>`
-        }
-        main += `<div class="col-lg-3 col-md-3 col-sm-6 col-6">
-                    <a href="detail?id=${list[i].id}&name=${list[i].alias}" class="linkpro">
-                        <div class="singlepro">
-                            <div class="productsold"><span class="reviewsp">Đã bán: ${list[i].quantitySold}</span></div>
-                            <img src="${list[i].imageBanner}" class="imgpro">
-                            <span class="proname">${list[i].name}</span>
-                            <span class="proprice">${formatmoney(list[i].price)}</span>
-                            <div class="listimgpro">${listimg}</div>
-                        </div>
-                    </a>
-                </div>`
-    }
-    document.getElementById("listproductpro").innerHTML = main
-    document.getElementById("slsp").innerHTML = result.totalElements
-
-    var mainpage = ''
-    for (i = 1; i <= totalPage; i++) {
-        mainpage += `<li onclick="loadProductByCategory(${(Number(i) - 1)})" class="page-item"><a class="page-link" href="#listsp">${i}</a></li>`
-    }
-    document.getElementById("pageable").innerHTML = mainpage
-}
+// async function searchFullmobile(page, sort) {
+//     type = 3;
+//     $("#modalfilter").modal("hide")
+//     var min_price = document.getElementById("min_price_mobile").value;
+//     var max_price = document.getElementById("max_price_mobile").value;
+//     var listCa = document.getElementById("listsearchCategoryMobile").getElementsByClassName("inputcheck");
+//     var listcate = [];
+//     for (i = 0; i < listCa.length; i++) {
+//         if (listCa[i].checked == true) {
+//             listcate.push(listCa[i].value);
+//         }
+//     }
+//     var url = 'http://localhost:8080/api/product/public/searchFull?page=' + page + '&size=' + size + '&smallPrice=' + min_price + '&largePrice=' + max_price;
+//     if (sort != null) {
+//         url += '&sort=' + sort;
+//     }
+//     const response = await fetch(url, {
+//         method: 'POST',
+//         headers: new Headers({
+//             'Content-Type': 'application/json'
+//         }),
+//         body: JSON.stringify(listcate)
+//     });
+//     var result = await response.json();
+//     console.log(result)
+//     var list = result.content;
+//     var totalPage = result.totalPages;
+//
+//     var main = '';
+//     for (i = 0; i < list.length; i++) {
+//         var listimg = ''
+//         for (j = 0; j < list[i].productImages.length; j++) {
+//             listimg += `<div class="divimgsmpro"><img class="imgsmpro" src="${list[i].productImages[j].linkImage}"></div>`
+//         }
+//         main += `<div class="col-lg-3 col-md-3 col-sm-6 col-6">
+//                     <a href="detail?id=${list[i].id}&name=${list[i].alias}" class="linkpro">
+//                         <div class="singlepro">
+//                             <div class="productsold"><span class="reviewsp">Đã bán: ${list[i].quantitySold}</span></div>
+//                             <img src="${list[i].imageBanner}" class="imgpro">
+//                             <span class="proname">${list[i].name}</span>
+//                             <span class="proprice">${formatmoney(list[i].price)}</span>
+//                             <div class="listimgpro">${listimg}</div>
+//                         </div>
+//                     </a>
+//                 </div>`
+//     }
+//     document.getElementById("listproductpro").innerHTML = main
+//     document.getElementById("slsp").innerHTML = result.totalElements
+//
+//     var mainpage = ''
+//     for (i = 1; i <= totalPage; i++) {
+//         mainpage += `<li onclick="loadProductByCategory(${(Number(i) - 1)})" class="page-item"><a class="page-link" href="#listsp">${i}</a></li>`
+//     }
+//     document.getElementById("pageable").innerHTML = mainpage
+// }
 
 
 async function loadTrademarkSub() {

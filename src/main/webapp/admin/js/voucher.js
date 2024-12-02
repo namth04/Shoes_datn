@@ -131,7 +131,6 @@ function validateVoucherForm() {
         }
     }
 
-    // Validate dates
     if (!startDate) {
         toastr.error("Ngày bắt đầu không được để trống");
         isValid = false;
@@ -146,7 +145,7 @@ function validateVoucherForm() {
         const start = new Date(startDate);
         const end = new Date(endDate);
         const now = new Date();
-        now.setHours(0, 0, 0, 0); // Reset time part for date comparison
+        now.setHours(0, 0, 0, 0);
 
         if (start < now) {
             toastr.error("Ngày bắt đầu phải lớn hơn hoặc bằng ngày hiện tại");
