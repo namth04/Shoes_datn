@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-public class VoucherServiceimp implements VoucherService {
+public class VoucherServiceImp implements VoucherService {
 
     @Autowired
     private VoucherRepository voucherRepository;

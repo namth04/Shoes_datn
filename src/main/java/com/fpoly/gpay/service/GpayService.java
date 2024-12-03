@@ -203,9 +203,7 @@ public class GpayService {
     }
 
     public void processPaymentNotification(Map<String, Object> payload) {
-        // Xử lý thông tin thanh toán
-        // Ví dụ: cập nhật trạng thái đơn hàng, gửi email xác nhận, v.v.
+
         log.info("Processing payment notification: {}", payload);
-        // Thêm logic xử lý tại đây
     }
 }

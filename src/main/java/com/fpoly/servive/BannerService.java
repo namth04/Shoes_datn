@@ -1,4 +1,4 @@
-package com.fpoly.service;
+package com.fpoly.servive;
 
 import com.fpoly.entity.Banner;
 import org.springframework.data.domain.Page;

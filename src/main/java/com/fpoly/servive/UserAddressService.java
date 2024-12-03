@@ -1,4 +1,4 @@
-package com.fpoly.service;
+package com.fpoly.servive;
 
 import com.fpoly.dto.request.UserAdressRequest;
 import com.fpoly.dto.response.UserAdressResponse;

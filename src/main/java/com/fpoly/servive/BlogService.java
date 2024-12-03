@@ -1,4 +1,4 @@
-package com.fpoly.service;
+package com.fpoly.servive;
 
 import com.fpoly.dto.request.BlogRequest;
 import com.fpoly.dto.response.BlogResponse;

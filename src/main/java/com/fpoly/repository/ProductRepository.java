@@ -18,6 +18,7 @@ public interface ProductRepository extends JpaRepository<Product,Long>, JpaSpeci
     @Query("select p from Product p where p.id = ?1")
     public Optional<Product> findById(Long id);
 
+
     @Query("select p from Product p where p.alias = ?1")
     public Optional<Product> findByAlias(String alias);
 

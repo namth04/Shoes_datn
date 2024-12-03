@@ -189,13 +189,17 @@ public class InvoiceServiceImp implements InvoiceService {
             invoiceDetail.setQuantity(p.getQuantity());
             invoiceDetail.setProductSize(productSize);
             invoiceDetailRepository.save(invoiceDetail);
+
+            // Chỉ trừ số lượng một lần
             productSize.setQuantity(productSize.getQuantity() - p.getQuantity());
             productSizeRepository.save(productSize);
-            try {
-                productSize.getProductColor().getProduct().setQuantitySold(productSize.getProductColor().getProduct().getQuantitySold() + p.getQuantity());
-                productSize.setQuantity(productSize.getQuantity() - p.getQuantity());
-                productRepository.save(productSize.getProductColor().getProduct());
-            }catch (Exception e){}
+
+            // Cập nhật số lượng đã bán
+            productSize.getProductColor().getProduct().setQuantitySold(
+                    productSize.getProductColor().getProduct().getQuantitySold() + p.getQuantity()
+            );
+
+            productRepository.save(productSize.getProductColor().getProduct());
         }
 
         if(invoiceRequest.getPayType().equals(PayType.PAYMENT_MOMO) || invoiceRequest.getPayType().equals(PayType.PAYMENT_VNPAY)){

@@ -68,7 +68,7 @@ public class UserApi {
         return new ResponseEntity(tokenDto, HttpStatus.OK);
     }
 
-    /*token device get from firebase*/
+
     @PostMapping("/login")
     public TokenDto authenticate(@RequestBody LoginDto loginDto) throws Exception {
         TokenDto tokenDto = userService.login(loginDto.getUsername(), loginDto.getPassword(), loginDto.getTokenFcm());

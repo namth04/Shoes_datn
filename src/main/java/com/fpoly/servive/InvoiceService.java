@@ -1,4 +1,4 @@
-package com.fpoly.service;
+package com.fpoly.servive;
 
 import com.fpoly.dto.request.InvoiceRequest;
 import com.fpoly.dto.request.InvoiceRequestCounter;

@@ -1,4 +1,4 @@
-package com.fpoly.service;
+package com.fpoly.servive;
 
 import com.fpoly.entity.Status;
 import org.springframework.stereotype.Service;

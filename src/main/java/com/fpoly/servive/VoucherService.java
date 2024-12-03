@@ -1,4 +1,4 @@
-package com.fpoly.service;
+package com.fpoly.servive;
 
 import com.fpoly.entity.Voucher;
 import org.springframework.data.domain.Page;
