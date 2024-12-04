@@ -318,7 +318,7 @@ function upAndDownDetail(idsize, quantityChange) {
 
     window.localStorage.setItem('product_cart', JSON.stringify(list));
 
-    // Remove items with zero quantity
+
     var remainingArr = list.filter(data => data.quantiy > 0);
     window.localStorage.setItem('product_cart', JSON.stringify(remainingArr));
 
@@ -357,258 +357,281 @@ function validateQuantityAndAddToCart(product) {
     addCart(product, currentQuantity);
 }
 
+// Global variables
+var size = 12; // Number of items per page
+var type = 1; // Tracking current filter type
 
-var type = 1;
+// Format money function
+function formatmoney(price) {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+}
 
+// Main sorting function
 function sortProduct() {
     var sort = document.getElementById("sortpro").value;
-    if (type == 1) {
-        loadProductByCategory(0, sort);
-    }
-    if (type == 2) {
-        searchFull(0, sort);
-    }
-    if (type == 3) {
-        searchFullmobile(0, sort);
+    switch(type) {
+        case 1:
+            loadProductByCategory(0, sort);
+            break;
+        case 2:
+            searchFull(0, sort);
+            break;
+        case 3:
+            searchFullmobile(0, sort);
+            break;
     }
 }
 
+// Load products by category
 async function loadProductByCategory(page, sort) {
-    var uls = new URL(document.URL)
+    type = 1;
+    var uls = new URL(document.URL);
     var category = uls.searchParams.get("category");
-    var url = 'http://localhost:8080/api/product/public/findByCategory?page=' + page + '&size=' + size + '&idCategory=' + category;
-    if (sort != null & sort != "") {
-        url = 'http://localhost:8080/api/product/public/findByCategory?page=' + page + '&size=' + size + '&idCategory=' + category + '&sort=' + sort;
-    }
-    const response = await fetch(url, {
-        method: 'GET'
-    });
-    var result = await response.json();
-    console.log(result)
-    var list = result.content;
-    var totalPage = result.totalPages;
 
-    var main = '';
-    for (i = 0; i < list.length; i++) {
-        var listimg = ''
-        for (j = 0; j < list[i].productImages.length; j++) {
-            listimg += `<div class="divimgsmpro"><img class="imgsmpro" src="${list[i].productImages[j].linkImage}"></div>`
-        }
-        main += `<div class="col-lg-3 col-md-3 col-sm-6 col-6">
-                    <a href="detail?id=${list[i].id}&name=${list[i].alias}" class="linkpro">
-                        <div class="singlepro">
-                            <div class="productsold"><span class="reviewsp">Đã bán: ${list[i].quantitySold}</span></div>
-                            <img src="${list[i].imageBanner}" class="imgpro">
-                            <span class="proname">${list[i].name}</span>
-                            <span class="proprice">${formatmoney(list[i].price)}</span>
-                            <div class="listimgpro">${listimg}</div>
-                        </div>
-                    </a>
-                </div>`
-    }
-    document.getElementById("listproductpro").innerHTML = main
-    document.getElementById("slsp").innerHTML = result.totalElements
+    var url = `http://localhost:8080/api/product/public/findByCategory?page=${page}&size=${size}&idCategory=${category}`;
 
-    var mainpage = ''
-    for (i = 1; i <= totalPage; i++) {
-        mainpage += `<li onclick="loadProductByCategory(${(Number(i) - 1)})" class="page-item"><a class="page-link" href="#listsp">${i}</a></li>`
+    if (sort && sort !== "") {
+        url += `&sort=${sort}`;
     }
-    document.getElementById("pageable").innerHTML = mainpage
+
+    try {
+        const response = await fetch(url, { method: 'GET' });
+        var result = await response.json();
+        console.log(result);
+
+        renderProductList(result);
+        renderPagination(result.totalPages, loadProductByCategory);
+    } catch (error) {
+        console.error("Error loading products by category:", error);
+    }
 }
+
 
 async function searchFull(page, sort) {
     type = 2;
-    var min_price = document.getElementById("min_price").value;
-    var max_price = document.getElementById("max_price").value;
+    var min_price = document.getElementById("min_price").value || 0;
+    var max_price = document.getElementById("max_price").value || Number.MAX_SAFE_INTEGER;
+
     var listCa = document.getElementById("listsearchCategory").getElementsByClassName("inputcheck");
-    var listTra = document.getElementById("listthuonghieu").getElementsByClassName("inputchecktrademark");
     var listcate = [];
-    for (i = 0; i < listCa.length; i++) {
-        if (listCa[i].checked == true) {
+    for (var i = 0; i < listCa.length; i++) {
+        if (listCa[i].checked) {
             listcate.push(listCa[i].value);
         }
     }
+
+    // Collect selected trademarks
+    var listTra = document.getElementById("listthuonghieu").getElementsByClassName("inputchecktrademark");
     var listTrademark = [];
-    for (i = 0; i < listTra.length; i++) {
-        if (listTra[i].checked == true) {
+    for (var i = 0; i < listTra.length; i++) {
+        if (listTra[i].checked) {
             listTrademark.push(listTra[i].value);
         }
     }
+
     var payload = {
-        "listIdCategory":listcate,
-        "listIdTrademark":listTrademark
+        "listIdCategory": listcate,
+        "listIdTrademark": listTrademark,
+        "smallPrice": min_price,
+        "largePrice": max_price
+    };
+
+    var url = `http://localhost:8080/api/product/public/searchFull?page=${page}&size=${size}`;
+
+    if (sort) {
+        url += `&sort=${sort}`;
     }
-    var url = 'http://localhost:8080/api/product/public/searchFull?page=' + page + '&size=' + size + '&smallPrice=' + min_price + '&largePrice=' + max_price;
-    if (sort != null) {
-        url += '&sort=' + sort;
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: new Headers({
+                'Content-Type': 'application/json'
+            }),
+            body: JSON.stringify(payload)
+        });
+
+        var result = await response.json();
+        console.log(result);
+
+        renderProductList(result);
+        renderPagination(result.totalPages, searchFull);
+    } catch (error) {
+        console.error("Error in full search:", error);
     }
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: new Headers({
-            'Content-Type': 'application/json'
-        }),
-        body: JSON.stringify(payload)
-    });
-    var result = await response.json();
-    console.log(result)
+}
+
+// Mobile search function
+async function searchFullmobile(page, sort) {
+    type = 3;
+    $("#modalfilter").modal("hide");
+
+    var min_price = document.getElementById("min_price_mobile").value || 0;
+    var max_price = document.getElementById("max_price_mobile").value || Number.MAX_SAFE_INTEGER;
+
+    var listCa = document.getElementById("listsearchCategoryMobile").getElementsByClassName("inputcheck");
+    var listcate = [];
+    for (var i = 0; i < listCa.length; i++) {
+        if (listCa[i].checked) {
+            listcate.push(listCa[i].value);
+        }
+    }
+
+    var payload = {
+        "listIdCategory": listcate,
+        "smallPrice": min_price,
+        "largePrice": max_price
+    };
+
+    var url = `http://localhost:8080/api/product/public/searchFull?page=${page}&size=${size}`;
+
+    if (sort) {
+        url += `&sort=${sort}`;
+    }
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: new Headers({
+                'Content-Type': 'application/json'
+            }),
+            body: JSON.stringify(payload)
+        });
+
+        var result = await response.json();
+        console.log(result);
+
+        renderProductList(result);
+        renderPagination(result.totalPages, searchFullmobile);
+    } catch (error) {
+        console.error("Error in mobile search:", error);
+    }
+}
+
+// Render product list
+function renderProductList(result) {
     var list = result.content;
-    var totalPage = result.totalPages;
-
     var main = '';
-    for (i = 0; i < list.length; i++) {
-        var listimg = ''
-        for (j = 0; j < list[i].productImages.length; j++) {
-            listimg += `<div class="divimgsmpro"><img class="imgsmpro" src="${list[i].productImages[j].linkImage}"></div>`
-        }
-        main += `<div class="col-lg-3 col-md-3 col-sm-6 col-6">
-                    <a href="detail?id=${list[i].id}&name=${list[i].alias}" class="linkpro">
-                        <div class="singlepro">
-                            <div class="productsold"><span class="reviewsp">Đã bán: ${list[i].quantitySold}</span></div>
-                            <img src="${list[i].imageBanner}" class="imgpro">
-                            <span class="proname">${list[i].name}</span>
-                            <span class="proprice">${formatmoney(list[i].price)}</span>
-                            <div class="listimgpro">${listimg}</div>
-                        </div>
-                    </a>
-                </div>`
-    }
-    document.getElementById("listproductpro").innerHTML = main
-    document.getElementById("slsp").innerHTML = result.totalElements
 
-    var mainpage = ''
-    for (i = 1; i <= totalPage; i++) {
-        mainpage += `<li onclick="loadProductByCategory(${(Number(i) - 1)})" class="page-item"><a class="page-link" href="#listsp">${i}</a></li>`
+    for (var i = 0; i < list.length; i++) {
+        var listimg = list[i].productImages.map(img =>
+            `<div class="divimgsmpro"><img class="imgsmpro" src="${img.linkImage}"></div>`
+        ).join('');
+
+        main += `
+            <div class="col-lg-3 col-md-3 col-sm-6 col-6">
+                <a href="detail?id=${list[i].id}&name=${list[i].alias}" class="linkpro">
+                    <div class="singlepro">
+                        <div class="productsold"><span class="reviewsp">Đã bán: ${list[i].quantitySold}</span></div>
+                        <img src="${list[i].imageBanner}" class="imgpro">
+                        <span class="proname">${list[i].name}</span>
+                        <span class="proprice">${formatmoney(list[i].price)}</span>
+                        <div class="listimgpro">${listimg}</div>
+                    </div>
+                </a>
+            </div>`;
     }
-    document.getElementById("pageable").innerHTML = mainpage
+
+    document.getElementById("listproductpro").innerHTML = main;
+    document.getElementById("slsp").innerHTML = result.totalElements;
 }
 
-// async function searchFullmobile(page, sort) {
-//     type = 3;
-//     $("#modalfilter").modal("hide")
-//     var min_price = document.getElementById("min_price_mobile").value;
-//     var max_price = document.getElementById("max_price_mobile").value;
-//     var listCa = document.getElementById("listsearchCategoryMobile").getElementsByClassName("inputcheck");
-//     var listcate = [];
-//     for (i = 0; i < listCa.length; i++) {
-//         if (listCa[i].checked == true) {
-//             listcate.push(listCa[i].value);
-//         }
-//     }
-//     var url = 'http://localhost:8080/api/product/public/searchFull?page=' + page + '&size=' + size + '&smallPrice=' + min_price + '&largePrice=' + max_price;
-//     if (sort != null) {
-//         url += '&sort=' + sort;
-//     }
-//     const response = await fetch(url, {
-//         method: 'POST',
-//         headers: new Headers({
-//             'Content-Type': 'application/json'
-//         }),
-//         body: JSON.stringify(listcate)
-//     });
-//     var result = await response.json();
-//     console.log(result)
-//     var list = result.content;
-//     var totalPage = result.totalPages;
-//
-//     var main = '';
-//     for (i = 0; i < list.length; i++) {
-//         var listimg = ''
-//         for (j = 0; j < list[i].productImages.length; j++) {
-//             listimg += `<div class="divimgsmpro"><img class="imgsmpro" src="${list[i].productImages[j].linkImage}"></div>`
-//         }
-//         main += `<div class="col-lg-3 col-md-3 col-sm-6 col-6">
-//                     <a href="detail?id=${list[i].id}&name=${list[i].alias}" class="linkpro">
-//                         <div class="singlepro">
-//                             <div class="productsold"><span class="reviewsp">Đã bán: ${list[i].quantitySold}</span></div>
-//                             <img src="${list[i].imageBanner}" class="imgpro">
-//                             <span class="proname">${list[i].name}</span>
-//                             <span class="proprice">${formatmoney(list[i].price)}</span>
-//                             <div class="listimgpro">${listimg}</div>
-//                         </div>
-//                     </a>
-//                 </div>`
-//     }
-//     document.getElementById("listproductpro").innerHTML = main
-//     document.getElementById("slsp").innerHTML = result.totalElements
-//
-//     var mainpage = ''
-//     for (i = 1; i <= totalPage; i++) {
-//         mainpage += `<li onclick="loadProductByCategory(${(Number(i) - 1)})" class="page-item"><a class="page-link" href="#listsp">${i}</a></li>`
-//     }
-//     document.getElementById("pageable").innerHTML = mainpage
-// }
+// Render pagination
+function renderPagination(totalPage, loadFunction) {
+    var mainpage = '';
+    for (var i = 1; i <= totalPage; i++) {
+        mainpage += `
+            <li onclick="${loadFunction.name}(${i - 1})" class="page-item">
+                <a class="page-link" href="#listsp">${i}</a>
+            </li>`;
+    }
+    document.getElementById("pageable").innerHTML = mainpage;
+}
 
-
+// Load trademark list
 async function loadTrademarkSub() {
-    var url = 'http://localhost:8080/api/trademark/public/all';
-    const response = await fetch(url, {});
-    var list = await response.json();
-    var main = ''
-    for (i = 0; i < list.length; i++) {
-        main += `<div class="singlelistmenu">
-                <label class="checkbox-custom cateparent">${list[i].name}</i>
-                    <input value="${list[i].id}" class="inputchecktrademark" type="checkbox">
+    try {
+        const response = await fetch('http://localhost:8080/api/trademark/public/all');
+        var list = await response.json();
+
+        var main = list.map(trademark => `
+            <div class="singlelistmenu">
+                <label class="checkbox-custom cateparent">${trademark.name}
+                    <input value="${trademark.id}" class="inputchecktrademark" type="checkbox">
                     <span class="checkmark-checkbox"></span>
                 </label>
-            </div>`
+            </div>
+        `).join('');
+
+        document.getElementById("listthuonghieu").innerHTML = main;
+    } catch (error) {
+        console.error("Error loading trademarks:", error);
     }
-    document.getElementById("listthuonghieu").innerHTML = main;
 }
 
+// Load category list
 async function loadCategorySub() {
-    var url = 'http://localhost:8080/api/category/public/findPrimaryCategory';
-    const response = await fetch(url, {});
-    var list = await response.json();
-    var main = ''
-    for (i = 0; i < list.length; i++) {
-        var listChild = list[i].categories;
-        var mainChild = ''
-        for (j = 0; j < listChild.length; j++) {
-            mainChild += ` <label class="checkbox-custom">${listChild[j].name}
-                                <input value="${listChild[j].id}" class="inputcheck" type="checkbox">
-                                <span class="checkmark-checkbox"></span>
-                            </label>`
-        }
-        main += `<div class="singlelistmenu">
-                <label class="checkbox-custom cateparent">${list[i].name}</i>
-                    <input value="${list[i].id}" class="inputcheck" onchange="clickOpenSubMenu(this)" type="checkbox">
+    try {
+        const response = await fetch('http://localhost:8080/api/category/public/findPrimaryCategory');
+        var list = await response.json();
+
+        var main = list.map(category => {
+            var mainChild = category.categories.map(child => `
+                <label class="checkbox-custom">${child.name}
+                    <input value="${child.id}" class="inputcheck" type="checkbox">
                     <span class="checkmark-checkbox"></span>
                 </label>
-                <div class="listsubcate">
-                   ${mainChild}
+            `).join('');
+
+            return `
+                <div class="singlelistmenu">
+                    <label class="checkbox-custom cateparent">${category.name}
+                        <input value="${category.id}" class="inputcheck" onchange="clickOpenSubMenu(this)" type="checkbox">
+                        <span class="checkmark-checkbox"></span>
+                    </label>
+                    <div class="listsubcate">
+                        ${mainChild}
+                    </div>
                 </div>
-            </div>`
+            `;
+        }).join('');
+
+        document.getElementById("listsearchCategory").innerHTML = main;
+        document.getElementById("listsearchCategoryMobile").innerHTML = main;
+    } catch (error) {
+        console.error("Error loading categories:", error);
     }
-    document.getElementById("listsearchCategory").innerHTML = main;
-    document.getElementById("listsearchCategoryMobile").innerHTML = main;
 }
 
+// Toggle sub-menu visibility
 function clickOpenSubMenu(e) {
-    var sing = e.parentNode.parentNode
-    console.log(sing)
-    if (sing.getElementsByClassName("listsubcate")[0].classList.contains("show") == false) {
-        sing.getElementsByClassName("listsubcate")[0].classList.add("show");
-    } else if (sing.getElementsByClassName("listsubcate")[0].classList.contains("show") == true) {
-        sing.getElementsByClassName("listsubcate")[0].classList.remove("show");
-        var listInput = sing.getElementsByClassName("listsubcate")[0].getElementsByClassName("inputcheck");
-        for (i = 0; i < listInput.length; i++) {
-            listInput[i].checked = false;
-        }
+    var sing = e.closest('.singlelistmenu');
+    var subCate = sing.querySelector('.listsubcate');
+
+    subCate.classList.toggle('show');
+
+    if (!subCate.classList.contains('show')) {
+        var listInput = subCate.querySelectorAll('.inputcheck');
+        listInput.forEach(input => input.checked = false);
     }
 }
 
-async function loadAllProductList(){
-    var search = document.getElementById("search").value
-    var url = 'http://localhost:8080/api/product/public/findAll-list?search=' + search
-    const response = await fetch(url, {
-        method: 'GET'
-    });
-    var list = await response.json();
-    var main = "";
-    for(i=0; i<list.length; i++){
-        main += `<tr>
-                  <td>${list[i].code}</td>
-                </tr>`
+// Load all product list for search
+async function loadAllProductList() {
+    var search = document.getElementById("search").value;
+
+    try {
+        const response = await fetch(`http://localhost:8080/api/product/public/findAll-list?search=${search}`);
+        var list = await response.json();
+
+        var main = list.map(product => `
+            <tr>
+                <td>${product.code}</td>
+            </tr>
+        `).join('');
+
+        document.getElementById("listproduct").innerHTML = main;
+    } catch (error) {
+        console.error("Error loading product list:", error);
     }
-    document.getElementById("listproduct").innerHTML = main;
 }

@@ -30,6 +30,9 @@
             loadAProduct();
             loadProductComment();
         }
+        function goToCheckout() {
+            window.location.href = "http://localhost:8080/checkout";
+        }
     </script>
 </head>
 
@@ -78,7 +81,7 @@
                     <button onclick="upAndDownDetail(1)" class="cartbtn"> + </button></div>
                 <div class="btndetail">
                     <button id="btnaddcart" class="btnaddcart"><i class="fa fa-shopping-cart"></i> Thêm giỏ hàng</button>
-                    <button class="btnmuangay">Mua ngay</button>
+                    <button id="btnmuangay" class="btnmuangay">Mua ngay</button>
                 </div>
             </div>
             <div class="col-lg-5 col-md-12 col-sm-12 col-12">
@@ -99,7 +102,7 @@
                         <div class="d-flex flex-column align-items-center">
                             <img src="image/pay.svg">
                         </div>
-                        <div class="titledetail">Đa dạng phương thức thanh toán<br>(VnPay,Gpay, COD)</div>
+                        <div class="titledetail">Đa dạng phương thức thanh toán<br>(Gpay, COD)</div>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-6 col-6 align-items-center">
                         <div class="d-flex flex-column align-items-center">

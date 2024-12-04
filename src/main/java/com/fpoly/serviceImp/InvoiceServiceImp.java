@@ -190,7 +190,7 @@ public class InvoiceServiceImp implements InvoiceService {
             invoiceDetail.setProductSize(productSize);
             invoiceDetailRepository.save(invoiceDetail);
 
-            // Chỉ trừ số lượng một lần
+
             productSize.setQuantity(productSize.getQuantity() - p.getQuantity());
             productSizeRepository.save(productSize);
 

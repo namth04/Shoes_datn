@@ -1,4 +1,4 @@
-// const exceptionCode = 417;
+
 var token = localStorage.getItem("token");
 async function checkroleUser() {
     var token = localStorage.getItem("token");
@@ -17,7 +17,7 @@ var total = 0;
 var listSize = [];
 
 function loadCartCheckOut() {
-    // Kiểm tra xem có phải đang mua ngay không
+
     const urlParams = new URLSearchParams(window.location.search);
     const isBuyNow = urlParams.get('type') === 'buynow';
 
@@ -31,6 +31,7 @@ function loadCartCheckOut() {
             return;
         }
         list = JSON.parse(buyNowData);
+
     } else {
         // Xử lý giỏ hàng bình thường
         var listcart = localStorage.getItem("product_cart");

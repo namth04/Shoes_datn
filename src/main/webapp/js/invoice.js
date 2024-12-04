@@ -41,7 +41,6 @@ async function loadMyInvoice() {
 
     var mobile = '';
     for (i = 0; i < list.length; i++) {
-        // Xác định trạng thái thanh toán cho mobile view
         let mobilePaymentStatus;
         if (list[i].payType !== 'PAYMENT_DELIVERY') {
             mobilePaymentStatus = '<span class="dathanhtoan">Đã thanh toán</span>';
@@ -121,7 +120,7 @@ async function loadDetailInvoice(id) {
     var result = await resp.json();
     document.getElementById("ngaytaoinvoice").innerHTML = result.createdTime + " " + result.createdDate;
 
-    // Xử lý trạng thái thanh toán
+
     let paymentStatus;
     if (result.payType !== 'PAYMENT_DELIVERY') {
         paymentStatus = 'Đã thanh toán';
@@ -134,7 +133,7 @@ async function loadDetailInvoice(id) {
     }
     document.getElementById("trangthaitt").innerHTML = paymentStatus;
 
-    // Cập nhật trạng thái vận chuyển
+
     document.getElementById("ttvanchuyen").innerHTML = result.status.name;
 
     // Cập nhật loại thanh toán
@@ -184,7 +183,6 @@ async function cancelInvoice(id) {
     }
 }
 
-// Hàm format tiền tệ
 function formatmoney(money) {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(money);
 }

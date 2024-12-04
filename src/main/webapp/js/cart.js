@@ -1,5 +1,5 @@
 var idColorCart = -1;
-var selectedColorImage = null; // Add a global variable to store the selected color image
+var selectedColorImage = null;
 
 async function clickColor(e, name, idColor) {
     idColorCart = idColor;
@@ -9,16 +9,12 @@ async function clickColor(e, name, idColor) {
     for (i = 0; i < img.length; i++) {
         document.getElementsByClassName("imgldetail")[i].classList.remove('imgactive');
     }
-
     // Thêm class 'imgactive' vào ảnh được chọn
     e.classList.add('imgactive');
-
     // Lưu lại ảnh màu được chọn
     selectedColorImage = e.src;
-
     // Hiển thị tên màu
     document.getElementById("colorname").innerHTML = name;
-
     try {
         var url = `http://localhost:8080/api/product-size/public/find-by-product-color?idProColor=${idColor}`;
         const response = await fetch(url, {});
@@ -55,11 +51,10 @@ async function clickColor(e, name, idColor) {
         console.error('Error fetching sizes:', error);
     }
 }
-
 async function addCart(product) {
     var sizeId = null;
     try {
-        sizeId = document.querySelector('input[name="sizepro"]:checked').value
+        sizeId = document.querySelector('input[name="sizepro"]:checked').value;
     } catch (error) {
         toastr.error("Bạn chưa chọn kích thước sản phẩm");
         return;
@@ -83,39 +78,74 @@ async function addCart(product) {
         "color": color,
         "size": size,
         "quantiy": document.getElementById("inputslcart").value,
-        // Use the selected color image or fallback to color link image or product banner
-        "colorImage": selectedColorImage || color.linkImage || product.imageBanner
-    }
+        "colorImage": selectedColorImage || color.linkImage || product.imageBanner,
+        "uniqueKey": `${product.id}_${color.id}_${sizeId}` // Thêm unique key
+    };
+
     if (localStorage.getItem("product_cart") == null) {
         var listproduct = [];
         listproduct.push(obj);
         window.localStorage.setItem('product_cart', JSON.stringify(listproduct));
-        toastr.success("Thêm giỏ hàng thành công");
-        loadAllCart();
-        return;
     } else {
         var list = JSON.parse(localStorage.getItem("product_cart"));
-        console.log(list)
 
-        // Check if the same product with the same size already exists
+        // Tìm index của sản phẩm có cùng unique key
         var existingProductIndex = list.findIndex(item =>
-            item.product.id === product.id &&
-            item.size.id === sizeId
+            item.uniqueKey === obj.uniqueKey
         );
 
         if (existingProductIndex !== -1) {
-            toastr.warning("Sản phẩm này đã có trong giỏ hàng");
-            return;
+            list[existingProductIndex].quantiy =
+                Number(list[existingProductIndex].quantiy) + Number(obj.quantiy);
+        } else {
+            list.push(obj);
         }
 
-        list.push(obj);
         window.localStorage.setItem('product_cart', JSON.stringify(list));
-        toastr.success("Thêm giỏ hàng thành công");
-        loadAllCart();
     }
+
+    toastr.success("Thêm giỏ hàng thành công");
+    loadAllCart();
 }
 
-// No changes needed in loadAllCart or loadAllCartMobile functions
+async function addLatestCart(product) {
+    var sizeId = null;
+    var color = null;
+    var size = null;
+
+    var listColor = product.productColors;
+    if (listColor.length > 0) {
+        color = listColor[0];
+    } else {
+        toastr.error("Sản phẩm không có màu để chọn");
+        return;
+    }
+
+    var listSize = color.productSizes;
+    if (listSize.length > 0) {
+        size = listSize[0];
+        sizeId = size.id;
+    } else {
+        toastr.error("Sản phẩm không có size để chọn");
+        return;
+    }
+
+    var obj = {
+        "product": product,
+        "color": color,
+        "size": size,
+        "quantiy": document.getElementById("inputslcart")?.value || 1,
+        "colorImage": color.linkImage || product.imageBanner,
+        "isLatestCart": true
+    };
+
+    var listproduct = [obj];
+    window.localStorage.setItem('product_cart', JSON.stringify(listproduct));
+
+    toastr.success("Thêm giỏ hàng thành công");
+    loadAllCart();
+}
+
 async function loadAllCart() {
     var listcart = localStorage.getItem("product_cart");
     if (listcart == null) {
@@ -145,7 +175,7 @@ async function loadAllCart() {
                     <td>
                         <div class="tdpricecart">
                             <p class="boldcart">${formatmoney(list[i].quantiy * list[i].product.price)}</p>
-                            <p onclick="remove(${list[i].color.id}, ${list[i].size.id})" class="delcart"><i class="fa fa-trash-o facartde"></i></p>
+                            <p onclick="remove(${list[i].product.id}, ${list[i].color.id}, ${list[i].size.id})" class="delcart"><i class="fa fa-trash-o facartde"></i></p>
                         </div>
                     </td>
                 </tr>`
@@ -177,18 +207,24 @@ async function loadAllCartMobile() {
             </div>
         </td>
         <td class="tdinforcart">
-          <i onclick="remove(${list[i].color.id}, ${list[i].size.id})" class="fa fa-trash-o facartde cartdels"></i>
+          <i onclick="remove(${list[i].product.id}, ${list[i].color.id}, ${list[i].size.id})" class="fa fa-trash-o facartde cartdels"></i>
             <p class="boldcart pricecmobile">${formatmoney(list[i].quantiy * list[i].product.price)}&ThinSpace;</p>
         </td>
     </tr>`
     }
     document.getElementById("tablemobilecart").innerHTML = main
 }
-async function remove(colorId, sizeId) {
+
+async function remove(productId, colorId, sizeId) {
     var list = JSON.parse(localStorage.getItem("product_cart"));
+
+    // Xóa tất cả sản phẩm có cùng product ID, color ID và size ID
     var remainingArr = list.filter(data =>
-        !(data.color.id == colorId && data.size.id == sizeId)
+        !(data.product.id === productId &&
+            data.color.id === colorId &&
+            data.size.id === sizeId)
     );
+
     window.localStorage.setItem('product_cart', JSON.stringify(remainingArr));
     toastr.success("Xóa sản phẩm thành công");
     loadAllCart();
@@ -289,4 +325,16 @@ async function productLqCart() {
             </div>`
     }
     document.getElementById("listproductgycart").innerHTML = main;
+}
+
+// Hàm xử lý thanh toán thành công
+function handleSuccessfulPayment() {
+    var list = JSON.parse(localStorage.getItem("product_cart"));
+
+    // Lọc ra các sản phẩm không phải từ nút thanh toán
+    var remainingCart = list.filter(item => !item.isLatestCart);
+
+    window.localStorage.setItem('product_cart', JSON.stringify(remainingCart));
+
+    loadAllCart();
 }

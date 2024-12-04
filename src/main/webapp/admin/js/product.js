@@ -1,6 +1,3 @@
-const listFile = [];
-
-var size = 8;
 async function loadProduct(page, param, listcate) {
     if (param == null) {
         param = "";
@@ -23,14 +20,14 @@ async function loadProduct(page, param, listcate) {
         });
         result = await response.json();
     }
-    console.log(result)
+    console.log(result);
     var list = result.content;
     var totalPage = result.totalPages;
 
     var main = '';
-    for (i = 0; i < list.length; i++) {
-        var listdm = '<div class="listtag">'
-        for (j = 0; j < list[i].productCategories.length; j++) {
+    for (let i = 0; i < list.length; i++) {
+        var listdm = '<div class="listtag">';
+        for (let j = 0; j < list[i].productCategories.length; j++) {
             listdm += `<a href="" class="tagcauhoi">.${list[i].productCategories[j].category.name}</a>`;
         }
         listdm += '</div>';
@@ -40,9 +37,9 @@ async function loadProduct(page, param, listcate) {
                     <td>${list[i].code}</td>
                     <td>${listdm}</td>
                     <td>
-                        Thương hiệu: ${list[i].trademark == null?'': list[i].trademark.name}<br>
-                        Chất liệu: ${list[i].material == null?'': list[i].material.name}
-                        Đế giày: ${list[i].sole == null?'': list[i].sole.name}
+                        Thương hiệu: ${list[i].trademark == null ? '' : list[i].trademark.name}<br>
+                        Chất liệu: ${list[i].material == null ? '' : list[i].material.name}
+                        Đế giày: ${list[i].sole == null ? '' : list[i].sole.name}
                     </td>
                     <td>${list[i].name}</td>
                     <td>${formatmoney(list[i].price)}</td>
@@ -52,16 +49,16 @@ async function loadProduct(page, param, listcate) {
                         <i onclick="deleteProduct(${list[i].id})" class="fa fa-trash-alt iconaction"></i>
                         <a href="addproduct?id=${list[i].id}"><i class="fa fa-edit iconaction"></i><br></a>
                     </td>
-                </tr>`
+                </tr>`;
     }
-    document.getElementById("listproduct").innerHTML = main
-    var mainpage = ''
-    for (i = 1; i <= totalPage; i++) {
-        mainpage += `<li onclick="loadProduct(${(Number(i) - 1)},${param},${listcate})" class="page-item"><a class="page-link" href="#listsp">${i}</a></li>`
-    }
-    document.getElementById("pageable").innerHTML = mainpage
-}
+    document.getElementById("listproduct").innerHTML = main;
 
+    var mainpage = '';
+    for (let i = 0; i < totalPage; i++) {
+        mainpage += `<li onclick="loadProduct(${i}, '${param}', ${JSON.stringify(listcate)})" class="page-item"><a class="page-link" href="#listsp">${i + 1}</a></li>`;
+    }
+    document.getElementById("pageable").innerHTML = mainpage;
+}
 async function filterByCate() {
     loadProduct(0, "", $("#listdpar").val());
 }
