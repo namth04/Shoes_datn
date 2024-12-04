@@ -1,5 +1,6 @@
-var size = 10;
+
 async function loadProductIndex(page) {
+    var size = 10;
     var url = 'http://localhost:8080/api/product/public/findAll?page=' + page + '&size=' + size;
     const response = await fetch(url, {
         method: 'GET'
@@ -38,6 +39,7 @@ async function loadProductIndex(page) {
 
 
 async function loadSanPhamBanChay(page) {
+    var size= 5;
     var url = 'http://localhost:8080/api/product/public/findAll?page=' + page + '&size=' + size+'&sort=quantitySold,desc';
     const response = await fetch(url, {
         method: 'GET'
@@ -106,6 +108,20 @@ async function loadAProduct() {
         document.getElementById("btnaddcart").onclick = function() {
             addCart(result);
         }
+        document.getElementById("btnmuangay").onclick = function() {
+            addLatestCart(result);
+
+            var listproduct = JSON.parse(localStorage.getItem('product_cart'));
+            if (listproduct && listproduct.length > 0) {
+                var latestProduct = listproduct[0];
+                console.log(latestProduct);
+            }
+            window.location.href = "checkout";
+
+            loadCartCheckOut();
+        }
+
+
         console.log("result"+result.name)
         var main = ''
         for (i = 0; i < result.productImages.length; i++) {
@@ -176,20 +192,16 @@ async function clickImgdetail(e) {
 async function clickColor(e, name, idColor) {
     idColorCart = idColor;
 
-    // Xóa class 'imgactive' khỏi tất cả các ảnh
     var img = document.getElementsByClassName("imgldetail");
     for (i = 0; i < img.length; i++) {
         document.getElementsByClassName("imgldetail")[i].classList.remove('imgactive');
     }
 
-    // Thêm class 'imgactive' vào ảnh được chọn
     e.classList.add('imgactive');
 
-    // Hiển thị tên màu
     document.getElementById("colorname").innerHTML = name;
 
     try {
-
         var url = `http://localhost:8080/api/product-size/public/find-by-product-color?idProColor=${idColor}`;
         const response = await fetch(url, {});
         var list = await response.json();
@@ -206,7 +218,7 @@ async function clickColor(e, name, idColor) {
                         <input value="${list[i].id}" type="radio" name="sizepro" id="size${list[i].id}">
                     </label>
                 </div>`;
-                totalQuantity += list[i].quantity;
+                totalQuantity += list[i].quantity
             } else {
                 main += `
                 <div class="colsize col-lg-2 col-md-2 col-sm-2 col-2">
@@ -217,10 +229,8 @@ async function clickColor(e, name, idColor) {
             }
         }
 
-
         document.getElementById("listsize").innerHTML = main;
 
-        // Hiển thị tổng số lượng của màu sắc
         document.getElementById("quantityA").innerHTML = `Số lượng: ${totalQuantity}`;
     } catch (error) {
         console.error('Error fetching sizes:', error);
@@ -260,7 +270,6 @@ async function displayProductQuantity(idProColor, idSize) {
         if (response.ok) {
             var quantity = await response.json();
 
-            // Lưu lại số lượng tối đa
             maxQuantity = quantity;
 
             if (quantity > 0) {
