@@ -60,7 +60,8 @@ async function loadInvoice(page) {
         main += `<tr>
                     <td>${list[i].id}</td>
                     <td>${list[i].createdTime}<br>${list[i].createdDate}</td>
-                    <td>${list[i].address}</td>
+                    <td> ${list[i].address != null ?  list[i].address : " "}</td>
+                   
                     <td>${formatmoney(list[i].totalAmount)}</td>
                     <td>${paymentStatusHtml}</td>
                     <td>${list[i].status.name}</td>

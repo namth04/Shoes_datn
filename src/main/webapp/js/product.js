@@ -357,16 +357,15 @@ function validateQuantityAndAddToCart(product) {
     addCart(product, currentQuantity);
 }
 
-// Global variables
-var size = 12; // Number of items per page
-var type = 1; // Tracking current filter type
 
-// Format money function
+var size = 4;
+var type = 1;
+
+
 function formatmoney(price) {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 }
 
-// Main sorting function
 function sortProduct() {
     var sort = document.getElementById("sortpro").value;
     switch(type) {
@@ -382,7 +381,6 @@ function sortProduct() {
     }
 }
 
-// Load products by category
 async function loadProductByCategory(page, sort) {
     type = 1;
     var uls = new URL(document.URL);
@@ -406,28 +404,16 @@ async function loadProductByCategory(page, sort) {
     }
 }
 
-
 async function searchFull(page, sort) {
     type = 2;
-    var min_price = document.getElementById("min_price").value || 0;
-    var max_price = document.getElementById("max_price").value || Number.MAX_SAFE_INTEGER;
+    var min_price = parseFloat(document.getElementById("min_price").value) || 0;
+    var max_price = parseFloat(document.getElementById("max_price").value) || Number.MAX_SAFE_INTEGER;
 
     var listCa = document.getElementById("listsearchCategory").getElementsByClassName("inputcheck");
-    var listcate = [];
-    for (var i = 0; i < listCa.length; i++) {
-        if (listCa[i].checked) {
-            listcate.push(listCa[i].value);
-        }
-    }
+    var listcate = Array.from(listCa).filter(input => input.checked).map(input => input.value);
 
-    // Collect selected trademarks
     var listTra = document.getElementById("listthuonghieu").getElementsByClassName("inputchecktrademark");
-    var listTrademark = [];
-    for (var i = 0; i < listTra.length; i++) {
-        if (listTra[i].checked) {
-            listTrademark.push(listTra[i].value);
-        }
-    }
+    var listTrademark = Array.from(listTra).filter(input => input.checked).map(input => input.value);
 
     var payload = {
         "listIdCategory": listcate,
@@ -437,7 +423,6 @@ async function searchFull(page, sort) {
     };
 
     var url = `http://localhost:8080/api/product/public/searchFull?page=${page}&size=${size}`;
-
     if (sort) {
         url += `&sort=${sort}`;
     }
@@ -445,9 +430,9 @@ async function searchFull(page, sort) {
     try {
         const response = await fetch(url, {
             method: 'POST',
-            headers: new Headers({
+            headers: {
                 'Content-Type': 'application/json'
-            }),
+            },
             body: JSON.stringify(payload)
         });
 
@@ -466,25 +451,23 @@ async function searchFullmobile(page, sort) {
     type = 3;
     $("#modalfilter").modal("hide");
 
-    var min_price = document.getElementById("min_price_mobile").value || 0;
-    var max_price = document.getElementById("max_price_mobile").value || Number.MAX_SAFE_INTEGER;
+    var min_price = parseFloat(document.getElementById("min_price_mobile").value) || 0;
+    var max_price = parseFloat(document.getElementById("max_price_mobile").value) || Number.MAX_SAFE_INTEGER;
 
     var listCa = document.getElementById("listsearchCategoryMobile").getElementsByClassName("inputcheck");
-    var listcate = [];
-    for (var i = 0; i < listCa.length; i++) {
-        if (listCa[i].checked) {
-            listcate.push(listCa[i].value);
-        }
-    }
+    var listcate = Array.from(listCa).filter(input => input.checked).map(input => input.value);
+
+    var listTra = document.getElementById("listthuonghieuMobile").getElementsByClassName("inputchecktrademark");
+    var listTrademark = Array.from(listTra).filter(input => input.checked).map(input => input.value);
 
     var payload = {
         "listIdCategory": listcate,
+        "listIdTrademark": listTrademark,
         "smallPrice": min_price,
         "largePrice": max_price
     };
 
     var url = `http://localhost:8080/api/product/public/searchFull?page=${page}&size=${size}`;
-
     if (sort) {
         url += `&sort=${sort}`;
     }
@@ -492,9 +475,9 @@ async function searchFullmobile(page, sort) {
     try {
         const response = await fetch(url, {
             method: 'POST',
-            headers: new Headers({
+            headers: {
                 'Content-Type': 'application/json'
-            }),
+            },
             body: JSON.stringify(payload)
         });
 
