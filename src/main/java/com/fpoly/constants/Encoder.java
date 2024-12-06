@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.fpoly.constants;
 
 import org.apache.commons.codec.binary.Base64;
@@ -19,9 +15,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Formatter;
 
-/**
- * @author khangdoan
- */
+
 @SuppressWarnings("restriction")
 public class Encoder {
 

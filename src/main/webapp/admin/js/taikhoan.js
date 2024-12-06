@@ -24,7 +24,7 @@ async function loadAllUser(page, param) {
     for (i = 0; i < listUser.length; i++) {
         var btn = '';
         if (listUser[i].actived == 0) {
-            var btn = `<td class="sticky-col"><button onclick="lockOrUnlock(${listUser[i].id},0)" class="btn btn-danger"><i class="fa fa-unlock"></i> mở khóa</button></td>`
+            var btn = `<td class="sticky-col"><button onclick="lockOrUnlock(${listUser[i].id},0)" class="btn btn-danger"><i class="fa fa-unlock"></i> Mở khóa</button></td>`
         } else {
             var btn = `<td class="sticky-col"><button onclick="lockOrUnlock(${listUser[i].id},1)" class="btn btn-primary"><i class="fa fa-lock"></i> Khóa</button></td>`
         }

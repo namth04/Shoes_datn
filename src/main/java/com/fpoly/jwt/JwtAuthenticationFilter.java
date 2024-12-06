@@ -44,16 +44,16 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
         try {
-            // Lấy jwt từ request
+
             String jwt = getJwtFromRequest((HttpServletRequest) request);
             if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
-                // Lấy id user từ chuỗi jwt
+
                 Long userId = tokenProvider.getUserIdFromJWT(jwt);
-                // Lấy thông tin người dùng từ id
+
                 UserDetails userDetails = new CustomUserDetails(userRepository.findById(userId).get());
                 System.out.println("user by access token-----: "+userDetails);
                 if(userDetails != null) {
-                    // Nếu người dùng hợp lệ, set thông tin cho Seturity Context
+
                     Authentication authentications = this.tokenProvider.getAuthentication(jwt);
                     SecurityContextHolder.getContext().setAuthentication(authentications);
                 }

@@ -31,11 +31,10 @@ public class JwtTokenProvider {
         System.out.println("oke");
     }
 
-    // Tạo ra jwt từ thông tin user
+
     public String generateToken(CustomUserDetails userDetails) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + JWT_EXPIRATION);
-        // Tạo chuỗi json web token từ id của user.
         return Jwts.builder()
                 .setSubject(Long.toString(userDetails.getUser().getId()))
                 .setIssuedAt(now)

@@ -2,10 +2,7 @@ var token = localStorage.getItem("token");
 
 var size = 10;
 
-// Format money function
 function formatmoney(num) {
-    // Assuming this function is defined elsewhere in your code
-    // If not, here's a basic implementation
     return num.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
 }
 
@@ -41,18 +38,17 @@ async function loadInvoice(page) {
     var main = '';
 
     for (i = 0; i < list.length; i++) {
-        // Logic hiển thị trạng thái thanh toán
+
         let paymentStatusHtml = '<span class="chuathanhtoan">Thanh toán khi nhận hàng(COD)</span>';
 
-        // Nếu là GPAY hoặc VNPAY thì luôn hiển thị Đã thanh toán
-        if (list[i].payType === 'PAYMENT_VNPAY' || list[i].payType === 'PAYMENT_GPAY') {
+        if ( list[i].payType === 'PAYMENT_GPAY') {
             paymentStatusHtml = '<span class="dathanhtoan">Đã thanh toán</span>';
         }
-        // Nếu là COD và trạng thái là Đã nhận đơn hàng thì hiển thị Đã thanh toán
+
         else if (list[i].payType === 'PAYMENT_DELIVERY' && list[i].status.name === 'Đã nhận đơn hàng') {
             paymentStatusHtml = '<span class="dathanhtoan">Đã thanh toán</span>';
         }
-        // Nếu là thanh toán tại quầy thì hiển thị Đã thanh toán
+
         else if (list[i].payType === 'PAY_COUNTER') {
             paymentStatusHtml = '<span class="dathanhtoan">Đã thanh toán</span>';
         }
@@ -123,7 +119,6 @@ async function loadDetailInvoice(id) {
     var result = await resp.json();
     document.getElementById("ngaytaoinvoice").innerHTML = result.createdTime + " " + result.createdDate
 
-    // Logic hiển thị trạng thái thanh toán trong chi tiết
     let paymentStatusText = "Thanh toán khi nhận hàng (COD)";
 
     if (result.payType === "PAYMENT_VNPAY" || result.payType === "PAYMENT_GPAY") {

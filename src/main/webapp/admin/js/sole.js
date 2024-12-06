@@ -32,12 +32,28 @@ async function loadAResult(id) {
     document.getElementById("name").value = result.name
 }
 
-
 async function saveResult() {
-    var payload = {
-        "id": document.getElementById("idres").value,
-        "name": document.getElementById("name").value,
+
+    var id = document.getElementById("idres").value.trim();
+    var name = document.getElementById("name").value.trim();
+
+    if (!name) {
+        toastr.warning("Tên không được để trống!");
+        return;
     }
+
+
+    const duplicate = Array.from(document.querySelectorAll("#listresult tr td:nth-child(2)")).some(td => td.textContent === name && id === "");
+    if (duplicate) {
+        toastr.warning("Tên đã tồn tại, vui lòng nhập tên khác!");
+        return;
+    }
+
+    var payload = {
+        "id": id || null,
+        "name": name
+    };
+
     const response = await fetch('http://localhost:8080/api/sole/admin/create', {
         method: 'POST',
         headers: new Headers({
@@ -48,11 +64,13 @@ async function saveResult() {
     });
     if (response.status < 300) {
         toastr.success("Thành công");
-        loadResult();
-    }
-    if (response.status == exceptionCode) {
-        var result = await response.json()
+        loadResult(); // Refresh the list
+        clearData(); // Clear the form
+    } else if (response.status === exceptionCode) {
+        var result = await response.json();
         toastr.warning(result.defaultMessage);
+    } else {
+        toastr.error("Đã xảy ra lỗi. Vui lòng thử lại.");
     }
 }
 

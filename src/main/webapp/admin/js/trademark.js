@@ -1,7 +1,5 @@
-// Global variables for tracking existing trademarks
 let existingTrademarks = [];
 
-// Load and validate trademarks
 async function loadResult() {
     try {
         var url = 'http://localhost:8080/api/trademark/public/all';
@@ -36,7 +34,7 @@ function clearData() {
     document.getElementById("name").value = "";
 }
 
-// Load a specific trademark for editing
+
 async function loadAResult(id) {
     try {
         const response = await fetch('http://localhost:8080/api/trademark/public/findById?id=' + id);
@@ -53,47 +51,16 @@ async function loadAResult(id) {
     }
 }
 
-// Validate trademark name
+
 function validateTrademark(name) {
-    // Trim whitespace
     name = name.trim();
-
-    // Check if name is empty
     if (!name) {
         toastr.warning("Tên nhãn hiệu không được để trống");
         return false;
     }
 
-    // Check for duplicate names (case-insensitive)
     const isDuplicate = existingTrademarks.some(
-        trademark => trademark.name.toLowerCase() === name.toLowerCase() &&
-            trademark.id != document.getElementById("idres").value
-    );
-
-    if (isDuplicate) {
-        toastr.warning("Tên nhãn hiệu đã tồn tại");
-        return false;
-    }
-
-    return true;
-}
-
-function validateTrademark(name) {
-    // Check if name is empty or contains only whitespace
-    if (!name) {
-        toastr.warning("Tên nhãn hiệu không được để trống");
-        return false;
-    }
-
-    // Check for names that are just spaces
-    if (name.trim() === '') {
-        toastr.warning("Tên nhãn hiệu không được chỉ chứa khoảng trắng");
-        return false;
-    }
-
-    // Check for duplicate names (case-insensitive)
-    const isDuplicate = existingTrademarks.some(
-        trademark => trademark.name.toLowerCase().trim() === name.toLowerCase().trim() &&
+        trademark => trademark.name.toLowerCase().trim() === name.toLowerCase() &&
             trademark.id != document.getElementById("idres").value
     );
 
@@ -110,7 +77,6 @@ async function saveResult() {
         const nameInput = document.getElementById("name");
         const name = nameInput.value.trim();
 
-        // Validate trademark name (empty and duplicate checks)
         if (!validateTrademark(name)) {
             return;
         }

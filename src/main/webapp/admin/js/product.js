@@ -1,122 +1,98 @@
-const listFile = [];  // Global file list array
-var size = 8;  // Items per page
+const listFile = [];
+
+var size = 8;
 
 async function loadProduct(page, param, listcate) {
-    // Normalize input parameters
-    page = page || 0;
-    param = param || "";
+    if (param == null) {
+        param = "";
+    }
 
-    let result = null;
-    let url = '';
-
-    try {
-        // If no category is selected (listcate is null or empty)
-        if (!listcate || listcate.length === 0) {
-            // Search without category
-            url = `http://localhost:8080/api/product/public/findByParam?page=${page}&size=${size}&q=${encodeURIComponent(param)}`;
+    var result = null;
+    var url = '';
+    // Xử lý trường hợp không có listcate
+    if (listcate == null || listcate.length === 0) {
+        url = `http://localhost:8080/api/product/public/findByParam?page=${page}&size=${size}&q=${param}`;
+        try {
             const response = await fetch(url, { method: 'GET' });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
             result = await response.json();
-        } else {
-            // Search with category
-            url = `http://localhost:8080/api/product/public/searchFull?page=${page}&size=${size}`;
+        } catch (error) {
+            console.error("Error fetching data: ", error);
+            toastr.error("Có lỗi khi tải dữ liệu sản phẩm.");
+            return;
+        }
+    } else {
+        url = 'http://localhost:8080/api/product/public/searchFull?page=' + page + '&size=' + size;
+        try {
             const response = await fetch(url, {
                 method: 'POST',
-                headers: {
+                headers: new Headers({
                     'Content-Type': 'application/json'
-                },
+                }),
                 body: JSON.stringify(listcate)
             });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
             result = await response.json();
+        } catch (error) {
+            console.error("Error fetching data: ", error);
+            toastr.error("Có lỗi khi tìm kiếm sản phẩm.");
+            return;
         }
-
-        // Process and display products
-        displayProducts(result);
-
-        // Generate pagination
-        generatePagination(result.totalPages, page, param, listcate);
-
-    } catch (error) {
-        console.error('Error loading products:', error);
-        // Optional: display error message to user
-        document.getElementById("listproduct").innerHTML = `<tr><td colspan="10">Error loading products: ${error.message}</td></tr>`;
     }
-}
 
-function displayProducts(result) {
-    const list = result.content;
-    let main = '';
+    // Kiểm tra nếu result không hợp lệ
+    if (!result || !result.content) {
+        toastr.error("Không tìm thấy sản phẩm.");
+        return;
+    }
 
-    list.forEach(product => {
-        // Generate category tags
-        const listdm = product.productCategories.map(pc =>
-            `<a href="" class="tagcauhoi">.${pc.category.name}</a>`
-        ).join('');
+    var list = result.content;
+    var totalPage = result.totalPages;
 
-        main += `
-            <tr>
-                <td>#${product.id}</td>
-                <td><img src="${product.imageBanner}" style="width: 100px;"></td>
-                <td>${product.code}</td>
-                <td><div class="listtag">${listdm}</div></td>
-                <td>
-                    Thương hiệu: ${product.trademark?.name || ''}<br>
-                    Chất liệu: ${product.material?.name || ''}<br>
-                    Đế giày: ${product.sole?.name || ''}
-                </td>
-                <td>${product.name}</td>
-                <td>${formatmoney(product.price)}</td>
-                <td>${product.createdTime}<br>${product.createdDate}</td>
-                <td>${product.quantitySold}</td>
-                <td class="sticky-col">
-                    <i onclick="deleteProduct(${product.id})" class="fa fa-trash-alt iconaction"></i>
-                    <a href="addproduct?id=${product.id}">
-                        <i class="fa fa-edit iconaction"></i>
-                    </a>
-                </td>
-            </tr>`;
-    });
+    var main = '';
+    for (i = 0; i < list.length; i++) {
+        var listdm = '<div class="listtag">'
+        for (j = 0; j < list[i].productCategories.length; j++) {
+            listdm += `<a href="" class="tagcauhoi">.${list[i].productCategories[j].category.name}</a>`;
+        }
+        listdm += '</div>';
+
+        main += `<tr>
+                    <td>#${list[i].id}</td>
+                    <td><img src="${list[i].imageBanner}" style="width: 100px;"></td>
+                    <td>${list[i].code}</td>
+                    <td>${listdm}</td>
+                    <td>
+                        Thương hiệu: ${list[i].trademark ? list[i].trademark.name : ''}<br>
+                        Chất liệu: ${list[i].material ? list[i].material.name : ''}<br>
+                        Đế giày: ${list[i].sole ? list[i].sole.name : ''}
+                    </td>
+                    <td>${list[i].name}</td>
+                    <td>${formatmoney(list[i].price)}</td>
+                    <td>${list[i].createdTime}<br>${list[i].createdDate}</td>
+                    <td>${list[i].quantitySold}</td>
+                    <td class="sticky-col">
+                        <i onclick="deleteProduct(${list[i].id})" class="fa fa-trash-alt iconaction"></i>
+                        <a href="addproduct?id=${list[i].id}"><i class="fa fa-edit iconaction"></i><br></a>
+                    </td>
+                </tr>`;
+    }
 
     document.getElementById("listproduct").innerHTML = main;
-}
 
-function generatePagination(totalPage, currentPage, param, listcate) {
-    let mainpage = '';
-
-    for (let i = 1; i <= totalPage; i++) {
-        mainpage += `
-            <li onclick="loadProduct(${i - 1}, '${param}', ${JSON.stringify(listcate)})" 
-                class="page-item ${i - 1 === currentPage ? 'active' : ''}">
-                <a class="page-link" href="#listsp">${i}</a>
-            </li>`;
+    // Xây dựng phân trang
+    var mainpage = '';
+    for (i = 1; i <= totalPage; i++) {
+        mainpage += `<li onclick="loadProduct(${(Number(i) - 1)}, '${param}', ${JSON.stringify(listcate)})" class="page-item">
+                        <a class="page-link" href="#listsp">${i}</a>
+                    </li>`;
     }
-
     document.getElementById("pageable").innerHTML = mainpage;
 }
 
+
 async function filterByCate() {
-    const selectedCategories = $("#listdpar").val();
-
-    if (selectedCategories && selectedCategories.length > 0) {
-        const categoryArray = Array.isArray(selectedCategories)
-            ? selectedCategories
-            : [selectedCategories];
-
-        loadProduct(0, "", categoryArray);
-    } else {
-        // No category selected, load all products
-        loadProduct(0, "", null);
-    }
+    loadProduct(0, "", $("#listdpar").val());
 }
+
 
 async function loadAProduct() {
     var uls = new URL(document.URL)
@@ -194,46 +170,120 @@ async function loadAProduct() {
 }
 
 var linkbanner = '';
+
 async function saveProduct() {
-    document.getElementById("loading").style.display = 'block'
-    var uls = new URL(document.URL)
+    document.getElementById("loading").style.display = 'block';
+    var uls = new URL(document.URL);
     var id = uls.searchParams.get("id");
 
-    var url = 'http://localhost:8080/api/product/admin/create';
-    if (id != null) {
-        url = 'http://localhost:8080/api/product/admin/update';
-    }
-    var codesp = document.getElementById("codesp").value
-    var namesp = document.getElementById("namesp").value
-    var price = document.getElementById("price").value
-    var alias = document.getElementById("alias").value
+    var url = id != null
+        ? 'http://localhost:8080/api/product/admin/update'
+        : 'http://localhost:8080/api/product/admin/create';
+
+    // Collecting form data
+    var codesp = document.getElementById("codesp").value.trim();
+    var namesp = document.getElementById("namesp").value.trim();
+    var price = document.getElementById("price").value.trim();
+    var alias = document.getElementById("alias").value.trim();
     var listdpar = $("#listdpar").val();
-    var description = tinyMCE.get('editor').getContent()
-    await uploadFile(document.getElementById("imgbanner"));
-    var listLinkImg = await uploadMultipleFileNotResp();
-    await loadColor();
-    var product = {
-        "id": id,
-        "code": codesp,
-        "alias": alias,
-        "name": namesp,
-        "imageBanner": linkbanner,
-        "price": price,
-        "description": description,
-        "listCategoryIds": listdpar,
-        "linkLinkImages": listLinkImg,
-        "colors": listColor,
-        "trademark": {
-            "id":document.getElementById("thuonghieu").value
-        },
-        "material": {
-            "id":document.getElementById("chatlieu").value
-        },
-        "sole": {
-            "id":document.getElementById("degiay").value
-        },
+    var description = tinyMCE.get('editor').getContent().trim();
+    var thuonghieu = document.getElementById("thuonghieu").value.trim();
+    var chatlieu = document.getElementById("chatlieu").value.trim();
+    var degiay = document.getElementById("degiay").value.trim();
+
+    // Validate basic fields
+    if (!codesp) {
+        toastr.warning("Mã sản phẩm không được để trống!");
+        document.getElementById("loading").style.display = 'none';
+        return;
     }
-    console.log(product)
+
+    if (!namesp) {
+        toastr.warning("Tên sản phẩm không được để trống!");
+        document.getElementById("loading").style.display = 'none';
+        return;
+    }
+    if (!price || isNaN(price) || Number(price) <= 0) {
+        toastr.warning("Giá phải là số dương!");
+        document.getElementById("loading").style.display = 'none';
+        return;
+    }
+    if (!alias) {
+        toastr.warning("Alias không được để trống!");
+        document.getElementById("loading").style.display = 'none';
+        return;
+    }
+    if (!listdpar || listdpar.length === 0) {
+        toastr.warning("Vui lòng chọn danh mục!");
+        document.getElementById("loading").style.display = 'none';
+        return;
+    }
+    if (!description) {
+        toastr.warning("Mô tả không được để trống!");
+        document.getElementById("loading").style.display = 'none';
+        return;
+    }
+    if (!thuonghieu) {
+        toastr.warning("Vui lòng chọn thương hiệu!");
+        document.getElementById("loading").style.display = 'none';
+        return;
+    }
+    if (!chatlieu) {
+        toastr.warning("Vui lòng chọn chất liệu!");
+        document.getElementById("loading").style.display = 'none';
+        return;
+    }
+    if (!degiay) {
+        toastr.warning("Vui lòng chọn đế giày!");
+        document.getElementById("loading").style.display = 'none';
+        return;
+    }
+
+    // Call loadColor to validate color and size
+    await loadColor();  // Ensure this function is run before proceeding
+
+    // If loadColor finds issues, it will return early with a warning, so we only proceed if everything is valid
+    if (listColor.length === 0) {
+        // No valid colors found
+        document.getElementById("loading").style.display = 'none';
+        return;
+    }
+
+    // File Upload and Data Preparation
+    await uploadFile(document.getElementById("imgbanner"));
+    var listLinkImg = id == null ? await uploadMultipleFileNotResp() : []; // Skip if updating
+    await loadColor(); // Re-run loadColor if necessary for images
+
+    if (!linkbanner) {
+        toastr.warning("Vui lòng tải lên banner hình ảnh!");
+        document.getElementById("loading").style.display = 'none';
+        return;
+    }
+
+    if (id == null && (!listLinkImg || listLinkImg.length === 0)) { // Only check for detail images if creating
+        toastr.warning("Vui lòng tải lên ít nhất một hình ảnh chi tiết!");
+        document.getElementById("loading").style.display = 'none';
+        return;
+    }
+
+    // Create product object
+    var product = {
+        id: id,
+        code: codesp,
+        alias: alias,
+        name: namesp,
+        imageBanner: linkbanner,
+        price: price,
+        description: description,
+        listCategoryIds: listdpar,
+        linkLinkImages: listLinkImg,
+        colors: listColor,
+        trademark: { id: thuonghieu },
+        material: { id: chatlieu },
+        sole: { id: degiay }
+    };
+
+    // Send API request
     const response = await fetch(url, {
         method: 'POST',
         headers: new Headers({
@@ -242,30 +292,33 @@ async function saveProduct() {
         }),
         body: JSON.stringify(product)
     });
-    var result = await response.json();
-    console.log(result)
+
+    // Handle response
     if (response.status < 300) {
         swal({
                 title: "Thông báo",
-                text: "thêm/sửa sản phẩm thành công",
+                text: "Thêm/Sửa sản phẩm thành công",
                 type: "success"
             },
             function() {
-                document.getElementById("loading").style.display = 'none'
-                window.location.reload();
+                document.getElementById("loading").style.display = 'none';
+                window.location.href = 'http://localhost:8080/admin/product';
             });
     } else {
         swal({
                 title: "Thông báo",
-                text: "thêm/sửa sản phẩm thất bại",
+                text: "Thêm/Sửa sản phẩm thất bại",
                 type: "error"
             },
             function() {
-                document.getElementById("loading").style.display = 'none'
+                document.getElementById("loading").style.display = 'none';
                 window.location.reload();
             });
     }
 }
+
+
+
 
 
 async function deleteProduct(id) {
@@ -281,7 +334,7 @@ async function deleteProduct(id) {
         })
     });
     if (response.status < 300) {
-        toastr.success("xóa sản phẩm thành công!");
+        toastr.success("Xóa sản phẩm thành công!");
         await new Promise(r => setTimeout(r, 1000));
         window.location.reload();
     }
@@ -305,7 +358,7 @@ async function deleteProductImage(id) {
         })
     });
     if (response.status < 300) {
-        toastr.success("xóa ảnh thành công!");
+        toastr.success("Xóa ảnh thành công!");
         document.getElementById("imgdathem" + id).style.display = 'none';
     }
     if (response.status == exceptionCode) {
@@ -327,7 +380,7 @@ async function deleteProductSize(id) {
         })
     });
     if (response.status < 300) {
-        toastr.success("xóa thành công!");
+        toastr.success("Xóa thành công!");
         await new Promise(r => setTimeout(r, 1000));
         loadAProduct();
     }
@@ -361,42 +414,70 @@ async function deleteProductColor(id) {
 }
 
 
-var listColor = [];
-var listLinkImgCt = [];
 async function loadColor() {
     var list = document.getElementById("listcolorblock").getElementsByClassName("singlecolor");
-    var listF = []
+    var listF = [];
+    listColor = []; // Clear listColor to ensure it is fresh for this load
+
     for (i = 0; i < list.length; i++) {
         var singleColor = list[i];
         var idcolor = singleColor.getElementsByClassName("idcolor")[0];
         var colorName = singleColor.getElementsByClassName("colorName")[0];
+
+        // Check if color name is empty
+        if (!colorName.value.trim()) {
+            toastr.warning("Tên màu sắc không được để trống!");
+            return;
+        }
+
         listF.push(singleColor.getElementsByClassName("fileimgclo")[0]);
         var obj = {
             "id": idcolor.value == '' ? null : idcolor.value,
             "colorName": colorName.value,
             "hasFile": singleColor.getElementsByClassName("fileimgclo")[0].files.length == 0 ? false : true,
             "linkImage": null
-        }
-        var listsizes = []
+        };
+
+        var listsizes = [];
         var sizeblockList = singleColor.getElementsByClassName("singelsizeblock");
+
+        // Validate each size block
         for (j = 0; j < sizeblockList.length; j++) {
             var size = sizeblockList[j];
             var objsize = {
                 "id": size.getElementsByClassName("idsize")[0].value == '' ? null : size.getElementsByClassName("idsize")[0].value,
                 "sizeName": size.getElementsByClassName("sizename")[0].value,
                 "quantity": size.getElementsByClassName("sizequantity")[0].value,
+            };
+
+            // Validate size
+            if (!objsize.sizeName || !objsize.quantity || isNaN(objsize.quantity) || Number(objsize.quantity) <= 0) {
+                toastr.warning("Kích thước phải có tên và số lượng hợp lệ!");
+                return;
             }
-            listsizes.push(objsize)
+
+            listsizes.push(objsize);
         }
-        console.log(listsizes);
+
+        // Validate that there is at least one size
+        if (listsizes.length === 0) {
+            toastr.warning("Vui lòng thêm ít nhất một kích thước cho màu sắc này!");
+            return;
+        }
+
         obj.size = listsizes;
-        listColor.push(obj)
+        listColor.push(obj);
     }
+
+    // Validate if at least one color has been added
+    if (listColor.length === 0) {
+        toastr.warning("Vui lòng chọn ít nhất một màu sắc!");
+        return;
+    }
+
+    // Handle file uploads
     var listImg = await uploadMultipleFile(listF);
-    console.log(listImg)
-    // for (i = 0; i < listImg.length; i++) {
-    //     listColor[listImg[i].id].linkImage = listImg[i].link
-    // }
+
     for (i = 0; i < listImg.length; i++) {
         for (j = 0; j < listColor.length; j++) {
             if (listColor[j].hasFile == true) {
@@ -407,8 +488,10 @@ async function loadColor() {
             }
         }
     }
-    console.log(listColor)
+
+    console.log(listColor);
 }
+
 
 async function uploadMultipleFile(listF) {
     const formData = new FormData()
