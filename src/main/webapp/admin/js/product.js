@@ -1,68 +1,122 @@
+const listFile = [];  // Global file list array
+var size = 8;  // Items per page
+
 async function loadProduct(page, param, listcate) {
-    if (param == null) {
-        param = "";
-    }
-    var result = null;
-    if (listcate == null) {
-        var url = 'http://localhost:8080/api/product/public/findByParam?page=' + page + '&size=' + size + '&q=' + param;
-        const response = await fetch(url, {
-            method: 'GET'
-        });
-        result = await response.json();
-    } else {
-        var url = 'http://localhost:8080/api/product/public/searchFull?page=' + page + '&size=' + size;
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: new Headers({
-                'Content-Type': 'application/json'
-            }),
-            body: JSON.stringify(listcate)
-        });
-        result = await response.json();
-    }
-    console.log(result);
-    var list = result.content;
-    var totalPage = result.totalPages;
+    // Normalize input parameters
+    page = page || 0;
+    param = param || "";
 
-    var main = '';
-    for (let i = 0; i < list.length; i++) {
-        var listdm = '<div class="listtag">';
-        for (let j = 0; j < list[i].productCategories.length; j++) {
-            listdm += `<a href="" class="tagcauhoi">.${list[i].productCategories[j].category.name}</a>`;
+    let result = null;
+    let url = '';
+
+    try {
+        // If no category is selected (listcate is null or empty)
+        if (!listcate || listcate.length === 0) {
+            // Search without category
+            url = `http://localhost:8080/api/product/public/findByParam?page=${page}&size=${size}&q=${encodeURIComponent(param)}`;
+            const response = await fetch(url, { method: 'GET' });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            result = await response.json();
+        } else {
+            // Search with category
+            url = `http://localhost:8080/api/product/public/searchFull?page=${page}&size=${size}`;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(listcate)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            result = await response.json();
         }
-        listdm += '</div>';
-        main += `<tr>
-                    <td>#${list[i].id}</td>
-                    <td><img src="${list[i].imageBanner}" style="width: 100px;"></td>
-                    <td>${list[i].code}</td>
-                    <td>${listdm}</td>
-                    <td>
-                        Thương hiệu: ${list[i].trademark == null ? '' : list[i].trademark.name}<br>
-                        Chất liệu: ${list[i].material == null ? '' : list[i].material.name}
-                        Đế giày: ${list[i].sole == null ? '' : list[i].sole.name}
-                    </td>
-                    <td>${list[i].name}</td>
-                    <td>${formatmoney(list[i].price)}</td>
-                    <td>${list[i].createdTime}<br>${list[i].createdDate}</td>
-                    <td>${list[i].quantitySold}</td>
-                    <td class="sticky-col">
-                        <i onclick="deleteProduct(${list[i].id})" class="fa fa-trash-alt iconaction"></i>
-                        <a href="addproduct?id=${list[i].id}"><i class="fa fa-edit iconaction"></i><br></a>
-                    </td>
-                </tr>`;
-    }
-    document.getElementById("listproduct").innerHTML = main;
 
-    var mainpage = '';
-    for (let i = 0; i < totalPage; i++) {
-        mainpage += `<li onclick="loadProduct(${i}, '${param}', ${JSON.stringify(listcate)})" class="page-item"><a class="page-link" href="#listsp">${i + 1}</a></li>`;
+        // Process and display products
+        displayProducts(result);
+
+        // Generate pagination
+        generatePagination(result.totalPages, page, param, listcate);
+
+    } catch (error) {
+        console.error('Error loading products:', error);
+        // Optional: display error message to user
+        document.getElementById("listproduct").innerHTML = `<tr><td colspan="10">Error loading products: ${error.message}</td></tr>`;
     }
+}
+
+function displayProducts(result) {
+    const list = result.content;
+    let main = '';
+
+    list.forEach(product => {
+        // Generate category tags
+        const listdm = product.productCategories.map(pc =>
+            `<a href="" class="tagcauhoi">.${pc.category.name}</a>`
+        ).join('');
+
+        main += `
+            <tr>
+                <td>#${product.id}</td>
+                <td><img src="${product.imageBanner}" style="width: 100px;"></td>
+                <td>${product.code}</td>
+                <td><div class="listtag">${listdm}</div></td>
+                <td>
+                    Thương hiệu: ${product.trademark?.name || ''}<br>
+                    Chất liệu: ${product.material?.name || ''}<br>
+                    Đế giày: ${product.sole?.name || ''}
+                </td>
+                <td>${product.name}</td>
+                <td>${formatmoney(product.price)}</td>
+                <td>${product.createdTime}<br>${product.createdDate}</td>
+                <td>${product.quantitySold}</td>
+                <td class="sticky-col">
+                    <i onclick="deleteProduct(${product.id})" class="fa fa-trash-alt iconaction"></i>
+                    <a href="addproduct?id=${product.id}">
+                        <i class="fa fa-edit iconaction"></i>
+                    </a>
+                </td>
+            </tr>`;
+    });
+
+    document.getElementById("listproduct").innerHTML = main;
+}
+
+function generatePagination(totalPage, currentPage, param, listcate) {
+    let mainpage = '';
+
+    for (let i = 1; i <= totalPage; i++) {
+        mainpage += `
+            <li onclick="loadProduct(${i - 1}, '${param}', ${JSON.stringify(listcate)})" 
+                class="page-item ${i - 1 === currentPage ? 'active' : ''}">
+                <a class="page-link" href="#listsp">${i}</a>
+            </li>`;
+    }
+
     document.getElementById("pageable").innerHTML = mainpage;
 }
-async function filterByCate() {
-    loadProduct(0, "", $("#listdpar").val());
-}
 
+async function filterByCate() {
+    const selectedCategories = $("#listdpar").val();
+
+    if (selectedCategories && selectedCategories.length > 0) {
+        const categoryArray = Array.isArray(selectedCategories)
+            ? selectedCategories
+            : [selectedCategories];
+
+        loadProduct(0, "", categoryArray);
+    } else {
+        // No category selected, load all products
+        loadProduct(0, "", null);
+    }
+}
 
 async function loadAProduct() {
     var uls = new URL(document.URL)
@@ -193,7 +247,7 @@ async function saveProduct() {
     if (response.status < 300) {
         swal({
                 title: "Thông báo",
-                text: "Thêm/Sửa sản phẩm thành công",
+                text: "thêm/sửa sản phẩm thành công",
                 type: "success"
             },
             function() {
@@ -203,7 +257,7 @@ async function saveProduct() {
     } else {
         swal({
                 title: "Thông báo",
-                text: "Thêm/Sửa sản phẩm thất bại",
+                text: "thêm/sửa sản phẩm thất bại",
                 type: "error"
             },
             function() {
@@ -227,7 +281,7 @@ async function deleteProduct(id) {
         })
     });
     if (response.status < 300) {
-        toastr.success("Xóa sản phẩm thành công!");
+        toastr.success("xóa sản phẩm thành công!");
         await new Promise(r => setTimeout(r, 1000));
         window.location.reload();
     }
@@ -251,7 +305,7 @@ async function deleteProductImage(id) {
         })
     });
     if (response.status < 300) {
-        toastr.success("Xóa ảnh thành công!");
+        toastr.success("xóa ảnh thành công!");
         document.getElementById("imgdathem" + id).style.display = 'none';
     }
     if (response.status == exceptionCode) {
@@ -273,7 +327,7 @@ async function deleteProductSize(id) {
         })
     });
     if (response.status < 300) {
-        toastr.success("Xóa thành công!");
+        toastr.success("xóa thành công!");
         await new Promise(r => setTimeout(r, 1000));
         loadAProduct();
     }
@@ -340,9 +394,9 @@ async function loadColor() {
     }
     var listImg = await uploadMultipleFile(listF);
     console.log(listImg)
-        // for (i = 0; i < listImg.length; i++) {
-        //     listColor[listImg[i].id].linkImage = listImg[i].link
-        // }
+    // for (i = 0; i < listImg.length; i++) {
+    //     listColor[listImg[i].id].linkImage = listImg[i].link
+    // }
     for (i = 0; i < listImg.length; i++) {
         for (j = 0; j < listColor.length; j++) {
             if (listColor[j].hasFile == true) {

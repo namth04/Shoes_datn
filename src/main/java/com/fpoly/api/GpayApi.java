@@ -64,7 +64,7 @@ public class GpayApi {
         System.out.println("tong tien: "+td);
         User user = userUtils.getUserWithAuthority();
         GpayPaymentRequest gpayPaymentRequest = new GpayPaymentRequest(orderId, td.longValue(), "Thanh toán gpay","",user.getId().toString(),
-                user.getFullname(), "0423534562",user.getEmail(), "Viet Nam","VA","{}","IMMEDIATE");
+                user.getFullname(), "0423534562",user.getEmail(), "Viet Nam","BANK_ATM","{}","IMMEDIATE");
 
         String paymentUrl = gpayService.createPaymentUrl(gpayPaymentRequest);
         ResponsePayment responsePayment = new ResponsePayment(paymentUrl,orderId,orderId);
