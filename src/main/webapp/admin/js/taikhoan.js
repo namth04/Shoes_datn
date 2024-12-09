@@ -35,7 +35,7 @@ async function loadAllUser(page, param) {
                     <td>${listUser[i].id}</td>
                     <td>${listUser[i].email}</td>
                     <td>${listUser[i].fullname}</td>
-                    <td>${listUser[i].phone}</td>
+                    <td>${listUser[i].phone ? listUser[i].phone : ""}</td>
                     <td>${listUser[i].createdDate}</td>
                     <td>${listUser[i].authorities.name}</td>
                     ${btn}
@@ -113,6 +113,14 @@ async function addAdmin() {
         "email": email,
         "password": password
 
+    }
+    if (!fullname){
+        toastr.warning("Tên không được để trống!");
+        return;
+    }
+    if (!phone){
+        toastr.warning("Số điện thoại không để trống!");
+        return;
     }
     if (password != repassword) {
         alert("Mật khẩu không trùng khớp")

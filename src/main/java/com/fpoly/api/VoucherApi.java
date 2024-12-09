@@ -71,4 +71,18 @@ public class VoucherApi {
         Optional<Voucher> result = voucherService.findByCode(code, amount);
         return new ResponseEntity<>(result.get(),HttpStatus.OK);
     }
+    @PutMapping("/admin/auto-block")
+    public ResponseEntity<?> autoBlockVoucher(@RequestParam("id") Long id) {
+        Optional<Voucher> optionalVoucher = voucherService.findById(id);
+        if (optionalVoucher.isPresent()) {
+            Voucher voucher = optionalVoucher.get();
+            if (!voucher.getBlock()) {
+                voucher.setBlock(true); // Chuyển trạng thái sang "khóa"
+                voucherService.block(id);
+            }
+            return ResponseEntity.ok("Voucher đã được tự động khóa.");
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Voucher không tồn tại.");
+    }
+
 }
