@@ -28,4 +28,5 @@ public interface VoucherService {
 
     public Optional<Voucher> findByCode(String code, Double amount);
 
+    public Optional<Voucher> findById(String id);
 }

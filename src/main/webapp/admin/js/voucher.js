@@ -17,7 +17,15 @@ async function loadVoucher(page, start, end) {
     var list = result.content;
     var totalPage = result.totalPages;
     var main = '';
+    const now = new Date();
     for (i = 0; i < list.length; i++) {
+        const endDate = new Date(list[i].endDate);
+        if (endDate < now && !list[i].block) {
+            // Gọi API để khóa voucher
+            await autoBlockVoucher(list[i].id);
+            list[i].block = true; // Cập nhật trạng thái trên giao diện
+        }
+
         main += `<tr>
                     <td>${list[i].id}</td>
                     <td>${list[i].code}</td>
@@ -39,6 +47,15 @@ async function loadVoucher(page, start, end) {
         mainpage += `<li onclick="loadVoucher(${(Number(i) - 1)},'${start}','${end}')" class="page-item"><a class="page-link" href="#listsp">${i}</a></li>`
     }
     document.getElementById("pageable").innerHTML = mainpage
+}
+async function autoBlockVoucher(id) {
+    var url = 'http://localhost:8080/api/voucher/admin/auto-block?id=' + id;
+    await fetch(url, {
+        method: 'PUT',
+        headers: new Headers({
+            'Authorization': 'Bearer ' + token
+        })
+    });
 }
 
 async function filter() {

@@ -80,14 +80,14 @@ async function thongke() {
     var result = await response.text();
     document.getElementById("doanhThu").innerHTML = formatmoney(result)
 
-    var url = 'http://localhost:8080/api/statistic/admin/number-admin';
-    const res = await fetch(url, {
-        headers: new Headers({
-            'Authorization': 'Bearer ' + token
-        })
-    });
-    var result = await res.text();
-    document.getElementById("soLuongNV").innerHTML = result
+    // var url = 'http://localhost:8080/api/statistic/admin/number-admin';
+    // const res = await fetch(url, {
+    //     headers: new Headers({
+    //         'Authorization': 'Bearer ' + token
+    //     })
+    // });
+    // var result = await res.text();
+    // document.getElementById("soLuongNV").innerHTML = result
 
 
     var url = 'http://localhost:8080/api/statistic/admin/number-product';
