@@ -22,25 +22,25 @@ public class VoucherApi {
     private VoucherService voucherService;
 
     @PostMapping("/admin/create")
-    public ResponseEntity<?> save(@RequestBody Voucher voucher){
+    public ResponseEntity<?> save(@RequestBody Voucher voucher) {
         Voucher result = voucherService.create(voucher);
         return new ResponseEntity<>(result, HttpStatus.CREATED);
     }
 
     @PostMapping("/admin/update")
-    public ResponseEntity<?> update(@RequestBody Voucher voucher){
+    public ResponseEntity<?> update(@RequestBody Voucher voucher) {
         Voucher result = voucherService.update(voucher);
         return new ResponseEntity<>(result, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/admin/delete")
-    public ResponseEntity<?> delete(@RequestParam("id") Long id){
+    public ResponseEntity<?> delete(@RequestParam("id") Long id) {
         voucherService.delete(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @DeleteMapping("/admin/block-or-unblock")
-    public ResponseEntity<?> block(@RequestParam("id") Long id){
+    public ResponseEntity<?> block(@RequestParam("id") Long id) {
         voucherService.block(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -48,41 +48,39 @@ public class VoucherApi {
     @GetMapping("/admin/findAll-page")
     public ResponseEntity<?> findAll(@RequestParam(value = "start", required = false) Date start,
                                      @RequestParam(value = "end", required = false) Date end,
-                                     Pageable pageable){
-        Page<Voucher> result = voucherService.findAll(start,end, pageable);
-        return new ResponseEntity<>(result,HttpStatus.OK);
+                                     Pageable pageable) {
+        Page<Voucher> result = voucherService.findAll(start, end, pageable);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @GetMapping("/admin/findAll-list")
     public ResponseEntity<?> findAllList(@RequestParam(value = "start", required = false) Date start,
-                                     @RequestParam(value = "end", required = false) Date end){
-        List<Voucher> result = voucherService.findAll(start,end);
-        return new ResponseEntity<>(result,HttpStatus.OK);
+                                         @RequestParam(value = "end", required = false) Date end) {
+        List<Voucher> result = voucherService.findAll(start, end);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @GetMapping("/admin/findById")
-    public ResponseEntity<?> findById(@RequestParam("id") Long id){
+    public ResponseEntity<?> findById(@RequestParam("id") Long id) {
         Optional<Voucher> result = voucherService.findById(id);
-        return new ResponseEntity<>(result.get(),HttpStatus.OK);
+        return new ResponseEntity<>(result.get(), HttpStatus.OK);
     }
 
     @GetMapping("/public/findByCode")
-    public ResponseEntity<?> findById(@RequestParam("code") String code, @RequestParam("amount") Double amount){
+    public ResponseEntity<?> findById(@RequestParam("code") String code, @RequestParam("amount") Double amount) {
         Optional<Voucher> result = voucherService.findByCode(code, amount);
-        return new ResponseEntity<>(result.get(),HttpStatus.OK);
+        return new ResponseEntity<>(result.get(), HttpStatus.OK);
     }
+
     @PutMapping("/admin/auto-block")
     public ResponseEntity<?> autoBlockVoucher(@RequestParam("id") Long id) {
         Optional<Voucher> optionalVoucher = voucherService.findById(id);
-        if (optionalVoucher.isPresent()) {
-            Voucher voucher = optionalVoucher.get();
-            if (!voucher.getBlock()) {
-                voucher.setBlock(true); // Chuyển trạng thái sang "khóa"
-                voucherService.block(id);
+        optionalVoucher.ifPresent(voucher -> {
+            if (voucher.getEndDate() != null && voucher.getEndDate().before(new java.util.Date())) {
+                voucher.setBlock(true); // Khóa voucher nếu đã hết hạn
+                voucherService.update(voucher);
             }
-            return ResponseEntity.ok("Voucher đã được tự động khóa.");
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Voucher không tồn tại.");
+        });
+        return new ResponseEntity<>(HttpStatus.OK);
     }
-
 }
