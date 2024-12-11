@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Date;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 
@@ -76,9 +77,24 @@ public class VoucherApi {
     public ResponseEntity<?> autoBlockVoucher(@RequestParam("id") Long id) {
         Optional<Voucher> optionalVoucher = voucherService.findById(id);
         optionalVoucher.ifPresent(voucher -> {
-            if (voucher.getEndDate() != null && voucher.getEndDate().before(new java.util.Date())) {
-                voucher.setBlock(true); // Khóa voucher nếu đã hết hạn
-                voucherService.update(voucher);
+            if (voucher.getEndDate() != null) {
+                // Tạo Calendar để kiểm tra thời gian chính xác
+                Calendar endDateTime = Calendar.getInstance();
+                endDateTime.setTime(voucher.getEndDate());
+
+                // Đặt giờ là 12:00:00
+                endDateTime.set(Calendar.HOUR_OF_DAY, 12);
+                endDateTime.set(Calendar.MINUTE, 0);
+                endDateTime.set(Calendar.SECOND, 0);
+                endDateTime.set(Calendar.MILLISECOND, 0);
+
+                // So sánh với thời gian hiện tại
+                Calendar now = Calendar.getInstance();
+
+                if (now.getTime().compareTo(endDateTime.getTime()) >= 0) {
+                    voucher.setBlock(true); // Khóa voucher nếu đã đến 12h trưa của ngày hết hạn
+                    voucherService.update(voucher);
+                }
             }
         });
         return new ResponseEntity<>(HttpStatus.OK);
