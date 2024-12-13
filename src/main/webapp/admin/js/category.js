@@ -197,3 +197,52 @@ async function checkDuplicateCategory(name, currentId = null) {
         category.id != currentId
     );
 }
+async function deleteCategory(id) {
+    // Xác nhận trước khi xóa
+    swal({
+        title: "Xác nhận xóa",
+        text: "Bạn có chắc chắn muốn xóa danh mục này?",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#DD6B55",
+        confirmButtonText: "Có, xóa nó!",
+        cancelButtonText: "Hủy bỏ",
+        closeOnConfirm: false
+    }, async function() {
+        try {
+            // Lấy token từ localStorage
+            var token = localStorage.getItem("token");
+
+            // URL API xóa danh mục
+            var url = `http://localhost:8080/api/category/admin/delete?id=${id}`;
+
+            // Gọi API xóa
+            const response = await fetch(url, {
+                method: 'DELETE',
+                headers: new Headers({
+                    'Authorization': 'Bearer ' + token
+                })
+            });
+
+            // Kiểm tra kết quả
+            if (response.status < 300) {
+                // Xóa thành công
+                swal({
+                    title: "Thành công",
+                    text: "Danh mục đã được xóa!",
+                    type: "success"
+                }, function() {
+                    // Tải lại danh sách danh mục sau khi xóa
+                    loadCategory(0, "");
+                });
+            } else {
+                // Xử lý lỗi
+                const errorData = await response.json();
+                swal("Lỗi", errorData.defaultMessage || "Không thể xóa danh mục", "error");
+            }
+        } catch (error) {
+            // Bắt lỗi mạng hoặc các lỗi khác
+            swal("Lỗi", "Đã có lỗi xảy ra: " + error.message, "error");
+        }
+    });
+}

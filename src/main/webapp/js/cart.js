@@ -73,6 +73,16 @@ async function addCart(product) {
             size = listSize[i];
         }
     }
+    var quantityAdded = Number(document.getElementById("inputslcart").value);
+    console.log(quantityAdded)
+    var totalQuantityElement = document.getElementById("quantityA");
+    console.log(totalQuantityElement);
+    var totalQuantity = Number(totalQuantityElement.innerHTML.replace("Số lượng: ", ""));
+    if(quantityAdded > totalQuantity) {
+        toastr.error("Vượt quá số lượng sản phẩm có sẵn");
+        return;
+    }
+
     var obj = {
         "product": product,
         "color": color,
@@ -95,19 +105,40 @@ async function addCart(product) {
         );
 
         if (existingProductIndex !== -1) {
-            list[existingProductIndex].quantiy =
-                Number(list[existingProductIndex].quantiy) + Number(obj.quantiy);
+            // Kiểm tra tổng số lượng sau khi thêm
+            var currentQuantity = Number(list[existingProductIndex].quantiy);
+            var newTotalQuantity = currentQuantity + Number(obj.quantiy);
+
+            // Kiểm tra với số lượng tối đa của sản phẩm
+            try {
+                var url = `http://localhost:8080/api/product-size/public/find-quantity-by-color-and-size?colorId=${color.id}&sizeId=${sizeId}`;
+                const response = await fetch(url);
+                var maxQuantity = await response.json();
+
+                if (newTotalQuantity > maxQuantity) {
+                    toastr.error(`Bạn đã thêm hết sản phẩm này vào giỏ hàng. Không thể thêm nữa.`);
+                    return;
+                }
+
+                // Nếu chưa vượt quá, mới cập nhật số lượng
+                list[existingProductIndex].quantiy = newTotalQuantity;
+            } catch (error) {
+                console.error("Lỗi kiểm tra số lượng sản phẩm:", error);
+                toastr.error("Không thể kiểm tra số lượng sản phẩm");
+                return;
+            }
         } else {
             list.push(obj);
         }
 
         window.localStorage.setItem('product_cart', JSON.stringify(list));
     }
+    totalQuantity -= quantityAdded;
+    totalQuantityElement.innerHTML = `Số lượng: ${totalQuantity}`;
 
     toastr.success("Thêm giỏ hàng thành công");
     loadAllCart();
 }
-
 async function addLatestCart(product) {
     var sizeId = null;
     var color = null;

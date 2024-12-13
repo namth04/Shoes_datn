@@ -2,15 +2,16 @@ const listFile = [];
 
 var size = 8;
 
-async function loadProduct(page, param, listcate) {
+async function loadProduct(page, param, listCate) {
     if (param == null) {
         param = "";
     }
 
     var result = null;
     var url = '';
+    let requestBody = null; // Khai báo requestBody bên ngoài
     // Xử lý trường hợp không có listcate
-    if (listcate == null || listcate.length === 0) {
+    if (listCate == null || listCate.length === 0) {
         url = `http://localhost:8080/api/product/public/findByParam?page=${page}&size=${size}&q=${param}`;
         try {
             const response = await fetch(url, { method: 'GET' });
@@ -21,14 +22,17 @@ async function loadProduct(page, param, listcate) {
             return;
         }
     } else {
-        url = 'http://localhost:8080/api/product/public/searchFull?page=' + page + '&size=' + size;
+         requestBody = {
+            listIdCategory: listCate || []
+        };
+        url = 'http://localhost:8080/api/product/public/searchFull?page=' + page + '&size=' + size ;
         try {
             const response = await fetch(url, {
                 method: 'POST',
                 headers: new Headers({
                     'Content-Type': 'application/json'
                 }),
-                body: JSON.stringify(listcate)
+                body: JSON.stringify(requestBody)
             });
             result = await response.json();
         } catch (error) {
@@ -81,7 +85,7 @@ async function loadProduct(page, param, listcate) {
     // Xây dựng phân trang
     var mainpage = '';
     for (i = 1; i <= totalPage; i++) {
-        mainpage += `<li onclick="loadProduct(${(Number(i) - 1)}, '${param}', ${JSON.stringify(listcate)})" class="page-item">
+        mainpage += `<li onclick="loadProduct(${(Number(i) - 1)}, '${param}', ${JSON.stringify(listCate)})" class="page-item">
                         <a class="page-link" href="#listsp">${i}</a>
                     </li>`;
     }
