@@ -15,7 +15,6 @@ async function loadMyInvoice() {
         if (list[i].payType !== 'PAYMENT_DELIVERY') {
             paymentStatus = '<span class="dathanhtoan">Đã thanh toán</span>';
         } else {
-            // Nếu là COD và trạng thái là "Đã nhận đơn hàng"
             if (list[i].status.name === 'Đã nhận đơn hàng') {
                 paymentStatus = '<span class="dathanhtoan">Đã thanh toán</span>';
             } else {
