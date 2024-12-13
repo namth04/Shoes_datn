@@ -90,6 +90,13 @@ async function loadProduct(page, param, listCate) {
                     </li>`;
     }
     document.getElementById("pageable").innerHTML = mainpage;
+    // Gắn sự kiện onclick bằng JavaScript
+    const pageItems = document.querySelectorAll("#pageable .page-item");
+    pageItems.forEach((item, index) => {
+        item.addEventListener("click", () => {
+            loadProduct(index, param, listCate);
+        });
+    });
 }
 
 
