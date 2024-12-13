@@ -496,11 +496,11 @@ async function searchFull(page, sort) {
                 </div>`
     }
     document.getElementById("listproductpro").innerHTML = main
-    document.getElementById("slsp").innerHTML = result.totalElements
+    // document.getElementById("slsp").innerHTML = result.totalElements
 
     var mainpage = ''
     for (i = 1; i <= totalPage; i++) {
-        mainpage += `<li onclick="loadProductByCategory(${(Number(i) - 1)})" class="page-item"><a class="page-link" href="#listsp">${i}</a></li>`
+        mainpage += `<li onclick="searchFull(${(Number(i) - 1)}, null)" class="page-item"><a class="page-link" href="#listsp">${i}</a></li>`
     }
     document.getElementById("pageable").innerHTML = mainpage
 }
