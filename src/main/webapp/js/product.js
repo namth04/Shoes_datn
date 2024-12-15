@@ -356,19 +356,53 @@ function validateQuantityAndAddToCart(product) {
 
     addCart(product, currentQuantity);
 }
+async function renderProductList(result) {
+    var productListContainer = document.getElementById("listproductpro");
+    productListContainer.innerHTML = ""; // Clear previous content
 
+    var list = result.content;
+    var main = '';
 
-var size = 10;
-var type = 1;
+    for (var i = 0; i < list.length; i++) {
+        var listimg = list[i].productImages.map(img =>
+            `<div class="divimgsmpro"><img class="imgsmpro" src="${img.linkImage}"></div>`
+        ).join('');
 
+        main += `
+            <div class="col-lg-3 col-md-3 col-sm-6 col-6">
+                <a href="detail?id=${list[i].id}&name=${list[i].alias}" class="linkpro">
+                    <div class="singlepro">
+                        <div class="productsold"><span class="reviewsp">Đã bán: ${list[i].quantitySold}</span></div>
+                        <img src="${list[i].imageBanner}" class="imgpro">
+                        <span class="proname">${list[i].name}</span>
+                        <span class="proprice">${formatmoney(list[i].price)}</span>
+                        <div class="listimgpro">${listimg}</div>
+                    </div>
+                </a>
+            </div>`;
+    }
 
-function formatmoney(price) {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+    productListContainer.innerHTML = main;
+    document.getElementById("slsp").innerHTML = result.totalElements;
 }
+
+function renderPagination(totalPage, loadFunction) {
+    var mainpage = '';
+    for (var i = 1; i <= totalPage; i++) {
+        mainpage += `
+            <li onclick="${loadFunction.name}(${i - 1}, document.getElementById('sortpro').value)" class="page-item">
+                <a class="page-link" href="#listsp">${i}</a>
+            </li>`;
+    }
+    document.getElementById("pageable").innerHTML = mainpage;
+}
+
+var size = 8;
+var currentFilterType = 1;
 
 function sortProduct() {
     var sort = document.getElementById("sortpro").value;
-    switch(type) {
+    switch(currentFilterType) {
         case 1:
             loadProductByCategory(0, sort);
             break;
@@ -382,7 +416,7 @@ function sortProduct() {
 }
 
 async function loadProductByCategory(page, sort) {
-    type = 1;
+    currentFilterType = 1;
     var uls = new URL(document.URL);
     var category = uls.searchParams.get("category");
 
@@ -395,13 +429,99 @@ async function loadProductByCategory(page, sort) {
     try {
         const response = await fetch(url, { method: 'GET' });
         var result = await response.json();
-        console.log(result);
         renderProductList(result);
         renderPagination(result.totalPages, loadProductByCategory);
     } catch (error) {
         console.error("Error loading products by category:", error);
     }
 }
+
+async function searchFull(page, sort) {
+    currentFilterType = 2;
+    var min_price = parseFloat(document.getElementById("min_price").value) || 0;
+    var max_price = parseFloat(document.getElementById("max_price").value) || Number.MAX_SAFE_INTEGER;
+
+    var listCa = document.getElementById("listsearchCategory").getElementsByClassName("inputcheck");
+    var listcate = Array.from(listCa).filter(input => input.checked).map(input => input.value);
+
+    var listTra = document.getElementById("listthuonghieu").getElementsByClassName("inputchecktrademark");
+    var listTrademark = Array.from(listTra).filter(input => input.checked).map(input => input.value);
+
+    var payload = {
+        "listIdCategory": listcate,
+        "listIdTrademark": listTrademark
+    };
+
+    var url = `http://localhost:8080/api/product/public/searchFull?page=${page}&size=${size}&smallPrice=${min_price}&largePrice=${max_price}`;
+
+    if (sort) {
+        url += `&sort=${sort}`;
+    }
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        var result = await response.json();
+        renderProductList(result);
+        renderPagination(result.totalPages, searchFull);
+    } catch (error) {
+        console.error("Error in full search:", error);
+    }
+}
+
+async function searchFullmobile(page, sort) {
+    currentFilterType = 3;
+    $("#modalfilter").modal("hide");
+
+    var min_price = parseFloat(document.getElementById("min_price_mobile").value) || 0;
+    var max_price = parseFloat(document.getElementById("max_price_mobile").value) || Number.MAX_SAFE_INTEGER;
+
+    var listCa = document.getElementById("listsearchCategoryMobile").getElementsByClassName("inputcheck");
+    var listcate = Array.from(listCa).filter(input => input.checked).map(input => input.value);
+
+    var listTra = document.getElementById("listthuonghieuMobile").getElementsByClassName("inputchecktrademark");
+    var listTrademark = Array.from(listTra).filter(input => input.checked).map(input => input.value);
+
+    var payload = {
+        "listIdCategory": listcate,
+        "listIdTrademark": listTrademark
+    };
+
+    var url = `http://localhost:8080/api/product/public/searchFull?page=${page}&size=${size}&smallPrice=${min_price}&largePrice=${max_price}`;
+
+    if (sort) {
+        url += `&sort=${sort}`;
+    }
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        var result = await response.json();
+        renderProductList(result);
+        renderPagination(result.totalPages, searchFullmobile);
+    } catch (error) {
+        console.error("Error in mobile search:", error);
+    }
+}
+
+// Existing helper functions (formatmoney, etc.) remain the same
+function formatmoney(price) {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+}
+
+
 async function postData(page) {
     const size = 2;
     const min_price = parseFloat(document.getElementById("min_price").value) || 0;
@@ -446,110 +566,6 @@ async function postData(page) {
     }
 }
 
-async function searchFull(page, sort) {
-    type = 2;
-    var min_price = parseFloat(document.getElementById("min_price").value) || 0;
-    var max_price = parseFloat(document.getElementById("max_price").value) || Number.MAX_SAFE_INTEGER;
-
-    var listCa = document.getElementById("listsearchCategory").getElementsByClassName("inputcheck");
-    var listcate = Array.from(listCa).filter(input => input.checked).map(input => input.value);
-
-    var listTra = document.getElementById("listthuonghieu").getElementsByClassName("inputchecktrademark");
-    var listTrademark = Array.from(listTra).filter(input => input.checked).map(input => input.value);
-
-    var payload = {
-        "listIdCategory":listcate,
-        "listIdTrademark":listTrademark
-    }
-    var url = 'http://localhost:8080/api/product/public/searchFull?page=' + page + '&size=' + size + '&smallPrice=' + min_price + '&largePrice=' + max_price;
-    if (sort != null) {
-        url += '&sort=' + sort;
-    }
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: new Headers({
-            'Content-Type': 'application/json'
-        }),
-        body: JSON.stringify(payload)
-    });
-    var result = await response.json();
-    console.log(result)
-    var list = result.content;
-    var totalPage = result.totalPages;
-
-    var main = '';
-    for (i = 0; i < list.length; i++) {
-        var listimg = ''
-        for (j = 0; j < list[i].productImages.length; j++) {
-            listimg += `<div class="divimgsmpro"><img class="imgsmpro" src="${list[i].productImages[j].linkImage}"></div>`
-        }
-        main += `<div class="col-lg-3 col-md-3 col-sm-6 col-6">
-                    <a href="detail?id=${list[i].id}&name=${list[i].alias}" class="linkpro">
-                        <div class="singlepro">
-                            <div class="productsold"><span class="reviewsp">Đã bán: ${list[i].quantitySold}</span></div>
-                            <img src="${list[i].imageBanner}" class="imgpro">
-                            <span class="proname">${list[i].name}</span>
-                            <span class="proprice">${formatmoney(list[i].price)}</span>
-                            <div class="listimgpro">${listimg}</div>
-                        </div>
-                    </a>
-                </div>`
-    }
-    document.getElementById("listproductpro").innerHTML = main
-    // document.getElementById("slsp").innerHTML = result.totalElements
-
-    var mainpage = ''
-    for (i = 1; i <= totalPage; i++) {
-        mainpage += `<li onclick="searchFull(${(Number(i) - 1)}, null)" class="page-item"><a class="page-link" href="#listsp">${i}</a></li>`
-    }
-    document.getElementById("pageable").innerHTML = mainpage
-}
-
-// Mobile search function
-async function searchFullmobile(page, sort) {
-    type = 3;
-    $("#modalfilter").modal("hide");
-
-    var min_price = parseFloat(document.getElementById("min_price_mobile").value) || 0;
-    var max_price = parseFloat(document.getElementById("max_price_mobile").value) || Number.MAX_SAFE_INTEGER;
-
-    var listCa = document.getElementById("listsearchCategoryMobile").getElementsByClassName("inputcheck");
-    var listcate = Array.from(listCa).filter(input => input.checked).map(input => input.value);
-
-    var listTra = document.getElementById("listthuonghieuMobile").getElementsByClassName("inputchecktrademark");
-    var listTrademark = Array.from(listTra).filter(input => input.checked).map(input => input.value);
-
-    var payload = {
-        "listIdCategory": listcate,
-        "listIdTrademark": listTrademark,
-        "smallPrice": min_price,
-        "largePrice": max_price
-    };
-
-    var url = `http://localhost:8080/api/product/public/searchFull?page=${page}&size=${size}`;
-    if (sort) {
-        url += `&sort=${sort}`;
-    }
-
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
-
-        var result = await response.json();
-        console.log(result);
-
-        renderProductList(result);
-        renderPagination(result.totalPages, searchFullmobile);
-    } catch (error) {
-        console.error("Error in mobile search:", error);
-    }
-}
-
 // Hàm render danh sách sản phẩm
 // function renderProductList(products) {
 //     const productListContainer = document.getElementById("listproductpro");
@@ -576,41 +592,7 @@ async function searchFullmobile(page, sort) {
 //     }
 // }
 
-function renderProductList(result) {
-    var list = result.content;
-    var main = '';
 
-    for (var i = 0; i < list.length; i++) {
-        var listimg = list[i].productImages.map(img =>
-            `<div class="divimgsmpro"><img class="imgsmpro" src="${img.linkImage}"></div>`
-        ).join('');
-
-        main += `
-            <div class="col-lg-3 col-md-3 col-sm-6 col-6">
-                <a href="detail?id=${list[i].id}&name=${list[i].alias}" class="linkpro">
-                    <div class="singlepro">
-                        <div class="productsold"><span class="reviewsp">Đã bán: ${list[i].quantitySold}</span></div>
-                        <img src="${list[i].imageBanner}" class="imgpro">
-                        <span class="proname">${list[i].name}</span>
-                        <span class="proprice">${formatmoney(list[i].price)}</span>
-                        <div class="listimgpro">${listimg}</div>
-                    </div>
-                </a>
-            </div>`;
-
-        document.getElementById("listproductpro").innerHTML = main;
-    }
-}
-function renderPagination(totalPage, loadFunction) {
-    var mainpage = '';
-    for (var i = 1; i <= totalPage; i++) {
-        mainpage += `
-            <li onclick="${loadFunction.name}(${i - 1})" class="page-item">
-                <a class="page-link" href="#listsp">${i}</a>
-            </li>`;
-    }
-    document.getElementById("pageable").innerHTML = mainpage;
-}
 
 // Load trademark list
 async function loadTrademarkSub() {
