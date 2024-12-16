@@ -1,4 +1,3 @@
-
 async function loadProductIndex(page) {
     var size = 10;
     var url = 'http://localhost:8080/api/product/public/findAll?page=' + page + '&size=' + size;
@@ -39,8 +38,8 @@ async function loadProductIndex(page) {
 
 
 async function loadSanPhamBanChay(page) {
-    var size= 5;
-    var url = 'http://localhost:8080/api/product/public/findAll?page=' + page + '&size=' + size+'&sort=quantitySold,desc';
+    var size = 5;
+    var url = 'http://localhost:8080/api/product/public/findAll?page=' + page + '&size=' + size + '&sort=quantitySold,desc';
     const response = await fetch(url, {
         method: 'GET'
     });
@@ -69,18 +68,16 @@ async function loadSanPhamBanChay(page) {
     }
     document.getElementById("listproductbanchay").innerHTML = main
 
-    if(result.last == false){
-        document.getElementById("btnsanphambanchay").onclick=function(){
+    if (result.last == false) {
+        document.getElementById("btnsanphambanchay").onclick = function () {
             loadSanPhamBanChay(Number(page) + Number(1));
         }
-    }
-    else{
-        document.getElementById("btnsanphambanchay").onclick=function(){
+    } else {
+        document.getElementById("btnsanphambanchay").onclick = function () {
             toastr.warning("Đã hết kết quả tìm kiếm");
         }
     }
 }
-
 
 
 async function loadAProduct() {
@@ -102,13 +99,13 @@ async function loadAProduct() {
         document.getElementById("imgdetailpro").src = result.imageBanner
         document.getElementById("quantityA").innerHTML = result.quantity
         document.getElementById("descriptiondetail").innerHTML = result.description
-        document.getElementById("thuonghieu").innerHTML = result.trademark==null?'':result.trademark.name
-        document.getElementById("chatlieu").innerHTML = result.material==null?'':'Chất liệu: '+result.material.name
-        document.getElementById("degiay").innerHTML = result.sole==null?'':'Loại đế giày: '+result.sole.name
-        document.getElementById("btnaddcart").onclick = function() {
+        document.getElementById("thuonghieu").innerHTML = result.trademark == null ? '' : result.trademark.name
+        document.getElementById("chatlieu").innerHTML = result.material == null ? '' : 'Chất liệu: ' + result.material.name
+        document.getElementById("degiay").innerHTML = result.sole == null ? '' : 'Loại đế giày: ' + result.sole.name
+        document.getElementById("btnaddcart").onclick = function () {
             addCart(result);
         }
-        document.getElementById("btnmuangay").onclick = function() {
+        document.getElementById("btnmuangay").onclick = function () {
             addLatestCart(result);
 
             var listproduct = JSON.parse(localStorage.getItem('product_cart'));
@@ -122,7 +119,7 @@ async function loadAProduct() {
         }
 
 
-        console.log("result"+result.name)
+        console.log("result" + result.name)
         var main = ''
         for (i = 0; i < result.productImages.length; i++) {
             main += `<div class="col-lg-2 col-md-2 col-sm-2 col-2 singdimg">
@@ -150,7 +147,7 @@ async function loadAProduct() {
         var url = 'http://localhost:8080/api/product/public/searchFull?page=0&size=6';
         const res = await fetch(url, {
             method: 'POST',
-            headers: new Headers({ 'Content-Type': 'application/json' }),
+            headers: new Headers({'Content-Type': 'application/json'}),
             body: JSON.stringify(listCate)
         });
         var resultLq = await res.json();
@@ -179,6 +176,7 @@ async function loadAProduct() {
         document.getElementById("listProductGy").innerHTML = main;
     }
 }
+
 async function clickImgdetail(e) {
     var img = document.getElementsByClassName("imgldetail");
     for (i = 0; i < img.length; i++) {
@@ -236,6 +234,7 @@ async function clickColor(e, name, idColor) {
         console.error('Error fetching sizes:', error);
     }
 }
+
 async function clickSize(e) {
     var size = document.getElementsByClassName("radio-custom");
     for (i = 0; i < size.length; i++) {
@@ -254,6 +253,7 @@ async function clickSize(e) {
 }
 
 let maxQuantity = 0;
+
 async function displayProductQuantity(idProColor, idSize) {
     try {
         var url = `http://localhost:8080/api/product-size/public/find-quantity-by-color-and-size?colorId=${idProColor}&sizeId=${idSize}`;
@@ -324,6 +324,7 @@ function upAndDownDetail(idsize, quantityChange) {
 
     loadAllCart();
 }
+
 function upAndDownDetail(val) {
     var quantityInput = document.getElementById("inputslcart");
     var currentQuantity = Number(quantityInput.value);
@@ -342,6 +343,7 @@ function upAndDownDetail(val) {
 
     quantityInput.value = newQuantity;
 }
+
 function validateQuantityAndAddToCart(product) {
 
     var quantityInput = document.getElementById('quantityInput');
@@ -356,6 +358,7 @@ function validateQuantityAndAddToCart(product) {
 
     addCart(product, currentQuantity);
 }
+
 async function renderProductList(result) {
     var productListContainer = document.getElementById("listproductpro");
     productListContainer.innerHTML = ""; // Clear previous content
@@ -402,7 +405,7 @@ var currentFilterType = 1;
 
 function sortProduct() {
     var sort = document.getElementById("sortpro").value;
-    switch(currentFilterType) {
+    switch (currentFilterType) {
         case 1:
             loadProductByCategory(0, sort);
             break;
@@ -427,7 +430,7 @@ async function loadProductByCategory(page, sort) {
     }
 
     try {
-        const response = await fetch(url, { method: 'GET' });
+        const response = await fetch(url, {method: 'GET'});
         var result = await response.json();
         renderProductList(result);
         renderPagination(result.totalPages, loadProductByCategory);
@@ -518,7 +521,7 @@ async function searchFullmobile(page, sort) {
 
 // Existing helper functions (formatmoney, etc.) remain the same
 function formatmoney(price) {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+    return new Intl.NumberFormat('vi-VN', {style: 'currency', currency: 'VND'}).format(price);
 }
 
 
@@ -553,7 +556,7 @@ async function postData(page) {
             // Lấy dữ liệu trả về và chuyển đổi nó thành JSON
             const result = await response.json();
             renderProductList(result.content);
-            renderPagination(result.totalPages,postData);
+            renderPagination(result.totalPages, postData);
             // In kết quả ra console
             console.log("Dữ liệu trả về từ API:", result);
         } else {
@@ -591,7 +594,6 @@ async function postData(page) {
 //         productListContainer.innerHTML = "<p>No products found.</p>";
 //     }
 // }
-
 
 
 // Load trademark list
