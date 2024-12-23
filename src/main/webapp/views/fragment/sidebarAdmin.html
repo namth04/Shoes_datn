@@ -137,11 +137,6 @@
                   Danh sách đơn hàng
                 </a>
               </li>
-<!--              <li>-->
-<!--                <a class="nav-link" href="/admin/create-invoice">-->
-<!--                  Thêm mới đơn hàng-->
-<!--                </a>-->
-<!--              </li>-->
             </ul>
           </li>
           <li class="nav-parent">
@@ -195,22 +190,20 @@
       <div class="dropdown-menu">
         <ul class="list-unstyled mb-2">
           <li class="divider"></li>
-<!--          <li>-->
-<!--            <a role="menuitem" tabindex="-1" href="/admin/tai-khoan"><i-->
-<!--                    class="bx bx-user-circle"></i>Thông tin tài khoản</a>-->
-<!--          </li>-->
           <li>
-            <a role="menuitem" tabindex="-1" href="#" onclick="logout()"><i class="bx bx-power-off"></i> Đăng xuất</a>
+            <a role="menuitem" tabindex="-1" href="#" onclick="logout()">
+              <i class="bx bx-power-off"></i> Đăng xuất
+            </a>
           </li>
         </ul>
       </div>
     </div>
   </div>
   <script>
-    function logout(){
+    function logout() {
       window.localStorage.removeItem("token");
       window.localStorage.removeItem("user");
-      window.location.href='/logout'
+      window.location.href = '/logout';
     }
   </script>
 </header>
@@ -218,14 +211,12 @@
 <header class="page-header" th:fragment="pageHeader">
   <div class="right-wrapper text-right">
     <ol class="breadcrumbs">
-      <li>
-        <a href="/admin/index">
-          <i class="bx bx-home-alt"></i>
-        </a>
-      </li>
+<!--      <li>-->
+<!--        <a href="/admin/index">-->
+<!--          <i class="bx bx-home-alt"></i>-->
+<!--        </a>-->
+<!--      </li>-->
     </ol>
-<!--    <a class="sidebar-right-toggle" data-open="sidebar-right"><i-->
-<!--            class="fas fa-chevron-left"></i></a>-->
   </div>
 </header>
 

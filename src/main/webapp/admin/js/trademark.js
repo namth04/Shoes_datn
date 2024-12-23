@@ -28,7 +28,6 @@ async function loadResult() {
     }
 }
 
-// Clear input fields
 function clearData() {
     document.getElementById("idres").value = "";
     document.getElementById("name").value = "";
@@ -58,20 +57,16 @@ function validateTrademark(name) {
         toastr.warning("Tên nhãn hiệu không được để trống");
         return false;
     }
-
     const isDuplicate = existingTrademarks.some(
         trademark => trademark.name.toLowerCase().trim() === name.toLowerCase() &&
             trademark.id != document.getElementById("idres").value
     );
-
     if (isDuplicate) {
         toastr.warning("Tên nhãn hiệu đã tồn tại");
         return false;
     }
-
     return true;
 }
-
 async function saveResult() {
     try {
         const nameInput = document.getElementById("name");
@@ -80,7 +75,6 @@ async function saveResult() {
         if (!validateTrademark(name)) {
             return;
         }
-
         var payload = {
             "id": document.getElementById("idres").value || null,
             "name": name,
@@ -116,7 +110,6 @@ async function deleteResult(id) {
         if (!con) {
             return;
         }
-
         var url = 'http://localhost:8080/api/trademark/admin/delete?id=' + id;
         const response = await fetch(url, {
             method: 'DELETE',
@@ -124,7 +117,6 @@ async function deleteResult(id) {
                 'Authorization': 'Bearer ' + token
             })
         });
-
         if (response.status < 300) {
             toastr.success("Xóa thành công!");
             loadResult();
@@ -142,5 +134,4 @@ async function deleteResult(id) {
         toastr.error('Lỗi: ' + error.message);
     }
 }
-
 document.addEventListener('DOMContentLoaded', loadResult);
