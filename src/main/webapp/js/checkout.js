@@ -1,5 +1,5 @@
-
 var token = localStorage.getItem("token");
+
 async function checkroleUser() {
     var token = localStorage.getItem("token");
     var url = 'http://localhost:8080/api/user/check-role-user';
@@ -13,71 +13,88 @@ async function checkroleUser() {
         window.location.replace('login')
     }
 }
+
 var total = 0;
 var listSize = [];
 
-function loadCartCheckOut() {
-
+async function loadCartCheckOut() {
     const urlParams = new URLSearchParams(window.location.search);
     const isBuyNow = urlParams.get('type') === 'buynow';
+    var selectedItems = JSON.parse(localStorage.getItem("selected_items") || "[]");
 
     var list;
     if (isBuyNow) {
-        // Lấy dữ liệu từ session storage nếu là mua ngay
         var buyNowData = sessionStorage.getItem("buy_now_item");
-        if (buyNowData == null) {
+        if (!buyNowData) {
             alert("Có lỗi xảy ra!");
             window.location.replace("cart");
             return;
         }
         list = JSON.parse(buyNowData);
-
     } else {
-        // Xử lý giỏ hàng bình thường
         var listcart = localStorage.getItem("product_cart");
-        if (listcart == null) {
+        if (!listcart) {
             alert("Bạn chưa có sản phẩm nào trong giỏ hàng!");
             window.location.replace("cart");
             return;
         }
         list = JSON.parse(listcart);
-        if (list.length == 0) {
-            alert("Bạn chưa có sản phẩm nào trong giỏ hàng!");
-            window.location.replace("cart");
+    }
+
+    // Kiểm tra sản phẩm được chọn
+    if (!isBuyNow && selectedItems.length === 0) {
+        alert("Bạn chưa chọn sản phẩm nào!");
+        window.location.replace("cart");
+        return;
+    }
+
+    var main = '';
+    total = 0; // Sử dụng biến toàn cục total
+    listSize = []; // Sử dụng biến toàn cục listSize
+
+    // Chỉ xử lý các sản phẩm được chọn
+    for (let i = 0; i < list.length; i++) {
+        if (isBuyNow || selectedItems.includes(i)) {
+            total += Number(list[i].quantiy * list[i].product.price);
+
+            // Thêm vào listSize cho việc đặt hàng
+            var obj = {
+                "idProductSize": list[i].size.id,
+                "quantity": list[i].quantiy
+            };
+            listSize.push(obj);
+
+            main += `<div class="row">
+                        <div class="col-lg-2 col-md-3 col-sm-3 col-3 colimgcheck">
+                            <img src="${list[i].colorImage || list[i].product.imageBanner}" class="procheckout">
+                            <span class="slpro">${list[i].quantiy}</span>
+                        </div>
+                        <div class="col-lg-7 col-md-6 col-sm-6 col-6">
+                            <span class="namecheck">${list[i].product.name}</span>
+                            <span class="colorcheck">${list[i].color.colorName} / ${list[i].size.sizeName}</span>
+                        </div>
+                        <div class="col-lg-3 col-md-3 col-sm-3 col-3 pricecheck">
+                            <span>${formatmoneyCheck(list[i].quantiy * list[i].product.price)}</span>
+                        </div>
+                    </div>`;
         }
     }
 
-    var main = ''
-    for (i = 0; i < list.length; i++) {
-        total += Number(list[i].quantiy * list[i].product.price);
-        var obj = {
-            "idProductSize": list[i].size.id,
-            "quantity": list[i].quantiy
-        }
-        listSize.push(obj);
-        main += `<div class="row">
-                    <div class="col-lg-2 col-md-3 col-sm-3 col-3 colimgcheck">
-                        <img src="${list[i].product.imageBanner}" class="procheckout">
-                        <span class="slpro">${list[i].quantiy}</span>
-                    </div>
-                    <div class="col-lg-7 col-md-6 col-sm-6 col-6">
-                        <span class="namecheck">${list[i].product.name}</span>
-                        <span class="colorcheck">${list[i].color.colorName} / ${list[i].size.sizeName}</span>
-                    </div>
-                    <div class="col-lg-3 col-md-3 col-sm-3 col-3 pricecheck">
-                        <span>${formatmoneyCheck(list[i].quantiy * list[i].product.price)}</span>
-                    </div>
-                </div>`
+    if (main === '') {
+        alert("Không có sản phẩm nào được chọn.");
+        window.location.replace("cart");
+        return;
     }
+
     document.getElementById("listproductcheck").innerHTML = main;
     document.getElementById("totalAmount").innerHTML = formatmoneyCheck(total);
     document.getElementById("totalfi").innerHTML = formatmoneyCheck(total + 0);
 
-    // Xóa session storage sau khi đã load xong nếu là mua ngay
     if (isBuyNow) {
         sessionStorage.removeItem("buy_now_item");
     }
 }
+
 function formatmoneyCheck(money) {
     const VND = new Intl.NumberFormat('vi-VN', {
         style: 'currency',
@@ -89,6 +106,7 @@ function formatmoneyCheck(money) {
 var voucherId = null;
 var voucherCode = null;
 var discountVou = 0;
+
 async function loadVoucher() {
     var code = document.getElementById("codevoucher").value
     // Changed from (total - Number(20000)) to just total
@@ -240,49 +258,58 @@ async function requestPayMentGpay() {
     }
 }
 async function paymentCod() {
-    var note = document.getElementById("ghichudonhang").value;
+    if (!listSize || listSize.length === 0) {
+        toastr.error("Không có sản phẩm nào được chọn!");
+        return;
+    }
+
     var orderDto = {
         "payType": "PAYMENT_DELIVERY",
         "userAddressId": document.getElementById("sodiachi").value,
         "voucherCode": voucherCode,
-        "note": note,
+        "note": document.getElementById("ghichudonhang").value,
         "listProductSize": listSize
-    }
+    };
+
     var url = 'http://localhost:8080/api/invoice/user/create';
     var token = localStorage.getItem("token");
-    const res = await fetch(url, {
-        method: 'POST',
-        headers: new Headers({
-            'Authorization': 'Bearer ' + token,
-            'Content-Type': 'application/json'
-        }),
-        body: JSON.stringify(orderDto)
-    });
-    if (res.status < 300) {
-        // Lấy danh sách các size đã đặt hàng
-        var listOrderedSize = listSize.map(item => item.idProductSize);
 
-        // Lấy giỏ hàng hiện tại
-        var currentCart = JSON.parse(localStorage.getItem("product_cart"));
+    try {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: new Headers({
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            }),
+            body: JSON.stringify(orderDto)
+        });
 
-        // Lọc ra những sản phẩm không được đặt
-        var remainingCart = currentCart.filter(cartItem =>
-            !listOrderedSize.includes(cartItem.size.id)
-        );
+        if (res.status < 300) {
+            // Lấy giỏ hàng hiện tại
+            var currentCart = JSON.parse(localStorage.getItem("product_cart"));
+            var selectedItems = JSON.parse(localStorage.getItem("selected_items") || "[]");
 
-        // Cập nhật lại localStorage
-        localStorage.setItem("product_cart", JSON.stringify(remainingCart));
+            // Lọc bỏ các sản phẩm đã đặt hàng
+            var remainingCart = currentCart.filter((_, index) => !selectedItems.includes(index));
 
-        swal({
+            // Cập nhật lại giỏ hàng
+            localStorage.setItem("product_cart", JSON.stringify(remainingCart));
+            localStorage.removeItem("selected_items"); // Xóa danh sách đã chọn
+
+            swal({
                 title: "Thông báo",
                 text: "Đặt hàng thành công!",
                 type: "success"
-            },
-            function() {
+            }, function () {
                 window.location.replace("account#invoice")
             });
+        }
+    } catch (error) {
+        console.error("Lỗi khi đặt hàng:", error);
+        toastr.error("Có lỗi xảy ra khi đặt hàng!");
     }
 }
+
 
 async function paymentOnline() {
     var list = JSON.parse(localStorage.getItem("product_cart"));
@@ -306,14 +333,14 @@ async function paymentOnline() {
     var paytype = window.localStorage.getItem("paytype")
     var type = "PAYMENT_MOMO";
     var urlVnpay = null
-    if(paytype == "VNPAY"){
+    if (paytype == "VNPAY") {
         type = "PAYMENT_VNPAY"
         const currentUrl = window.location.href;
         const parsedUrl = new URL(currentUrl);
         const queryStringWithoutQuestionMark = parsedUrl.search.substring(1);
         urlVnpay = queryStringWithoutQuestionMark
     }
-    if(paytype == "GPAY"){
+    if (paytype == "GPAY") {
         type = "PAYMENT_GPAY"
     }
     var orderDto = {
