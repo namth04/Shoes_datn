@@ -62,7 +62,7 @@ function searchTable() {
 
 async function lockOrUnlock(id, type) {
     var con = confirm("Xác nhận hành động?");
-    if (con == false) {
+    if (!con) {
         return;
     }
     var url = 'http://localhost:8080/api/admin/lockOrUnlockUser?id=' + id;
@@ -72,13 +72,10 @@ async function lockOrUnlock(id, type) {
             'Authorization': 'Bearer ' + token
         })
     });
+    const result = await response.text();
+
     if (response.status < 300) {
-        var mess = '';
-        if (type == 1) {
-            mess = 'Khóa thành công'
-        } else {
-            mess = 'Mở khóa thành công'
-        }
+        var mess = type == 1 ? 'Khóa thành công' : 'Mở khóa thành công';
         swal({
                 title: "Thông báo",
                 text: mess,
@@ -89,15 +86,14 @@ async function lockOrUnlock(id, type) {
             });
     } else {
         swal({
-                title: "Thông báo",
-                text: "hành động thất bại",
-                type: "error"
-            },
-            function() {
-                window.location.reload();
-            });
+            title: "Thông báo",
+            text: result,
+            type: "error"
+        });
     }
 }
+
+
 
 
 async function addAdmin() {

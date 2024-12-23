@@ -1,5 +1,6 @@
 package com.fpoly.api;
 
+import com.fpoly.repository.InvoiceRepository;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.fpoly.dto.request.LoginDto;
 import com.fpoly.dto.request.PasswordDto;
@@ -32,6 +33,8 @@ import java.net.URISyntaxException;
 public class UserApi {
 
     private final UserRepository userRepository;
+    @Autowired
+    private  InvoiceRepository invoiceRepository;
 
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -121,17 +124,21 @@ public class UserApi {
     }
 
     @PostMapping("/admin/lockOrUnlockUser")
-    public void activeOrUnactiveUser(@RequestParam("id") Long id){
-        User user = userRepository.findById(id).get();
-        if(user.getActived() == true){
-            user.setActived(false);
-            userRepository.save(user);
-            return;
+    public ResponseEntity<String> activeOrUnactiveUser(@RequestParam("id") Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Kiểm tra nếu người dùng đã mua hàng
+        boolean hasInvoices = invoiceRepository.existsByUserAddress_User_Id(id);
+        if (hasInvoices && user.getActived()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Người dùng đã mua hàng, không thể khóa tài khoản.");
         }
-        else{
-            user.setActived(true);
-            userRepository.save(user);
-        }
+
+        // Toggle trạng thái actived
+        user.setActived(!user.getActived());
+        userRepository.save(user);
+
+        String message = user.getActived() ? "Mở khóa thành công" : "Khóa tài khoản thành công";
+        return ResponseEntity.ok(message);
     }
 
     @PostMapping("/admin/addaccount")

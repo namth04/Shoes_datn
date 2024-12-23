@@ -51,4 +51,6 @@ public interface InvoiceRepository extends JpaRepository<Invoice,Long> {
             "inner join invoice_status issn on issn.invoice_id = i.id\n" +
             "where issn.status_id = 4 and issn.created_date = ?1",nativeQuery = true)
     public Double numInvoiceToDay(Date ngay);
+
+    public boolean existsByUserAddress_User_Id(Long userId);
 }
