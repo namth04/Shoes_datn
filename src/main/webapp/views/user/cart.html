@@ -36,92 +36,71 @@
 </head>
 
 <body>
-    <div id="menu" >
+<div id="menu" >
+
+</div>
+
+<div class="content contentcart">
+    <div class="bannerhot1">
 
     </div>
+    <div class="row cartbds">
+        <div class="col-lg-8 col-md-12 col-sm-12 col-12 collistcart">
+            <div class="listcart">
+                <span class="cartname">GIỎ HÀNG</span>
+                <span class="slcarts">(<span id="slcart">1</span>) Sản phẩm</span>
 
-    <div class="content contentcart">
-        <div class="bannerhot1">
-
-        </div>
-        <div class="row cartbds">
-            <div class="col-lg-8 col-md-12 col-sm-12 col-12 collistcart">
-                <div class="listcart">
-                    <span class="cartname">GIỎ HÀNG</span>
-                    <span class="slcarts">(<span id="slcart">1</span>) Sản phẩm</span>
-
-                    <div class="cartres">
-                        <table class="table tablecart">
-                            <tr>
-                                <th>Sản phẩm</th>
-                                <th>Đơn giá</th>
-                                <th style="text-align: center;">Số lượng</th>
-                                <th style="width: 100px;">Tổng tiền</th>
-                            </tr>
-                            <tbody id="listcartDes">
-                                <tr>
-                                    <td>
-                                        <a href=""><img class="imgprocart" src="image/pro.webp"></a>
-                                        <div class="divnamecart">
-                                            <a href="" class="nameprocart"></a>
-                                            <p class="sizecart"> </p>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <p class="boldcart"></p>
-                                    </td>
-                                    <td>
-                                        <div class="clusinp"><button class="cartbtn"> </button>
-                                            <input class="inputslcart">
-                                            <button class="cartbtn"> </button></div>
-                                    </td>
-                                    <td>
-                                        <div class="tdpricecart">
-                                            <p class="boldcart"></p>
-                                            <p class="delcart"><i class="fa fa-trash-o facartde"></i></p>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                            </tbody>
-                        </table>
+                <div class="cartres">
+                    <table class="table tablecart">
+                        <thead>
+                        <tr>
+                            <th><input type="checkbox" id="select-all"></th>
+                            <th>Sản phẩm</th>
+                            <th>Đơn giá</th>
+                            <th style="text-align: center;">Số lượng</th>
+                            <th style="width: 100px;">Tổng tiền</th>
+                        </tr>
+                        </thead>
+                        <tbody id="listcartDes"></tbody>
+                    </table>
 
 
-                        <table id="tablemobilecart" class="table tablecartmobile">
-                            <tr>
-                                <td>
-                                    <a href=""><img class="imgprocmobile" src=""></a>
-                                </td>
-                                <td class="tdinforcart">
-                                    <a href="" class="nameprocmobile"></a>
-                                    <p class="sizecmobile"></p>
-                                    <div class="clusinpmobile"><button class="cartbtn"> + </button>
-                                        <input class="inputslcart">
-                                        <button class="cartbtn"> - </button></div>
-                                </td>
-                                <td class="tdinforcart">
-                                    <i class="fa fa-trash-o facartde cartdels"></i>
-                                    <p class="boldcart pricecmobile"></p>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
+
+                    <table id="tablemobilecart" class="table tablecartmobile">
+                        <tr>
+                            <td>
+                                <a href=""><img class="imgprocmobile" src=""></a>
+                            </td>
+                            <td class="tdinforcart">
+                                <a href="" class="nameprocmobile"></a>
+                                <p class="sizecmobile"></p>
+                                <div class="clusinpmobile"><button class="cartbtn"> + </button>
+                                    <input class="inputslcart">
+                                    <button class="cartbtn"> - </button></div>
+                            </td>
+                            <td class="tdinforcart">
+                                <i class="fa fa-trash-o facartde cartdels"></i>
+                                <p class="boldcart pricecmobile"></p>
+                            </td>
+                        </tr>
+                    </table>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-12 col-sm-12 col-12 collistcart">
-                <div class="ttcart">
-                    <div class="tongdon">
-                        <span class="tds">Tổng đơn: </span>
-                        <span class="tonggiatien" id="tonggiatien">299.000đ</span>
-                        <button onclick="location.href='checkout'" class="btnthanhtoan">Thanh toán</button>
+        </div>
+        <div class="col-lg-4 col-md-12 col-sm-12 col-12 collistcart">
+            <div class="ttcart">
+                <div class="tongdon">
+                    <span class="tds">Tổng đơn: </span>
+                    <span class="tonggiatien" id="tonggiatien">299.000đ</span>
+                    <button onclick="location.href='checkout'" class="btnthanhtoan">Thanh toán</button>
 
-                    </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <div id="footer"></div>
+<div id="footer"></div>
 </body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js" integrity="sha512-bPs7Ae6pVvhOSiIcyUClR7/q2OAsRiovw4vAkX+zJbw3ShAeeqezq50RIIcIURq7Oa20rW2n2q+fyXBNcU9lrw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="js/carousel.js"></script>

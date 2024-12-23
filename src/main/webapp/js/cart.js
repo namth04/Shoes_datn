@@ -182,42 +182,111 @@ async function loadAllCart() {
     if (listcart == null) {
         return;
     }
-    var list = JSON.parse(localStorage.getItem("product_cart"));
-    console.log(list)
-    var main = ''
+    var list = JSON.parse(listcart);
+    console.log(list);
+
+    var main = '';
     var total = 0;
-    for (i = 0; i < list.length; i++) {
+
+    // Khởi tạo mảng lưu trạng thái checkbox (đã chọn hay chưa)
+    let selectedItems = JSON.parse(localStorage.getItem("selected_items") || "[]");
+
+    for (let i = 0; i < list.length; i++) {
+        const product = list[i];
+        const isChecked = selectedItems.includes(i); // Kiểm tra nếu sản phẩm này đã được chọn
+
+        // Tạo mã HTML cho mỗi sản phẩm trong giỏ hàng
         main += `<tr>
                     <td>
-                        <a href="detail?id=${list[i].product.id}&name=${list[i].product.alias}">
-                            <img class="imgprocart" src="${list[i].colorImage || list[i].product.imageBanner}">
+                        <input type="checkbox" class="product-checkbox" data-index="${i}" onchange="updateTotal()"
+                               ${isChecked ? 'checked' : ''}>  <!-- Đánh dấu checkbox nếu sản phẩm đã được chọn -->
+                    </td>
+                    <td>
+                        <a href="detail?id=${product.product.id}&name=${product.product.alias}">
+                            <img class="imgprocart" src="${product.colorImage || product.product.imageBanner}">
                         </a>
                         <div class="divnamecart">
-                            <a href="detail?id=${list[i].product.id}&name=${list[i].product.alias}" class="nameprocart">${list[i].product.name}</a>
-                            <p class="sizecart">${list[i].color.colorName} / ${list[i].size.sizeName}</p>
+                            <a href="detail?id=${product.product.id}&name=${product.product.alias}" class="nameprocart">${product.product.name}</a>
+                            <p class="sizecart">${product.color.colorName} / ${product.size.sizeName}</p>
                         </div>
                     </td>
-                    <td><p class="boldcart">${formatmoney(list[i].product.price)}</p></td>
+                    <td><p class="boldcart">${formatmoney(product.product.price)}</p></td>
                     <td>
-                        <div class="clusinp"><button onclick="upDownQuantity(${list[i].size.id},-1)" class="cartbtn"> - </button>
-                        <input value="${list[i].quantiy}" class="inputslcart">
-                        <button onclick="upDownQuantity(${list[i].size.id},1)" class="cartbtn"> + </button></div>
+                        <div class="clusinp">
+                            <button onclick="upDownQuantity(${product.size.id}, -1)" class="cartbtn"> - </button>
+                            <input value="${product.quantiy}" class="inputslcart">
+                            <button onclick="upDownQuantity(${product.size.id}, 1)" class="cartbtn"> + </button>
+                        </div>
                     </td>
                     <td>
                         <div class="tdpricecart">
-                            <p class="boldcart">${formatmoney(list[i].quantiy * list[i].product.price)}</p>
-                            <p onclick="remove(${list[i].product.id}, ${list[i].color.id}, ${list[i].size.id})" class="delcart"><i class="fa fa-trash-o facartde"></i></p>
+                            <p class="boldcart">${formatmoney(product.quantiy * product.product.price)}</p>
+                            <p onclick="remove(${product.product.id}, ${product.color.id}, ${product.size.id})" class="delcart">
+                                <i class="fa fa-trash-o facartde"></i>
+                            </p>
                         </div>
                     </td>
-                </tr>`
-        total += Number(list[i].quantiy * list[i].product.price)
-    }
-    document.getElementById("listcartDes").innerHTML = main
-    loadAllCartMobile();
-    document.getElementById("slcart").innerHTML = list.length
-    document.getElementById("tonggiatien").innerHTML = formatmoney(total)
-}
+                </tr>`;
 
+        // Cộng dồn tổng tiền nếu sản phẩm này đã được chọn
+        if (isChecked) {
+            total += Number(product.quantiy * product.product.price);
+        }
+    }
+
+    document.getElementById("listcartDes").innerHTML = main;
+    loadAllCartMobile();
+    document.getElementById("slcart").innerHTML = list.length;
+    document.getElementById("tonggiatien").innerHTML = formatmoney(total);
+
+    // Add event listener for "Select All" checkbox
+    document.getElementById("select-all").addEventListener("change", function () {
+        const checkboxes = document.querySelectorAll(".product-checkbox");
+        checkboxes.forEach((checkbox) => {
+            checkbox.checked = this.checked;
+            const index = checkbox.dataset.index;
+            updateSelectedItems(index, this.checked);
+        });
+        updateTotal();
+    });
+
+    // Tạo sự kiện cho từng checkbox
+    const checkboxes = document.querySelectorAll(".product-checkbox");
+    checkboxes.forEach((checkbox) => {
+        checkbox.addEventListener("change", function () {
+            const index = this.dataset.index;
+            updateSelectedItems(index, this.checked);
+            updateTotal();
+        });
+    });
+}
+function updateSelectedItems(index, isSelected) {
+    let selectedItems = JSON.parse(localStorage.getItem("selected_items") || "[]");
+
+    if (isSelected) {
+        if (!selectedItems.includes(parseInt(index))) {
+            selectedItems.push(parseInt(index));
+        }
+    } else {
+        selectedItems = selectedItems.filter(item => item !== parseInt(index));
+    }
+
+    localStorage.setItem("selected_items", JSON.stringify(selectedItems));
+}
+updateSelectedItems();
+function updateTotal() {
+    const selectedItems = JSON.parse(localStorage.getItem("selected_items") || "[]");
+    const listcart = JSON.parse(localStorage.getItem("product_cart") || "[]");
+
+    let total = 0;
+    selectedItems.forEach((index) => {
+        const product = listcart[index];
+        total += Number(product.quantiy * product.product.price);
+    });
+
+    document.getElementById("tonggiatien").innerHTML = formatmoney(total);
+}
+updateTotal();
 async function loadAllCartMobile() {
     var list = JSON.parse(localStorage.getItem("product_cart"));
     var main = ''
