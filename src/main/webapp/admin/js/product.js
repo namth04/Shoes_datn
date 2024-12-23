@@ -9,8 +9,7 @@ async function loadProduct(page, param, listCate) {
 
     var result = null;
     var url = '';
-    let requestBody = null; // Khai báo requestBody bên ngoài
-    // Xử lý trường hợp không có listcate
+    let requestBody = null;
     if (listCate == null || listCate.length === 0) {
         url = `http://localhost:8080/api/product/public/findByParam?page=${page}&size=${size}&q=${param}`;
         try {
@@ -22,7 +21,7 @@ async function loadProduct(page, param, listCate) {
             return;
         }
     } else {
-         requestBody = {
+        requestBody = {
             listIdCategory: listCate || []
         };
         url = 'http://localhost:8080/api/product/public/searchFull?page=' + page + '&size=' + size ;
@@ -42,7 +41,6 @@ async function loadProduct(page, param, listCate) {
         }
     }
 
-    // Kiểm tra nếu result không hợp lệ
     if (!result || !result.content) {
         toastr.error("Không tìm thấy sản phẩm.");
         return;
@@ -82,7 +80,6 @@ async function loadProduct(page, param, listCate) {
 
     document.getElementById("listproduct").innerHTML = main;
 
-    // Xây dựng phân trang
     var mainpage = '';
     for (i = 1; i <= totalPage; i++) {
         mainpage += `<li onclick="loadProduct(${(Number(i) - 1)}, '${param}', ${JSON.stringify(listCate)})" class="page-item">
@@ -103,8 +100,6 @@ async function loadProduct(page, param, listCate) {
 async function filterByCate() {
     loadProduct(0, "", $("#listdpar").val());
 }
-
-
 async function loadAProduct() {
     var uls = new URL(document.URL)
     var id = uls.searchParams.get("id");
@@ -181,7 +176,6 @@ async function loadAProduct() {
 }
 
 var linkbanner = '';
-
 async function saveProduct() {
     document.getElementById("loading").style.display = 'block';
     var uls = new URL(document.URL);
@@ -191,7 +185,7 @@ async function saveProduct() {
         ? 'http://localhost:8080/api/product/admin/update'
         : 'http://localhost:8080/api/product/admin/create';
 
-    // Collecting form data
+
     var codesp = document.getElementById("codesp").value.trim();
     var namesp = document.getElementById("namesp").value.trim();
     var price = document.getElementById("price").value.trim();
@@ -202,7 +196,7 @@ async function saveProduct() {
     var chatlieu = document.getElementById("chatlieu").value.trim();
     var degiay = document.getElementById("degiay").value.trim();
 
-    // Validate basic fields
+
     if (!codesp) {
         toastr.warning("Mã sản phẩm không được để trống!");
         document.getElementById("loading").style.display = 'none';
@@ -250,20 +244,16 @@ async function saveProduct() {
         return;
     }
 
-    // Call loadColor to validate color and size
-    await loadColor();  // Ensure this function is run before proceeding
+    await loadColor();
 
-    // If loadColor finds issues, it will return early with a warning, so we only proceed if everything is valid
     if (listColor.length === 0) {
-        // No valid colors found
         document.getElementById("loading").style.display = 'none';
         return;
     }
 
-    // File Upload and Data Preparation
     await uploadFile(document.getElementById("imgbanner"));
     var listLinkImg = id == null ? await uploadMultipleFileNotResp() : []; // Skip if updating
-    await loadColor(); // Re-run loadColor if necessary for images
+    await loadColor();
 
     if (!linkbanner) {
         toastr.warning("Vui lòng tải lên banner hình ảnh!");
@@ -276,8 +266,6 @@ async function saveProduct() {
         document.getElementById("loading").style.display = 'none';
         return;
     }
-
-    // Create product object
     var product = {
         id: id,
         code: codesp,
@@ -293,8 +281,6 @@ async function saveProduct() {
         material: { id: chatlieu },
         sole: { id: degiay }
     };
-
-    // Send API request
     const response = await fetch(url, {
         method: 'POST',
         headers: new Headers({
@@ -303,8 +289,6 @@ async function saveProduct() {
         }),
         body: JSON.stringify(product)
     });
-
-    // Handle response
     if (response.status < 300) {
         swal({
                 title: "Thông báo",
@@ -327,11 +311,6 @@ async function saveProduct() {
             });
     }
 }
-
-
-
-
-
 async function deleteProduct(id) {
     var con = confirm("Bạn chắc chắn muốn xóa sản phẩm này?");
     if (con == false) {
@@ -354,8 +333,6 @@ async function deleteProduct(id) {
         toastr.warning(result.defaultMessage);
     }
 }
-
-
 async function deleteProductImage(id) {
     var con = confirm("Bạn muốn xóa ảnh này?");
     if (con == false) {
@@ -424,18 +401,16 @@ async function deleteProductColor(id) {
     }
 }
 
-
 async function loadColor() {
     var list = document.getElementById("listcolorblock").getElementsByClassName("singlecolor");
     var listF = [];
-    listColor = []; // Clear listColor to ensure it is fresh for this load
+    listColor = [];
 
     for (i = 0; i < list.length; i++) {
         var singleColor = list[i];
         var idcolor = singleColor.getElementsByClassName("idcolor")[0];
         var colorName = singleColor.getElementsByClassName("colorName")[0];
 
-        // Check if color name is empty
         if (!colorName.value.trim()) {
             toastr.warning("Tên màu sắc không được để trống!");
             return;
@@ -452,7 +427,6 @@ async function loadColor() {
         var listsizes = [];
         var sizeblockList = singleColor.getElementsByClassName("singelsizeblock");
 
-        // Validate each size block
         for (j = 0; j < sizeblockList.length; j++) {
             var size = sizeblockList[j];
             var objsize = {
@@ -461,7 +435,6 @@ async function loadColor() {
                 "quantity": size.getElementsByClassName("sizequantity")[0].value,
             };
 
-            // Validate size
             if (!objsize.sizeName || !objsize.quantity || isNaN(objsize.quantity) || Number(objsize.quantity) <= 0) {
                 toastr.warning("Kích thước phải có tên và số lượng hợp lệ!");
                 return;
@@ -470,7 +443,6 @@ async function loadColor() {
             listsizes.push(objsize);
         }
 
-        // Validate that there is at least one size
         if (listsizes.length === 0) {
             toastr.warning("Vui lòng thêm ít nhất một kích thước cho màu sắc này!");
             return;
@@ -479,14 +451,10 @@ async function loadColor() {
         obj.size = listsizes;
         listColor.push(obj);
     }
-
-    // Validate if at least one color has been added
     if (listColor.length === 0) {
         toastr.warning("Vui lòng chọn ít nhất một màu sắc!");
         return;
     }
-
-    // Handle file uploads
     var listImg = await uploadMultipleFile(listF);
 
     for (i = 0; i < listImg.length; i++) {
@@ -502,7 +470,6 @@ async function loadColor() {
 
     console.log(listColor);
 }
-
 
 async function uploadMultipleFile(listF) {
     const formData = new FormData()
@@ -533,8 +500,6 @@ async function uploadMultipleFileNotResp() {
         return [];
     }
 }
-
-
 async function uploadFile(filePath) {
     const formData = new FormData()
     formData.append("file", filePath.files[0])
@@ -547,7 +512,6 @@ async function uploadFile(filePath) {
         linkbanner = await res.text();
     }
 }
-
 function priviewImg(e) {
     var dv = e.parentNode.parentNode;
     var img = dv.getElementsByClassName("divimgpre")[0].getElementsByClassName("imgpreview")[0]
@@ -638,9 +602,6 @@ function loadInit() {
 
         var preview = document.querySelector('#preview');
 
-        // if (this.files) {
-        //     [].forEach.call(this.files, readAndPreview);
-        // }
         for (i = 0; i < files.length; i++) {
             readAndPreview(files[i]);
         }
@@ -701,13 +662,8 @@ function loadInit() {
             reader.readAsDataURL(file);
 
         }
-
     }
-
 }
-
-
-
 async function loadAllProductList(){
     var search = document.getElementById("search").value
     var url = 'http://localhost:8080/api/product/public/findAll-list?search=' + search
@@ -820,11 +776,24 @@ async function addTam(idsize, e){
         method: 'GET'
     });
     var result = await response.json();
-    result.quantity = 1;
-    listProductTam.push(result);
+
+    const formattedResult = {
+        product: result.product,
+        productColor: {
+            colorName: result.productColor.colorName,
+            id: result.productColor.id
+        },
+        productSize: {
+            id: result.productSize.id,
+            sizeName: result.productSize.sizeName,
+            quantity: result.productSize.quantity
+        },
+        quantity: 1
+    };
+
+    listProductTam.push(formattedResult);
     loadSizeProduct();
 }
-
 function checkTonTai(idsize){
     for(var k=0; k< listProductTam.length; k++){
         if(listProductTam[k].productSize.id == idsize){
@@ -848,13 +817,18 @@ function loadSizeProduct(){
     var tongtientt = 0;
     for(i=0; i< listProductTam.length; i++){
         tongtientt = Number(tongtientt) + Number(listProductTam[i].product.price) * Number(listProductTam[i].quantity);
+        const colorName = listProductTam[i].productColor.colorName;
+        const sizeName = listProductTam[i].productSize.sizeName;
+
         main += `<tr>
-            <td>Size: ${listProductTam[i].productSize.sizeName}, Màu: ${listProductTam[i].productColor.colorName}<br>${listProductTam[i].product.name}</td>
+            <td>Size: ${sizeName}, Màu: ${colorName}<br>${listProductTam[i].product.name}</td>
             <td>${formatmoney(listProductTam[i].product.price)}</td>
             <td>
-                <div class="clusinp"><button onclick="upDownQuantity(${listProductTam[i].productSize.id},-1)" class="cartbtn"> - </button>
-                <input value="${listProductTam[i].quantity}" class="inputslcart">
-                <button onclick="upDownQuantity(${listProductTam[i].productSize.id},1)" class="cartbtn"> + </button></div>
+                <div class="clusinp">
+                    <button onclick="upDownQuantity(${listProductTam[i].productSize.id},-1)" class="cartbtn"> - </button>
+                    <input value="${listProductTam[i].quantity}" class="inputslcart">
+                    <button onclick="upDownQuantity(${listProductTam[i].productSize.id},1)" class="cartbtn"> + </button>
+                </div>
             </td>
             <td><i onclick="removeTam(${listProductTam[i].productSize.id})" class="fa fa-trash-alt pointer"></i></td>
         </tr>`
@@ -875,7 +849,6 @@ function upDownQuantity(idsize, quantity){
     }
     loadSizeProduct();
 }
-
 async function loadSelect() {
     var response = await fetch('http://localhost:8080/api/material/public/all', {
     });
