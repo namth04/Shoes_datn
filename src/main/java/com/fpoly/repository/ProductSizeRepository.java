@@ -1,5 +1,6 @@
 package com.fpoly.repository;
 
+import com.fpoly.entity.ProductColor;
 import com.fpoly.entity.ProductSize;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -23,4 +24,5 @@ public interface ProductSizeRepository extends JpaRepository<ProductSize,Long> {
             "where pc.id = ?1 and ps.id = ?2")
     Integer findQuantityByColorAndSize(Long colorId, Long sizeId);
 
+    boolean existsBySizeNameAndProductColor(String sizeName, ProductColor productColor);
 }

@@ -104,6 +104,10 @@ public class ProductServiceImp implements ProductService {
             productColor.setLinkImage(color.getLinkImage());
             ProductColor colorResult = productColorRepository.save(productColor);
             for(SizeRequest size : color.getSize()){
+                boolean sizeExists = productSizeRepository.existsBySizeNameAndProductColor(size.getSizeName(), colorResult);
+                if (sizeExists) {
+                    throw new MessageException("Size " + size.getSizeName() + " đã tồn tại cho màu " + color.getColorName());
+                }
                 ProductSize productSize = new ProductSize();
                 productSize.setProductColor(colorResult);
                 productSize.setSizeName(size.getSizeName());
