@@ -406,7 +406,7 @@ async function loadColor() {
     var listF = [];
     listColor = [];
 
-    for (i = 0; i < list.length; i++) {
+    for (let i = 0; i < list.length; i++) {
         var singleColor = list[i];
         var idcolor = singleColor.getElementsByClassName("idcolor")[0];
         var colorName = singleColor.getElementsByClassName("colorName")[0];
@@ -427,19 +427,32 @@ async function loadColor() {
         var listsizes = [];
         var sizeblockList = singleColor.getElementsByClassName("singelsizeblock");
 
-        for (j = 0; j < sizeblockList.length; j++) {
+        // Tập hợp sizeName đã thêm
+        var existingSizeNames = new Set();
+        for (let j = 0; j < sizeblockList.length; j++) {
             var size = sizeblockList[j];
-            var objsize = {
-                "id": size.getElementsByClassName("idsize")[0].value == '' ? null : size.getElementsByClassName("idsize")[0].value,
-                "sizeName": size.getElementsByClassName("sizename")[0].value,
-                "quantity": size.getElementsByClassName("sizequantity")[0].value,
-            };
+            var sizeName = size.getElementsByClassName("sizename")[0].value.trim();
+            var quantity = size.getElementsByClassName("sizequantity")[0].value;
 
-            if (!objsize.sizeName || !objsize.quantity || isNaN(objsize.quantity) || Number(objsize.quantity) <= 0) {
-                toastr.warning("Kích thước phải có tên và số lượng hợp lệ!");
+            if (!sizeName) {
+                toastr.warning("Tên kích thước không được để trống!");
                 return;
             }
 
+            if (!quantity || isNaN(quantity) || Number(quantity) <= 0) {
+                toastr.warning("Số lượng phải là số dương!");
+                return;
+            }
+            if (existingSizeNames.has(sizeName)) {
+                toastr.warning(`Kích thước "${sizeName}" đã tồn tại!`);
+                return;
+            }
+            existingSizeNames.add(sizeName);
+            var objsize = {
+                "id": size.getElementsByClassName("idsize")[0].value == '' ? null : size.getElementsByClassName("idsize")[0].value,
+                "sizeName": sizeName,
+                "quantity": quantity,
+            };
             listsizes.push(objsize);
         }
 
@@ -455,10 +468,11 @@ async function loadColor() {
         toastr.warning("Vui lòng chọn ít nhất một màu sắc!");
         return;
     }
+
     var listImg = await uploadMultipleFile(listF);
 
-    for (i = 0; i < listImg.length; i++) {
-        for (j = 0; j < listColor.length; j++) {
+    for (let i = 0; i < listImg.length; i++) {
+        for (let j = 0; j < listColor.length; j++) {
             if (listColor[j].hasFile == true) {
                 if (listColor[j].linkImage == null) {
                     listColor[j].linkImage = listImg[i].link;
