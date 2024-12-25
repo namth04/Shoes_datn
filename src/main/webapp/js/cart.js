@@ -4,16 +4,14 @@ var selectedColorImage = null;
 async function clickColor(e, name, idColor) {
     idColorCart = idColor;
 
-    // Xóa class 'imgactive' khỏi tất cả các ảnh
     var img = document.getElementsByClassName("imgldetail");
     for (i = 0; i < img.length; i++) {
         document.getElementsByClassName("imgldetail")[i].classList.remove('imgactive');
     }
-    // Thêm class 'imgactive' vào ảnh được chọn
     e.classList.add('imgactive');
-    // Lưu lại ảnh màu được chọn
+
     selectedColorImage = e.src;
-    // Hiển thị tên màu
+
     document.getElementById("colorname").innerHTML = name;
     try {
         var url = `http://localhost:8080/api/product-size/public/find-by-product-color?idProColor=${idColor}`;
@@ -45,7 +43,6 @@ async function clickColor(e, name, idColor) {
 
         document.getElementById("listsize").innerHTML = main;
 
-        // Hiển thị tổng số lượng của màu sắc
         document.getElementById("quantityA").innerHTML = `Số lượng: ${totalQuantity}`;
     } catch (error) {
         console.error('Error fetching sizes:', error);
@@ -74,11 +71,11 @@ async function addCart(product) {
         }
     }
     var quantityAdded = Number(document.getElementById("inputslcart").value);
-    console.log(quantityAdded)
+    console.log(quantityAdded);
     var totalQuantityElement = document.getElementById("quantityA");
     console.log(totalQuantityElement);
     var totalQuantity = Number(totalQuantityElement.innerHTML.replace("Số lượng: ", ""));
-    if(quantityAdded > totalQuantity) {
+    if (quantityAdded > totalQuantity) {
         toastr.error("Vượt quá số lượng sản phẩm có sẵn");
         return;
     }
@@ -89,7 +86,7 @@ async function addCart(product) {
         "size": size,
         "quantiy": document.getElementById("inputslcart").value,
         "colorImage": selectedColorImage || color.linkImage || product.imageBanner,
-        "uniqueKey": `${product.id}_${color.id}_${sizeId}` // Thêm unique key
+        "uniqueKey": `${product.id}_${color.id}_${sizeId}`
     };
 
     if (localStorage.getItem("product_cart") == null) {
@@ -99,17 +96,14 @@ async function addCart(product) {
     } else {
         var list = JSON.parse(localStorage.getItem("product_cart"));
 
-        // Tìm index của sản phẩm có cùng unique key
         var existingProductIndex = list.findIndex(item =>
             item.uniqueKey === obj.uniqueKey
         );
 
         if (existingProductIndex !== -1) {
-            // Kiểm tra tổng số lượng sau khi thêm
             var currentQuantity = Number(list[existingProductIndex].quantiy);
             var newTotalQuantity = currentQuantity + Number(obj.quantiy);
 
-            // Kiểm tra với số lượng tối đa của sản phẩm
             try {
                 var url = `http://localhost:8080/api/product-size/public/find-quantity-by-color-and-size?colorId=${color.id}&sizeId=${sizeId}`;
                 const response = await fetch(url);
@@ -120,7 +114,6 @@ async function addCart(product) {
                     return;
                 }
 
-                // Nếu chưa vượt quá, mới cập nhật số lượng
                 list[existingProductIndex].quantiy = newTotalQuantity;
             } catch (error) {
                 console.error("Lỗi kiểm tra số lượng sản phẩm:", error);
@@ -136,9 +129,20 @@ async function addCart(product) {
     totalQuantity -= quantityAdded;
     totalQuantityElement.innerHTML = `Số lượng: ${totalQuantity}`;
 
-    toastr.success("Thêm giỏ hàng thành công");
+    localStorage.setItem("cart_message", "Thêm giỏ hàng thành công");
+
     loadAllCart();
+    window.location.reload();
 }
+
+window.addEventListener("load", () => {
+    const message = localStorage.getItem("cart_message");
+    if (message) {
+        toastr.success(message);
+        localStorage.removeItem("cart_message");
+    }
+});
+
 async function addLatestCart(product) {
     var sizeId = null;
     var color = null;
@@ -188,18 +192,16 @@ async function loadAllCart() {
     var main = '';
     var total = 0;
 
-    // Khởi tạo mảng lưu trạng thái checkbox (đã chọn hay chưa)
     let selectedItems = JSON.parse(localStorage.getItem("selected_items") || "[]");
 
     for (let i = 0; i < list.length; i++) {
         const product = list[i];
-        const isChecked = selectedItems.includes(i); // Kiểm tra nếu sản phẩm này đã được chọn
+        const isChecked = selectedItems.includes(i);
 
-        // Tạo mã HTML cho mỗi sản phẩm trong giỏ hàng
         main += `<tr>
                     <td>
                         <input type="checkbox" class="product-checkbox" data-index="${i}" onchange="updateTotal()"
-                               ${isChecked ? 'checked' : ''}>  <!-- Đánh dấu checkbox nếu sản phẩm đã được chọn -->
+                               ${isChecked ? 'checked' : ''}> 
                     </td>
                     <td>
                         <a href="detail?id=${product.product.id}&name=${product.product.alias}">
@@ -228,7 +230,6 @@ async function loadAllCart() {
                     </td>
                 </tr>`;
 
-        // Cộng dồn tổng tiền nếu sản phẩm này đã được chọn
         if (isChecked) {
             total += Number(product.quantiy * product.product.price);
         }
@@ -239,7 +240,6 @@ async function loadAllCart() {
     document.getElementById("slcart").innerHTML = list.length;
     document.getElementById("tonggiatien").innerHTML = formatmoney(total);
 
-    // Add event listener for "Select All" checkbox
     document.getElementById("select-all").addEventListener("change", function () {
         const checkboxes = document.querySelectorAll(".product-checkbox");
         checkboxes.forEach((checkbox) => {
@@ -250,7 +250,6 @@ async function loadAllCart() {
         updateTotal();
     });
 
-    // Tạo sự kiện cho từng checkbox
     const checkboxes = document.querySelectorAll(".product-checkbox");
     checkboxes.forEach((checkbox) => {
         checkbox.addEventListener("change", function () {
@@ -318,7 +317,6 @@ async function loadAllCartMobile() {
 async function remove(productId, colorId, sizeId) {
     var list = JSON.parse(localStorage.getItem("product_cart"));
 
-    // Xóa tất cả sản phẩm có cùng product ID, color ID và size ID
     var remainingArr = list.filter(data =>
         !(data.product.id === productId &&
             data.color.id === colorId &&
@@ -427,11 +425,9 @@ async function productLqCart() {
     document.getElementById("listproductgycart").innerHTML = main;
 }
 
-// Hàm xử lý thanh toán thành công
 function handleSuccessfulPayment() {
     var list = JSON.parse(localStorage.getItem("product_cart"));
 
-    // Lọc ra các sản phẩm không phải từ nút thanh toán
     var remainingCart = list.filter(item => !item.isLatestCart);
 
     window.localStorage.setItem('product_cart', JSON.stringify(remainingCart));
