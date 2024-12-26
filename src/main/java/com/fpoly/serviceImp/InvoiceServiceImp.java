@@ -26,6 +26,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import javax.transaction.Transactional;
 import java.sql.Date;
 import java.sql.Time;
 import java.util.List;
@@ -120,7 +121,6 @@ public class InvoiceServiceImp implements InvoiceService {
             if(historyPayRepository.findByOrderIdAndRequestId(invoiceRequest.getMerchantOrderId(), invoiceRequest.getMerchantOrderId()).isPresent()){
                 throw new MessageException("Đơn hàng đã được thanh toán");
             }
-//            int paymentStatus = vnPayService.orderReturnByUrl(invoiceRequest.getUrlVnpay());
             if(!invoiceRequest.getStatusGpay().equals("ORDER_SUCCESS")){
                 throw new MessageException("Thanh toán thất bại");
             }
@@ -194,7 +194,6 @@ public class InvoiceServiceImp implements InvoiceService {
             productSize.setQuantity(productSize.getQuantity() - p.getQuantity());
             productSizeRepository.save(productSize);
 
-            // Cập nhật số lượng đã bán
             productSize.getProductColor().getProduct().setQuantitySold(
                     productSize.getProductColor().getProduct().getQuantitySold() + p.getQuantity()
             );
@@ -294,34 +293,49 @@ public class InvoiceServiceImp implements InvoiceService {
     @Override
     public InvoiceResponse cancelInvoice(Long invoiceId) {
         Optional<Invoice> invoice = invoiceRepository.findById(invoiceId);
-        if(invoice.isEmpty()){
-            throw new MessageException("invoice id not found");
+        if (invoice.isEmpty()) {
+            throw new MessageException("Invoice ID not found");
         }
-        if(invoice.get().getUserAddress().getUser().getId() != userUtils.getUserWithAuthority().getId()){
-            throw new MessageException("access denied");
+
+        if (invoice.get().getUserAddress().getUser().getId() != userUtils.getUserWithAuthority().getId()) {
+            throw new MessageException("Access denied");
         }
-        if(!invoice.get().getPayType().equals(PayType.PAYMENT_DELIVERY)){
+
+        if (invoice.get().getPayType().equals(PayType.PAYMENT_GPAY)) {
+            Long idSt = invoice.get().getStatus().getId();
+            if (idSt != StatusUtils.DANG_CHO_XAC_NHAN) {
+                throw new MessageException("Đơn hàng đã được thanh toán qua GPay, không thể hủy");
+            }
+        }
+        else if (!invoice.get().getPayType().equals(PayType.PAYMENT_DELIVERY)) {
             throw new MessageException("Đơn hàng đã được thanh toán, không thể hủy");
         }
         Long idSt = invoice.get().getStatus().getId();
-        if(idSt == StatusUtils.DA_GUI || idSt == StatusUtils.DA_NHAN || idSt == StatusUtils.DA_HUY || idSt == StatusUtils.KHONG_NHAN_HANG){
-            throw new MessageException(invoice.get().getStatus().getName()+ " không thể hủy hàng");
+        if (idSt == StatusUtils.DA_GUI || idSt == StatusUtils.DA_NHAN ||
+                idSt == StatusUtils.DA_HUY || idSt == StatusUtils.KHONG_NHAN_HANG) {
+            throw new MessageException(invoice.get().getStatus().getName() + " không thể hủy hàng");
         }
+
+
         invoice.get().setStatus(statusRepository.findById(StatusUtils.DA_HUY).get());
         Invoice result = invoiceRepository.save(invoice.get());
-        List<InvoiceDetail> list  = invoiceDetailRepository.findByInvoiceId(invoiceId);
-        for(InvoiceDetail i : list){
+
+        List<InvoiceDetail> list = invoiceDetailRepository.findByInvoiceId(invoiceId);
+        for (InvoiceDetail i : list) {
             i.getProductSize().setQuantity(i.getQuantity() + i.getProductSize().getQuantity());
             productSizeRepository.save(i.getProductSize());
         }
+
         InvoiceStatus invoiceStatus = new InvoiceStatus();
         invoiceStatus.setInvoice(invoice.get());
         invoiceStatus.setCreatedDate(new Date(System.currentTimeMillis()));
         invoiceStatus.setCreatedTime(new Time(System.currentTimeMillis()));
         invoiceStatus.setStatus(statusRepository.findById(StatusUtils.DA_HUY).get());
         invoiceStatusRepository.save(invoiceStatus);
+
         return invoiceMapper.invoiceToInvoiceResponse(result);
     }
+
 
     @Override
     public InvoiceResponse findById(Long invoiceId) {
@@ -369,54 +383,84 @@ public class InvoiceServiceImp implements InvoiceService {
         return result;
     }
 
-    @Override
+    @Transactional
     public void payCounter(InvoiceRequestCounter invoiceRequestCounter) {
-        if(invoiceRequestCounter.getListProductSize().isEmpty()){
+        if (invoiceRequestCounter.getListProductSize() == null || invoiceRequestCounter.getListProductSize().isEmpty()) {
             throw new MessageException("Hãy chọn 1 sản phẩm");
         }
-        Double totalAmount = 0D;
-        for(ProductSizeRequest p : invoiceRequestCounter.getListProductSize()){
-            Optional<ProductSize> productSize = productSizeRepository.findById(p.getIdProductSize());
-            if(productSize.get().getQuantity() < p.getQuantity()){
-                throw new MessageException("product size: "+productSize.get().getSizeName()+" màu "+productSize.get().getProductColor().getColorName()+" "+productSize.get().getProductColor().getProduct().getName()+" không đủ số lượng");
-            }
-            totalAmount += productSize.get().getProductColor().getProduct().getPrice() * p.getQuantity();
+
+        if (invoiceRequestCounter.getFullName() == null || invoiceRequestCounter.getFullName().trim().isEmpty()) {
+            throw new MessageException("Vui lòng nhập tên khách hàng");
         }
 
+        if (invoiceRequestCounter.getPhone() == null || invoiceRequestCounter.getPhone().trim().isEmpty()) {
+            throw new MessageException("Vui lòng nhập số điện thoại");
+        }
+
+        Double totalAmount = 0D;
+        for (ProductSizeRequest p : invoiceRequestCounter.getListProductSize()) {
+            Optional<ProductSize> productSizeOpt = productSizeRepository.findById(p.getIdProductSize());
+            if (productSizeOpt.isEmpty()) {
+                throw new MessageException("Không tìm thấy sản phẩm với ID: " + p.getIdProductSize());
+            }
+
+            ProductSize productSize = productSizeOpt.get();
+            if (productSize.getQuantity() < p.getQuantity()) {
+                throw new MessageException("Sản phẩm " + productSize.getSizeName() +
+                        " màu " + productSize.getProductColor().getColorName() +
+                        " " + productSize.getProductColor().getProduct().getName() +
+                        " không đủ số lượng (Còn: " + productSize.getQuantity() + ")");
+            }
+            totalAmount += productSize.getProductColor().getProduct().getPrice() * p.getQuantity();
+        }
 
         Invoice invoice = new Invoice();
         invoice.setCreatedDate(new Date(System.currentTimeMillis()));
         invoice.setCreatedTime(new Time(System.currentTimeMillis()));
-        invoice.setPhone(invoiceRequestCounter.getPhone());
-        invoice.setReceiverName(invoiceRequestCounter.getFullName());
+        invoice.setPhone(invoiceRequestCounter.getPhone().trim());
+        invoice.setReceiverName(invoiceRequestCounter.getFullName().trim());
         invoice.setPayType(PayType.PAY_COUNTER);
         invoice.setStatus(statusRepository.findById(StatusUtils.DA_NHAN).get());
         invoice.setTotalAmount(totalAmount);
-        Invoice result = invoiceRepository.save(invoice);
+        Invoice savedInvoice = invoiceRepository.save(invoice);
 
-        for(ProductSizeRequest p : invoiceRequestCounter.getListProductSize()){
+
+        for (ProductSizeRequest p : invoiceRequestCounter.getListProductSize()) {
             ProductSize productSize = productSizeRepository.findById(p.getIdProductSize()).get();
-            InvoiceDetail invoiceDetail = new InvoiceDetail();
-            invoiceDetail.setInvoice(result);
-            invoiceDetail.setPrice(productSize.getProductColor().getProduct().getPrice());
-            invoiceDetail.setQuantity(p.getQuantity());
-            invoiceDetail.setProductSize(productSize);
-            invoiceDetailRepository.save(invoiceDetail);
-            productSize.setQuantity(productSize.getQuantity() - p.getQuantity());
-            productSizeRepository.save(productSize);
-            try {
-                productSize.getProductColor().getProduct().setQuantitySold(productSize.getProductColor().getProduct().getQuantitySold() + p.getQuantity());
+
+            synchronized (ProductSize.class) {
+
+                if (productSize.getQuantity() < p.getQuantity()) {
+                    throw new MessageException("Sản phẩm " + productSize.getSizeName() +
+                            " màu " + productSize.getProductColor().getColorName() +
+                            " " + productSize.getProductColor().getProduct().getName() +
+                            " đã hết hàng trong quá trình xử lý");
+                }
+
+
+                InvoiceDetail invoiceDetail = new InvoiceDetail();
+                invoiceDetail.setInvoice(savedInvoice);
+                invoiceDetail.setPrice(productSize.getProductColor().getProduct().getPrice());
+                invoiceDetail.setQuantity(p.getQuantity());
+                invoiceDetail.setProductSize(productSize);
+                invoiceDetailRepository.save(invoiceDetail);
+
+
                 productSize.setQuantity(productSize.getQuantity() - p.getQuantity());
-                productRepository.save(productSize.getProductColor().getProduct());
-            }catch (Exception e){}
+                productSizeRepository.save(productSize);
+
+                Product product = productSize.getProductColor().getProduct();
+                product.setQuantitySold(product.getQuantitySold() + p.getQuantity());
+                productRepository.save(product);
+            }
         }
 
+
         InvoiceStatus invoiceStatus = new InvoiceStatus();
-        invoiceStatus.setInvoice(result);
+        invoiceStatus.setInvoice(savedInvoice);
         invoiceStatus.setCreatedDate(new Date(System.currentTimeMillis()));
         invoiceStatus.setCreatedTime(new Time(System.currentTimeMillis()));
         invoiceStatus.setStatus(statusRepository.findById(StatusUtils.DA_NHAN).get());
         invoiceStatusRepository.save(invoiceStatus);
-
     }
 }
