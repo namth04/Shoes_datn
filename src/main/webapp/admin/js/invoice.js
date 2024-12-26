@@ -219,17 +219,17 @@ async function createInvoice() {
         const phone = document.getElementById("phone").value.trim();
 
         if (!fullName) {
-            alert('Vui lòng nhập tên khách hàng');
+            toastr.warning('Vui lòng nhập tên khách hàng');
             return;
         }
 
         if (!phone) {
-            alert('Vui lòng nhập số điện thoại');
+            toastr.warning('Vui lòng nhập số điện thoại');
             return;
         }
 
         if (!listProductTam || listProductTam.length === 0) {
-            alert('Giỏ hàng trống. Vui lòng chọn sản phẩm');
+            toastr.warning('Giỏ hàng trống. Vui lòng chọn sản phẩm');
             return;
         }
 
@@ -237,7 +237,7 @@ async function createInvoice() {
         const customerPaid = parseFloat(document.getElementById('customerPaid').value) || 0;
 
         if (customerPaid < totalAmount) {
-            alert('Tiền khách đưa không đủ để thanh toán!');
+            toastr.dang('Tiền khách đưa không đủ để thanh toán!');
             return;
         }
 
@@ -298,7 +298,6 @@ async function createInvoice() {
                     type: "success",
                     closeOnConfirm: true
                 }, function() {
-                    // Reset form và chuyển hướng chỉ khi đã tạo hóa đơn thành công
                     if (invoiceCreated) {
                         resetInvoiceForm();
                         window.location.href = '/admin/invoice';
@@ -310,17 +309,17 @@ async function createInvoice() {
                 if (res.status === exceptionCode) {
                     toastr.warning(errorResult.defaultMessage || 'Có lỗi xảy ra');
                 } else {
-                    alert(errorResult.message || 'Có lỗi xảy ra! Vui lòng thử lại.');
+                    toastr.error(errorResult.message || 'Có lỗi xảy ra! Vui lòng thử lại.');
                 }
             }
         } catch (error) {
             console.error("Lỗi khi tạo hóa đơn:", error);
-            alert('Đã xảy ra lỗi khi tạo hóa đơn. Vui lòng thử lại.');
+            toastr.error ('Đã xảy ra lỗi khi tạo hóa đơn. Vui lòng thử lại.');
         }
 
     } catch (unexpectedError) {
         console.error("Lỗi không xác định khi tạo hóa đơn:", unexpectedError);
-        alert('Đã xảy ra lỗi không mong muốn. Vui lòng thử lại.');
+        toastr.error('Đã xảy ra lỗi không mong muốn. Vui lòng thử lại.');
     }
 }
 
@@ -358,6 +357,7 @@ function validateProductData(item) {
         sizeName
     };
 }
+
 function generateInvoiceNumber() {
     return 'HD-' + Math.random().toString(36).substr(2, 9).toUpperCase();
 }
@@ -467,7 +467,6 @@ header p {
     `);
     printWindow.document.close();
 }
-
 function createInvoiceDetailsObject(invoiceResponse, fullName, phone, totalAmount, customerPaid, changeAmount) {
     const invoiceNumber = invoiceResponse?.id ? `HD-${invoiceResponse.id}` : generateInvoiceNumber();
     const items = listProductTam.map(item => ({
@@ -480,7 +479,6 @@ function createInvoiceDetailsObject(invoiceResponse, fullName, phone, totalAmoun
     }));
 
     return {
-        //invoiceNumber: invoiceResponse?.id ? 'HD-' + invoiceResponse.id : generateInvoiceNumber(),
         invoiceNumber: invoiceNumber,
         date: new Date().toLocaleString('vi-VN', {
             day: '2-digit',

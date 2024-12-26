@@ -38,7 +38,7 @@ async function loadProductIndex(page) {
 
 
 async function loadSanPhamBanChay(page) {
-    var size = 5;
+    var size= 5;
     var url = 'http://localhost:8080/api/product/public/findAll?page=' + page + '&size=' + size + '&sort=quantitySold,desc';
     const response = await fetch(url, {
         method: 'GET'
@@ -99,27 +99,51 @@ async function loadAProduct() {
         document.getElementById("imgdetailpro").src = result.imageBanner
         document.getElementById("quantityA").innerHTML = result.quantity
         document.getElementById("descriptiondetail").innerHTML = result.description
-        document.getElementById("thuonghieu").innerHTML = result.trademark == null ? '' : result.trademark.name
-        document.getElementById("chatlieu").innerHTML = result.material == null ? '' : 'Chất liệu: ' + result.material.name
-        document.getElementById("degiay").innerHTML = result.sole == null ? '' : 'Loại đế giày: ' + result.sole.name
-        document.getElementById("btnaddcart").onclick = function () {
+        document.getElementById("thuonghieu").innerHTML = result.trademark==null?'':result.trademark.name
+        document.getElementById("chatlieu").innerHTML = result.material==null?'':'Chất liệu: '+result.material.name
+        document.getElementById("degiay").innerHTML = result.sole==null?'':'Loại đế giày: '+result.sole.name
+        document.getElementById("btnaddcart").onclick = function() {
             addCart(result);
         }
         document.getElementById("btnmuangay").onclick = function () {
-            addLatestCart(result);
-
-            var listproduct = JSON.parse(localStorage.getItem('product_cart'));
-            if (listproduct && listproduct.length > 0) {
-                var latestProduct = listproduct[0];
-                console.log(latestProduct);
+            if (!idColorCart) {
+                toastr.error("Vui lòng chọn màu sản phẩm");
+                return;
             }
-            window.location.href = "checkout";
 
-            loadCartCheckOut();
+            var selectedSize = document.querySelector('input[name="sizepro"]:checked');
+            if (!selectedSize) {
+                toastr.error("Vui lòng chọn kích thước");
+                return;
+            }
+
+            var quantity = parseInt(document.getElementById("inputslcart").value) || 1;
+            if (quantity > maxQuantity) {
+                toastr.error(`Số lượng tồn kho không đủ. Chỉ còn ${maxQuantity} sản phẩm`);
+                return;
+            }
+
+            var buyNowItem = [{
+                product: result,
+                color: {
+                    id: idColorCart,
+                    colorName: document.getElementById("colorname").innerHTML
+                },
+                size: {
+                    id: selectedSize.value,
+                    sizeName: selectedSize.parentElement.textContent.trim()
+                },
+                quantiy: quantity,
+                colorImage: document.getElementById("imgdetailpro").src
+            }];
+
+            sessionStorage.setItem("buy_now_item", JSON.stringify(buyNowItem));
+
+            window.location.href = "checkout?type=buynow";
         }
+    }
 
-
-        console.log("result" + result.name)
+        console.log("result"+result.name)
         var main = ''
         for (i = 0; i < result.productImages.length; i++) {
             main += `<div class="col-lg-2 col-md-2 col-sm-2 col-2 singdimg">
@@ -147,7 +171,7 @@ async function loadAProduct() {
         var url = 'http://localhost:8080/api/product/public/searchFull?page=0&size=6';
         const res = await fetch(url, {
             method: 'POST',
-            headers: new Headers({'Content-Type': 'application/json'}),
+            headers: new Headers({ 'Content-Type': 'application/json' }),
             body: JSON.stringify(listCate)
         });
         var resultLq = await res.json();
@@ -174,7 +198,6 @@ async function loadAProduct() {
                 </div>`
         }
         document.getElementById("listProductGy").innerHTML = main;
-    }
 }
 
 async function clickImgdetail(e) {
@@ -253,7 +276,6 @@ async function clickSize(e) {
 }
 
 let maxQuantity = 0;
-
 async function displayProductQuantity(idProColor, idSize) {
     try {
         var url = `http://localhost:8080/api/product-size/public/find-quantity-by-color-and-size?colorId=${idProColor}&sizeId=${idSize}`;
@@ -275,17 +297,17 @@ async function displayProductQuantity(idProColor, idSize) {
             if (quantity > 0) {
                 quantityElement.innerHTML = `Số lượng: ${quantity}`;
                 quantityElement.classList.remove('text-danger');
-                quantityElement.classList.add('text-success');
+                quantityElement.classList.add('text-black');
             } else {
                 quantityElement.innerHTML = "Hết hàng";
-                quantityElement.classList.remove('text-success');
+                quantityElement.classList.remove('text-black');
                 quantityElement.classList.add('text-danger');
             }
 
             return quantity;
         } else {
             quantityElement.innerHTML = "Không tìm thấy số lượng";
-            quantityElement.classList.remove('text-success');
+            quantityElement.classList.remove('text-black');
             quantityElement.classList.add('text-danger');
             return 0;
         }
@@ -301,12 +323,10 @@ function upAndDownDetail(idsize, quantityChange) {
         if (list[i].size.id == idsize) {
             var newQuantity = Number(list[i].quantiy) + Number(quantityChange);
 
-            // Validate new quantity against available stock
             if (newQuantity <= 0) {
                 toastr.error("Số lượng không thể nhỏ hơn 1");
                 return;
             }
-
             if (newQuantity > list[i].size.quantity) {
                 toastr.error(`Số lượng sản phẩm chỉ còn ${list[i].size.quantity}`);
                 return;
@@ -324,7 +344,6 @@ function upAndDownDetail(idsize, quantityChange) {
 
     loadAllCart();
 }
-
 function upAndDownDetail(val) {
     var quantityInput = document.getElementById("inputslcart");
     var currentQuantity = Number(quantityInput.value);
@@ -343,7 +362,6 @@ function upAndDownDetail(val) {
 
     quantityInput.value = newQuantity;
 }
-
 function validateQuantityAndAddToCart(product) {
 
     var quantityInput = document.getElementById('quantityInput');
@@ -358,10 +376,9 @@ function validateQuantityAndAddToCart(product) {
 
     addCart(product, currentQuantity);
 }
-
 async function renderProductList(result) {
     var productListContainer = document.getElementById("listproductpro");
-    productListContainer.innerHTML = ""; // Clear previous content
+    productListContainer.innerHTML = "";
 
     var list = result.content;
     var main = '';
@@ -405,7 +422,7 @@ var currentFilterType = 1;
 
 function sortProduct() {
     var sort = document.getElementById("sortpro").value;
-    switch (currentFilterType) {
+    switch(currentFilterType) {
         case 1:
             loadProductByCategory(0, sort);
             break;
@@ -430,7 +447,7 @@ async function loadProductByCategory(page, sort) {
     }
 
     try {
-        const response = await fetch(url, {method: 'GET'});
+        const response = await fetch(url, { method: 'GET' });
         var result = await response.json();
         renderProductList(result);
         renderPagination(result.totalPages, loadProductByCategory);
@@ -519,9 +536,8 @@ async function searchFullmobile(page, sort) {
     }
 }
 
-// Existing helper functions (formatmoney, etc.) remain the same
 function formatmoney(price) {
-    return new Intl.NumberFormat('vi-VN', {style: 'currency', currency: 'VND'}).format(price);
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 }
 
 
@@ -535,36 +551,31 @@ async function postData(page) {
     const listTrademark = Array.from(listTra).filter(input => input.checked).map(input => input.value);
     const url = `http://localhost:8080/api/product/public/searchFull?smallPrice=${min_price}&largePrice=${max_price}&size=${size}`;
 
-    // Payload (dữ liệu cần gửi đi, có thể thêm các tham số nếu cần)
+
     const payload = {
         listIdCategory: listcate,
         listIdTrademark: listTrademark
     };
 
     try {
-        // Gửi yêu cầu POST với payload
         const response = await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(payload) // Dữ liệu gửi đi dưới dạng JSON
+            body: JSON.stringify(payload)
         });
 
-        // Kiểm tra nếu phản hồi từ server là thành công (status 200)
         if (response.ok) {
-            // Lấy dữ liệu trả về và chuyển đổi nó thành JSON
+
             const result = await response.json();
             renderProductList(result.content);
-            renderPagination(result.totalPages, postData);
-            // In kết quả ra console
+            renderPagination(result.totalPages,postData);
             console.log("Dữ liệu trả về từ API:", result);
         } else {
-            // Nếu có lỗi trong yêu cầu, in ra lỗi status
             console.error("Lỗi khi gọi API:", response.status, response.statusText);
         }
     } catch (error) {
-        // Nếu có lỗi trong quá trình gửi yêu cầu, in ra lỗi
         console.error("Lỗi khi gửi yêu cầu POST:", error);
     }
 }
@@ -595,8 +606,6 @@ async function postData(page) {
 //     }
 // }
 
-
-// Load trademark list
 async function loadTrademarkSub() {
     try {
         const response = await fetch('http://localhost:8080/api/trademark/public/all');
@@ -616,8 +625,6 @@ async function loadTrademarkSub() {
         console.error("Error loading trademarks:", error);
     }
 }
-
-// Load category list
 async function loadCategorySub() {
     try {
         const response = await fetch('http://localhost:8080/api/category/public/findPrimaryCategory');
@@ -650,8 +657,6 @@ async function loadCategorySub() {
         console.error("Error loading categories:", error);
     }
 }
-
-// Toggle sub-menu visibility
 function clickOpenSubMenu(e) {
     var sing = e.closest('.singlelistmenu');
     var subCate = sing.querySelector('.listsubcate');
@@ -664,7 +669,6 @@ function clickOpenSubMenu(e) {
     }
 }
 
-// Load all product list for search
 async function loadAllProductList() {
     var search = document.getElementById("search").value;
 
