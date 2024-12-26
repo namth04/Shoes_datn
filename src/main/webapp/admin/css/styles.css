@@ -11894,15 +11894,17 @@ body {
 }
 
 .thongke1 {
-    background-color: #B6E2FD;
+    background: linear-gradient(to bottom, #61dee5, #36bcdf);
     /* width: 300px; */
-    height: 125px;
-    border: 3px solid #345d74;
+    height: 120px;
+    line-height: 30px;
+    border: 1px solid rgb(141 137 137);
     -moz-border-radius: 10px;
     -webkit-border-radius: 10px;
     -ms-border-radius: 10px;
     -o-border-radius: 10px;
     border-radius: 10px;
+    box-shadow: 4px 4px 10px 0px rgb(0 0 0 / 14%);
 }
 
 .thongke2 {
@@ -11959,11 +11961,11 @@ body {
 .texts {
     text-align: center;
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 18px;
+    font-size: 14px;
     color: #000000;
     letter-spacing: .1em;
-    padding: 10px;
-    height: 80px;
+    padding: 8px;
+    /* height: 80px; */
 }
 
 .soluong {
