@@ -113,7 +113,7 @@ async function loadAProduct() {
 
             var selectedSize = document.querySelector('input[name="sizepro"]:checked');
             if (!selectedSize) {
-                toastr.error("Vui lòng chọn kích thước");
+                toastr.error("Bạn chưa chọn kích thước sản phẩm");
                 return;
             }
 
@@ -580,32 +580,6 @@ async function postData(page) {
     }
 }
 
-// Hàm render danh sách sản phẩm
-// function renderProductList(products) {
-//     const productListContainer = document.getElementById("listproductpro");
-//     productListContainer.innerHTML = "";  // Xóa dữ liệu cũ
-//
-//     if (products && products.length > 0) {
-//         products.forEach(product => {
-//             const productItem = document.createElement("div");
-//             productItem.classList.add("product-item");
-//
-//             productItem.innerHTML = `
-//                         <img src="${product.imageUrl}" alt="${product.name}">
-//                         <h3>${product.name}</h3>
-//                         <p>Price: ${product.price}</p>
-//                         <p>Category: ${product.category}</p>
-//                         <p>Trademark: ${product.trademark}</p>
-//                     `;
-//
-//             productListContainer.appendChild(productItem);  // Thêm sản phẩm vào container
-//         });
-//     } else {
-//         // Nếu không có sản phẩm, hiển thị thông báo
-//         productListContainer.innerHTML = "<p>No products found.</p>";
-//     }
-// }
-
 async function loadTrademarkSub() {
     try {
         const response = await fetch('http://localhost:8080/api/trademark/public/all');
@@ -614,7 +588,7 @@ async function loadTrademarkSub() {
         var main = list.map(trademark => `
             <div class="singlelistmenu">
                 <label class="checkbox-custom cateparent">${trademark.name}
-                    <input value="${trademark.id}" class="inputchecktrademark" type="checkbox">
+                    <input value="${trademark.id}" class="inputchecktrademark" onchange="handleCategoryChange(this)" type="checkbox">
                     <span class="checkmark-checkbox"></span>
                 </label>
             </div>
@@ -633,7 +607,7 @@ async function loadCategorySub() {
         var main = list.map(category => {
             var mainChild = category.categories.map(child => `
                 <label class="checkbox-custom">${child.name}
-                    <input value="${child.id}" class="inputcheck" type="checkbox">
+                    <input value="${child.id}" class="inputcheck" onchange="handleCategoryChange(this)" type="checkbox">
                     <span class="checkmark-checkbox"></span>
                 </label>
             `).join('');
@@ -667,6 +641,15 @@ function clickOpenSubMenu(e) {
         var listInput = subCate.querySelectorAll('.inputcheck');
         listInput.forEach(input => input.checked = false);
     }
+}
+function handleCategoryChange(checkbox) {
+    const allCheckedBoxes = document.querySelectorAll('.inputcheck:checked, .inputchecktrademark:checked');
+
+    if (allCheckedBoxes.length === 0) {
+        return;
+    }
+
+    searchFull(0, null);
 }
 
 async function loadAllProductList() {

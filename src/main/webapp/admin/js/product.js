@@ -1,5 +1,4 @@
-const listFile = [];
-
+let listFile = [];
 var size = 8;
 
 async function loadProduct(page, param, listCate) {
@@ -87,18 +86,12 @@ async function loadProduct(page, param, listCate) {
                     </li>`;
     }
     document.getElementById("pageable").innerHTML = mainpage;
-    // Gắn sự kiện onclick bằng JavaScript
     const pageItems = document.querySelectorAll("#pageable .page-item");
     pageItems.forEach((item, index) => {
         item.addEventListener("click", () => {
             loadProduct(index, param, listCate);
         });
     });
-}
-
-
-async function filterByCate() {
-    loadProduct(0, "", $("#listdpar").val());
 }
 async function loadAProduct() {
     var uls = new URL(document.URL)
@@ -122,20 +115,29 @@ async function loadAProduct() {
         document.getElementById("imgpreproduct").src = result.imageBanner
         tinyMCE.get('editor').setContent(result.description)
         var main = ''
+
+        listFile = [];
         for (i = 0; i < result.productImages.length; i++) {
+            listFile.push({
+                id: result.productImages[i].id,
+                isExisting: true,
+                url: result.productImages[i].linkImage
+            });
             main += `<div id="imgdathem${result.productImages[i].id}" class="col-md-3 col-sm-4 col-4">
                         <img style="width: 90%;" src="${result.productImages[i].linkImage}" class="image-upload">
                         <button onclick="deleteProductImage(${result.productImages[i].id})" class="btn btn-danger form-control">Xóa ảnh</button>
                     </div>`
         }
         document.getElementById("listanhdathem").innerHTML = main
+
+        updateChooseFileButton();
         await loadAllCategorySelect();
         var listCate = []
+        console.log(listCate)
         for (i = 0; i < result.productCategories.length; i++) {
             listCate.push(result.productCategories[i].category.id);
         }
-        console.log(listCate)
-        $("#listdpar").val(listCate).change();;
+        $("#listdpar").val(listCate).change();
         var color = result.productColors;
         var mcl = ''
         for (i = 0; i < color.length; i++) {
@@ -175,164 +177,6 @@ async function loadAProduct() {
     }
 }
 
-var linkbanner = '';
-async function saveProduct() {
-    document.getElementById("loading").style.display = 'block';
-    var uls = new URL(document.URL);
-    var id = uls.searchParams.get("id");
-
-    var url = id != null
-        ? 'http://localhost:8080/api/product/admin/update'
-        : 'http://localhost:8080/api/product/admin/create';
-
-
-    var codesp = document.getElementById("codesp").value.trim();
-    var namesp = document.getElementById("namesp").value.trim();
-    var price = document.getElementById("price").value.trim();
-    var alias = document.getElementById("alias").value.trim();
-    var listdpar = $("#listdpar").val();
-    var description = tinyMCE.get('editor').getContent().trim();
-    var thuonghieu = document.getElementById("thuonghieu").value.trim();
-    var chatlieu = document.getElementById("chatlieu").value.trim();
-    var degiay = document.getElementById("degiay").value.trim();
-
-
-    if (!codesp) {
-        toastr.warning("Mã sản phẩm không được để trống!");
-        document.getElementById("loading").style.display = 'none';
-        return;
-    }
-
-    if (!namesp) {
-        toastr.warning("Tên sản phẩm không được để trống!");
-        document.getElementById("loading").style.display = 'none';
-        return;
-    }
-    if (!price || isNaN(price) || Number(price) <= 0) {
-        toastr.warning("Giá phải là số dương!");
-        document.getElementById("loading").style.display = 'none';
-        return;
-    }
-    if (!alias) {
-        toastr.warning("Alias không được để trống!");
-        document.getElementById("loading").style.display = 'none';
-        return;
-    }
-    if (!listdpar || listdpar.length === 0) {
-        toastr.warning("Vui lòng chọn danh mục!");
-        document.getElementById("loading").style.display = 'none';
-        return;
-    }
-    if (!description) {
-        toastr.warning("Mô tả không được để trống!");
-        document.getElementById("loading").style.display = 'none';
-        return;
-    }
-    if (!thuonghieu) {
-        toastr.warning("Vui lòng chọn thương hiệu!");
-        document.getElementById("loading").style.display = 'none';
-        return;
-    }
-    if (!chatlieu) {
-        toastr.warning("Vui lòng chọn chất liệu!");
-        document.getElementById("loading").style.display = 'none';
-        return;
-    }
-    if (!degiay) {
-        toastr.warning("Vui lòng chọn đế giày!");
-        document.getElementById("loading").style.display = 'none';
-        return;
-    }
-
-    await loadColor();
-
-    if (listColor.length === 0) {
-        document.getElementById("loading").style.display = 'none';
-        return;
-    }
-
-    await uploadFile(document.getElementById("imgbanner"));
-    var listLinkImg = id == null ? await uploadMultipleFileNotResp() : []; // Skip if updating
-    await loadColor();
-
-    if (!linkbanner) {
-        toastr.warning("Vui lòng tải lên banner hình ảnh!");
-        document.getElementById("loading").style.display = 'none';
-        return;
-    }
-
-    if (id == null && (!listLinkImg || listLinkImg.length === 0)) { // Only check for detail images if creating
-        toastr.warning("Vui lòng tải lên ít nhất một hình ảnh chi tiết!");
-        document.getElementById("loading").style.display = 'none';
-        return;
-    }
-    var product = {
-        id: id,
-        code: codesp,
-        alias: alias,
-        name: namesp,
-        imageBanner: linkbanner,
-        price: price,
-        description: description,
-        listCategoryIds: listdpar,
-        linkLinkImages: listLinkImg,
-        colors: listColor,
-        trademark: { id: thuonghieu },
-        material: { id: chatlieu },
-        sole: { id: degiay }
-    };
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: new Headers({
-            'Authorization': 'Bearer ' + token,
-            'Content-Type': 'application/json'
-        }),
-        body: JSON.stringify(product)
-    });
-    if (response.status < 300) {
-        swal({
-                title: "Thông báo",
-                text: "Thêm/Sửa sản phẩm thành công",
-                type: "success"
-            },
-            function() {
-                document.getElementById("loading").style.display = 'none';
-                window.location.href = 'http://localhost:8080/admin/product';
-            });
-    } else {
-        swal({
-                title: "Thông báo",
-                text: "Thêm/Sửa sản phẩm thất bại",
-                type: "error"
-            },
-            function() {
-                document.getElementById("loading").style.display = 'none';
-                window.location.reload();
-            });
-    }
-}
-async function deleteProduct(id) {
-    var con = confirm("Bạn chắc chắn muốn xóa sản phẩm này?");
-    if (con == false) {
-        return;
-    }
-    var url = 'http://localhost:8080/api/product/admin/delete?id=' + id;
-    const response = await fetch(url, {
-        method: 'DELETE',
-        headers: new Headers({
-            'Authorization': 'Bearer ' + token
-        })
-    });
-    if (response.status < 300) {
-        toastr.success("Xóa sản phẩm thành công!");
-        await new Promise(r => setTimeout(r, 1000));
-        window.location.reload();
-    }
-    if (response.status == exceptionCode) {
-        var result = await response.json()
-        toastr.warning(result.defaultMessage);
-    }
-}
 async function deleteProductImage(id) {
     var con = confirm("Bạn muốn xóa ảnh này?");
     if (con == false) {
@@ -348,10 +192,437 @@ async function deleteProductImage(id) {
     if (response.status < 300) {
         toastr.success("Xóa ảnh thành công!");
         document.getElementById("imgdathem" + id).style.display = 'none';
+
+        // Remove the deleted image from listFile
+        listFile = listFile.filter(file => !(file.isExisting && file.id === id));
+
+        // Update choose file button state
+        updateChooseFileButton();
     }
     if (response.status == exceptionCode) {
         var result = await response.json()
         toastr.warning(result.defaultMessage);
+    }
+}
+
+function updateChooseFileButton() {
+    const maxImages = 3;
+    const currentImageCount = listFile.length;
+    const chooseFileInput = document.querySelector('#choosefile');
+    const chooseImageDiv = document.getElementById("choose-image");
+
+    if (currentImageCount >= maxImages) {
+        chooseFileInput.disabled = true;
+        chooseImageDiv.style.opacity = "0.5";
+        chooseImageDiv.style.cursor = "not-allowed";
+        chooseFileInput.value = ''; // Clear any selected files
+    } else {
+        chooseFileInput.disabled = false;
+        chooseImageDiv.style.opacity = "1";
+        chooseImageDiv.style.cursor = "pointer";
+    }
+}
+
+function loadInit() {
+    $('input#choosefile').change(function() {
+        var files = $(this)[0].files;
+    });
+    document.querySelector('#choosefile').addEventListener("change", previewImages);
+    updateChooseFileButton();
+
+    function previewImages() {
+        var files = $(this)[0].files;
+
+        // Calculate remaining slots considering both existing and new files
+        const remainingSlots = 3 - listFile.filter(file => !file.isExisting).length -
+            listFile.filter(file => file.isExisting).length;
+
+        if (remainingSlots <= 0) {
+            toastr.warning("Chỉ được phép thêm tối đa 3 ảnh sản phẩm phụ!");
+            return;
+        }
+
+        // Only process up to the remaining slots
+        const filesToProcess = Array.from(files).slice(0, remainingSlots);
+
+        var preview = document.querySelector('#preview');
+
+        filesToProcess.forEach(file => {
+            if (!/\.(jpe?g|png|gif)$/i.test(file.name)) {
+                toastr.warning(file.name + " không phải là file ảnh hợp lệ");
+                return;
+            }
+
+            listFile.push({
+                file: file,
+                isExisting: false
+            });
+            readAndPreview(file);
+        });
+
+        updateChooseFileButton();
+
+        function readAndPreview(file) {
+            var reader = new FileReader();
+
+            reader.addEventListener("load", function() {
+                var div = document.createElement('div');
+                div.className = 'col-md-3 col-sm-6 col-6';
+                div.style.height = '120px';
+                div.style.paddingTop = '5px';
+                div.marginTop = '100px';
+                preview.appendChild(div);
+
+                var img = document.createElement('img');
+                img.src = this.result;
+                img.style.height = '85px';
+                img.style.width = '90%';
+                img.className = 'image-upload';
+                img.style.marginTop = '5px';
+                div.appendChild(img);
+
+                var button = document.createElement('button');
+                button.style.height = '30px';
+                button.style.width = '90%';
+                button.innerHTML = 'xóa';
+                button.className = 'btn btn-warning';
+                div.appendChild(button);
+
+                button.addEventListener("click", function() {
+                    div.remove();
+                    listFile = listFile.filter(f =>
+                        f.isExisting || (f.file !== file)
+                    );
+                    updateChooseFileButton();
+                });
+            });
+
+            reader.readAsDataURL(file);
+        }
+    }
+}
+
+
+async function uploadMultipleFileNotResp() {
+    const formData = new FormData()
+
+    const newFiles = listFile.filter(file => !file.isExisting);
+    for (let file of newFiles) {
+        formData.append("file", file.file)
+    }
+
+    if (newFiles.length === 0) {
+        return [];
+    }
+
+    var urlUpload = 'http://localhost:8080/api/public/upload-multiple-file';
+    const res = await fetch(urlUpload, {
+        method: 'POST',
+        body: formData
+    });
+    if (res.status < 300) {
+        return await res.json();
+    } else {
+        return [];
+    }
+}
+
+async function filterByCate() {
+    loadProduct(0, "", $("#listdpar").val());
+}
+
+
+let listColor = [];
+let linkbanner = null;
+
+
+function isColorDuplicate(newColorName, currentColorBlock = null) {
+    const colorBlocks = document.getElementById("listcolorblock").getElementsByClassName("singlecolor");
+    for (let block of colorBlocks) {
+        if (block === currentColorBlock?.parentNode.parentNode) continue;
+        const existingName = block.getElementsByClassName("colorName")[0].value.trim().toLowerCase();
+        if (existingName === newColorName.toLowerCase()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function validateColors() {
+    const colorBlocks = document.getElementById("listcolorblock").getElementsByClassName("singlecolor");
+    if (colorBlocks.length === 0) {
+        toastr.warning("Vui lòng thêm ít nhất một màu sắc!");
+        return false;
+    }
+    return true;
+}
+
+
+async function saveProduct() {
+    try {
+
+        document.getElementById("loading").style.display = 'block';
+        const uls = new URL(document.URL);
+        const id = uls.searchParams.get("id");
+        const formData = {
+            codesp: document.getElementById("codesp").value.trim(),
+            namesp: document.getElementById("namesp").value.trim(),
+            price: document.getElementById("price").value.trim(),
+            alias: document.getElementById("alias").value.trim(),
+            listdpar: $("#listdpar").val(),
+            description: tinyMCE.get('editor').getContent().trim(),
+            thuonghieu: document.getElementById("thuonghieu").value.trim(),
+            chatlieu: document.getElementById("chatlieu").value.trim(),
+            degiay: document.getElementById("degiay").value.trim()
+        };
+
+        if (!validateProduct(formData)) {
+            document.getElementById("loading").style.display = 'none';
+            return;
+        }
+        await loadColor();
+
+        if (listColor.length === 0) {
+            document.getElementById("loading").style.display = 'none';
+            return;
+        }
+        const [bannerResult, detailImagesResult] = await Promise.all([
+            uploadFile(document.getElementById("imgbanner")),
+            id == null ? uploadMultipleFileNotResp() : Promise.resolve([])
+        ]);
+
+        if (!linkbanner) {
+            toastr.warning("Vui lòng tải lên banner hình ảnh!");
+            document.getElementById("loading").style.display = 'none';
+            return;
+        }
+
+        if (id == null && (!detailImagesResult || detailImagesResult.length === 0)) {
+            toastr.warning("Vui lòng tải lên ít nhất một hình ảnh chi tiết!");
+            document.getElementById("loading").style.display = 'none';
+            return;
+        }
+        if (!validateColors()) {
+            document.getElementById("loading").style.display = 'none';
+            return;
+        }
+
+        const url = id != null
+            ? 'http://localhost:8080/api/product/admin/update'
+            : 'http://localhost:8080/api/product/admin/create';
+
+        const product = {
+            id: id,
+            code: formData.codesp,
+            alias: formData.alias,
+            name: formData.namesp,
+            imageBanner: linkbanner,
+            price: formData.price,
+            description: formData.description,
+            listCategoryIds: formData.listdpar,
+            linkLinkImages: detailImagesResult,
+            colors: listColor,
+            trademark: { id: formData.thuonghieu },
+            material: { id: formData.chatlieu },
+            sole: { id: formData.degiay }
+        };
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: new Headers({
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            }),
+            body: JSON.stringify(product)
+        });
+
+        if (response.status < 300) {
+            swal({
+                title: "Thông báo",
+                text: "Thêm/Sửa sản phẩm thành công",
+                type: "success"
+            }, () => {
+                document.getElementById("loading").style.display = 'none';
+                window.location.href = 'http://localhost:8080/admin/product';
+            });
+        } else {
+            throw new Error('Server error');
+        }
+
+
+    } catch (error) {
+        console.error('Error:', error);
+        swal({
+            title: "Thông báo",
+            text: "Thêm/Sửa sản phẩm thất bại",
+            type: "error"
+        }, () => {
+            document.getElementById("loading").style.display = 'none';
+            window.location.reload();
+        });
+    }
+}
+
+function addBlockColor() {
+    var main = `<div class="col-sm-6">
+        <div class="singlecolor row">
+            <div class="col-12"><i onclick="removeColorBlock(this)" class="fa fa-trash pointer"></i></div>
+            <div class="col-8 inforcolor">
+                <input type="hidden" class="idcolor">
+                <label class="lb-form">Tên màu:</label>
+                <input type="text" class="form-control colorName" onchange="validateColorName(this)">
+                <label class="lb-form">Ảnh màu</label>
+                <input onchange="priviewImg(this)" type="file" class="form-control fileimgclo">
+            </div>
+            <div class="col-4 divimgpre">
+                <img class="imgpreview" src="" style="width: 100%;">
+            </div>
+            <span onclick="addSizeBlock(this)" class="pointer btnaddsize"><i class="fa fa-plus"></i> Thêm size</span>
+            <div class="listsizeblock">
+            </div>
+        </div></div>`;
+    document.getElementById("listcolorblock").insertAdjacentHTML('beforeend', main);
+}
+
+function validateColorName(input) {
+    const colorName = input.value.trim();
+    if (isColorDuplicate(colorName, input)) {
+        toastr.warning(`Màu sắc "${colorName}" đã tồn tại!`);
+        input.value = '';
+        input.focus();
+    }
+}
+async function addColor() {
+    const colorName = document.getElementById("colorName").value.trim();
+    const colorCode = document.getElementById("colorCode").value.trim();
+
+    if (!colorName) {
+        toastr.warning("Tên màu không được để trống!");
+        return;
+    }
+    if (!colorCode) {
+        toastr.warning("Mã màu không được để trống!");
+        return;
+    }
+
+    if (isColorDuplicate(colorName)) {
+        toastr.warning("Tên màu này đã tồn tại!");
+        return;
+    }
+
+    const newColor = {
+        colorName: colorName,
+        colorCode: colorCode,
+        sizes: []
+    };
+
+    listColor.push(newColor);
+    renderColorTable();
+
+    document.getElementById("colorName").value = "";
+    document.getElementById("colorCode").value = "";
+    document.getElementById("sizeTable").style.display = "none";
+}
+
+
+function removeColor(index) {
+    listColor.splice(index, 1);
+    renderColorTable();
+}
+
+
+function renderColorTable() {
+    const tableBody = document.getElementById("colorTableBody");
+    if (!tableBody) return;
+
+    tableBody.innerHTML = "";
+    listColor.forEach((color, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${color.colorName}</td>
+            <td>
+                <div class="color-preview" style="background-color: ${color.colorCode}"></div>
+                ${color.colorCode}
+            </td>
+            <td>
+                <button class="btn btn-sm btn-danger" onclick="removeColor(${index})">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+function validateProduct(data) {
+    const validations = [
+        { condition: !data.codesp, message: "Mã sản phẩm không được để trống!" },
+        { condition: !data.namesp, message: "Tên sản phẩm không được để trống!" },
+        { condition: !data.price || isNaN(data.price) || Number(data.price) <= 0, message: "Giá phải là số dương!" },
+        { condition: !data.alias, message: "Alias không được để trống!" },
+        { condition: !data.listdpar || data.listdpar.length === 0, message: "Vui lòng chọn danh mục!" },
+        { condition: !data.description, message: "Mô tả không được để trống!" },
+        { condition: !data.thuonghieu, message: "Vui lòng chọn thương hiệu!" },
+        { condition: !data.chatlieu, message: "Vui lòng chọn chất liệu!" },
+        { condition: !data.degiay, message: "Vui lòng chọn đế giày!" }
+    ];
+
+    for (const validation of validations) {
+        if (validation.condition) {
+            toastr.warning(validation.message);
+            return false;
+        }
+    }
+    return true;
+}
+
+async function deleteProduct(productId) {
+    try {
+        const url = `http://localhost:8080/api/product/admin/findById?id=${productId}`;
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: new Headers({
+                'Authorization': 'Bearer ' + token
+            })
+        });
+
+        if (!response.ok) {
+            toastr.error("Không thể lấy thông tin sản phẩm.");
+            return;
+        }
+
+        const product = await response.json();
+
+
+
+
+        const confirmDelete = confirm("Bạn chắc chắn muốn xóa sản phẩm này?");
+        if (!confirmDelete) {
+            return;
+        }
+        if (product.quantitySold > 0) {
+            toastr.warning("Sản phẩm đã có người mua, không thể xóa.");
+            return;
+        }
+
+        const deleteUrl = `http://localhost:8080/api/product/admin/delete?id=${productId}`;
+        const deleteResponse = await fetch(deleteUrl, {
+            method: 'DELETE',
+            headers: new Headers({
+                'Authorization': 'Bearer ' + token
+            })
+        });
+
+        if (deleteResponse.ok) {
+            toastr.success("Sản phẩm đã được xóa thành công.");
+            loadProduct(0, "", []);
+        } else {
+            toastr.error("Không thể xóa sản phẩm.");
+        }
+    } catch (error) {
+        console.error("Error deleting product: ", error);
+        toastr.error("Có lỗi xảy ra khi xóa sản phẩm.");
     }
 }
 
@@ -401,10 +672,32 @@ async function deleteProductColor(id) {
     }
 }
 
+
+function checkDuplicateColors() {
+    const colorBlocks = document.getElementById("listcolorblock").getElementsByClassName("singlecolor");
+    const colorNames = new Set();
+
+    for (let block of colorBlocks) {
+        const colorName = block.getElementsByClassName("colorName")[0].value.trim().toLowerCase();
+        if (colorName) {
+            if (colorNames.has(colorName)) {
+                toastr.warning(`Màu sắc "${colorName}" đã tồn tại!`);
+                return false;
+            }
+            colorNames.add(colorName);
+        }
+    }
+    return true;
+}
+
 async function loadColor() {
     var list = document.getElementById("listcolorblock").getElementsByClassName("singlecolor");
     var listF = [];
     listColor = [];
+
+    if (!checkDuplicateColors()) {
+        return;
+    }
 
     for (let i = 0; i < list.length; i++) {
         var singleColor = list[i];
@@ -427,7 +720,6 @@ async function loadColor() {
         var listsizes = [];
         var sizeblockList = singleColor.getElementsByClassName("singelsizeblock");
 
-        // Tập hợp sizeName đã thêm
         var existingSizeNames = new Set();
         for (let j = 0; j < sizeblockList.length; j++) {
             var size = sizeblockList[j];
@@ -464,8 +756,10 @@ async function loadColor() {
         obj.size = listsizes;
         listColor.push(obj);
     }
+
+
     if (listColor.length === 0) {
-        toastr.warning("Vui lòng chọn ít nhất một màu sắc!");
+        toastr.warning("Vui lòng thêm ít nhất một màu sắc!");
         return;
     }
 
@@ -485,6 +779,8 @@ async function loadColor() {
     console.log(listColor);
 }
 
+
+
 async function uploadMultipleFile(listF) {
     const formData = new FormData()
     for (i = 0; i < listF.length; i++) {
@@ -498,22 +794,6 @@ async function uploadMultipleFile(listF) {
     return await res.json();
 }
 
-async function uploadMultipleFileNotResp() {
-    const formData = new FormData()
-    for (i = 0; i < listFile.length; i++) {
-        formData.append("file", listFile[i])
-    }
-    var urlUpload = 'http://localhost:8080/api/public/upload-multiple-file';
-    const res = await fetch(urlUpload, {
-        method: 'POST',
-        body: formData
-    });
-    if (res.status < 300) {
-        return await res.json();
-    } else {
-        return [];
-    }
-}
 async function uploadFile(filePath) {
     const formData = new FormData()
     formData.append("file", filePath.files[0])
@@ -535,33 +815,6 @@ function priviewImg(e) {
     }
 }
 
-function addBlockColor() {
-    var main =
-        `<div class="col-sm-6">
-        <div class="singlecolor row">
-            <div class="col-12"><i onclick="removeColorBlock(this)" class="fa fa-trash pointer"></i></div>
-            <div class="col-8 inforcolor">
-                <input type="hidden" class="idcolor">
-                <label class="lb-form">Tên màu:</label>
-                <input type="text" class="form-control colorName">
-                <label class="lb-form">Ảnh màu</label>
-                <input onchange="priviewImg(this)" type="file" class="form-control fileimgclo">
-            </div>
-            <div class="col-4 divimgpre">
-                <img class="imgpreview" src="" style="width: 100%;">
-            </div>
-            <span onclick="addSizeBlock(this)" class="pointer btnaddsize"><i class="fa fa-plus"></i> Thêm size</span>
-            <div class="listsizeblock">
-                <!-- <div class="singelsizeblock">
-                    <input type="hidden" class="idsize">
-                    <input placeholder="tên size" class="sizename">
-                    <input placeholder="Số lượng" value="0" class="sizequantity">
-                    <i onclick="removeInputSize(this)" class="fa fa-trash-alt trashsize"></i>
-                </div> -->
-            </div>
-        </div></div>`
-    document.getElementById("listcolorblock").insertAdjacentHTML('beforeend', main);
-}
 
 function addSizeBlock(e) {
     var dv = e.parentNode;
@@ -602,82 +855,7 @@ async function loadAllCategorySelect() {
     });
 }
 
-function loadInit() {
-    $('input#choosefile').change(function() {
-        var files = $(this)[0].files;
-    });
-    document.querySelector('#choosefile').addEventListener("change", previewImages);
 
-    function previewImages() {
-        var files = $(this)[0].files;
-        for (i = 0; i < files.length; i++) {
-            listFile.push(files[i]);
-        }
-
-        var preview = document.querySelector('#preview');
-
-        for (i = 0; i < files.length; i++) {
-            readAndPreview(files[i]);
-        }
-
-        function readAndPreview(file) {
-
-            if (!/\.(jpe?g|png|gif)$/i.test(file.name)) {
-                return alert(file.name + " is not an image");
-            }
-
-            var reader = new FileReader(file);
-
-            reader.addEventListener("load", function() {
-                document.getElementById("chon-anhs").className = 'col-sm-3';
-                document.getElementById("chon-anhs").style.height = '100px';
-                document.getElementById("chon-anhs").style.marginTop = '5px';
-                document.getElementById("choose-image").style.height = '120px';
-                document.getElementById("numimage").innerHTML = '';
-                document.getElementById("camera").style.fontSize = '20px';
-                document.getElementById("camera").style.marginTop = '40px';
-                document.getElementById("camera").className = 'fas fa-plus';
-                document.getElementById("choose-image").style.width = '90%';
-
-                var div = document.createElement('div');
-                div.className = 'col-md-3 col-sm-6 col-6';
-                div.style.height = '120px';
-                div.style.paddingTop = '5px';
-                div.marginTop = '100px';
-                preview.appendChild(div);
-
-                var img = document.createElement('img');
-                img.src = this.result;
-                img.style.height = '85px';
-                img.style.width = '90%';
-                img.className = 'image-upload';
-                img.style.marginTop = '5px';
-                div.appendChild(img);
-
-                var button = document.createElement('button');
-                button.style.height = '30px';
-                button.style.width = '90%';
-                button.innerHTML = 'xóa'
-                button.className = 'btn btn-warning';
-                div.appendChild(button);
-
-                button.addEventListener("click", function() {
-                    div.remove();
-                    console.log(listFile.length)
-                    for (i = 0; i < listFile.length; i++) {
-                        if (listFile[i] === file) {
-                            listFile.splice(i, 1);
-                        }
-                    }
-                    console.log(listFile.length)
-                });
-            });
-
-            reader.readAsDataURL(file);
-
-        }
-    }
-}
 async function loadAllProductList(){
     var search = document.getElementById("search").value
     var url = 'http://localhost:8080/api/product/public/findAll-list?search=' + search
@@ -890,4 +1068,8 @@ async function loadSelect() {
         main += `<option value="${list[i].id}">${list[i].name}</option>`
     }
     document.getElementById("degiay").innerHTML = main
+}
+async function addColor(){
+    var response = await fetch('http://localhost:8080/api/trademark/public/all')
+
 }

@@ -57,13 +57,7 @@ public class ProductApi {
 
     @DeleteMapping("/admin/delete")
     public ResponseEntity<?> delete(@RequestParam("id") Long id){
-        if (invoiceDetailRepository.countByProduct(id) > 0 ||
-                invoiceDetailRepository.countByProductColor(id) > 0 ||
-                invoiceDetailRepository.countByProductSize(id) > 0) {
-            throw new MessageException("Sản phẩm đã có người mua, không thể xóa");
-        }
-
-        productService.delete(id);
+            productService.delete(id);
         return new ResponseEntity<>("delete success", HttpStatus.OK);
     }
 
