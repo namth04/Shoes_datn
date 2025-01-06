@@ -2199,14 +2199,14 @@ tr {
 .headersection h4{
     padding: 5px 60px 6px 35px;
     margin: 0 0 0 60px;
-    background: #00483d;
+    background: #FCAF17;
     color: #fff;
     font-size: 14px;
     text-transform: uppercase;
 }
 .headersection:after {
     content: " ";
-    border-top: 30px solid #00483d;
+    border-top: 30px solid #FCAF17;
     border-left: 30px solid #fef1d7;
     margin-left: 40px;
 }
@@ -2236,18 +2236,19 @@ tr {
     position: relative;
 }
 .xemthemblog{
+    padding: 7px 0px;
     position: absolute;
     right: 0;
-    color: #E03C31;
+    color: #FCAF17;
     text-decoration: none;
     font-size: 0.9rem;
     top: 10px;
 }
-.listblogindex{
-    padding-top: 20px;
+.xemthemblog:hover{
+    color: #f3d457;
 }
 .listblogindex{
-    padding-top: 20px;
+    padding-top: 40px;
 }
 .blogpriimage{
     width: 100%;
@@ -2265,6 +2266,9 @@ tr {
     -webkit-line-clamp: 2; /* number of lines to show */
     line-clamp: 2;
     -webkit-box-orient: vertical;
+}
+.titlepriindex:hover{
+    color: #FCAF17;
 }
 .singleblogindex{
     border-bottom: 1px solid #dedede;

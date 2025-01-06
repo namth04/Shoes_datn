@@ -1810,7 +1810,7 @@ pre code {
 
 .table thead th {
     vertical-align: bottom;
-    border-bottom: 2px solid #dee2e6
+    border-bottom: 1px solid #dee2e6
 }
 
 .table tbody + tbody {
@@ -1830,7 +1830,7 @@ pre code {
 }
 
 .table-bordered thead th, .table-bordered thead td {
-    border-bottom-width: 2px
+    border-bottom: 1px solid #dee2e6
 }
 
 .table-borderless th, .table-borderless td, .table-borderless thead th, .table-borderless tbody + tbody {
