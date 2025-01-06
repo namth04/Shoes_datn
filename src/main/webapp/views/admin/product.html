@@ -43,12 +43,14 @@
                     <div class="wrapper">
                         <div class="headertable">
                             <div class="divsearchtb">
-                                <label>search: </label>
-                                <input onkeyup="loadProduct(0,this.value,null)" id="searchtable" placeholder="Tìm kiếm" class="inputsearchtable">
+                                <div class="divsearchtb border" style="height: 45px; line-height: 35px; padding: 5px 10px; border-radius: 7px; width: 200px">
+
+                                <input style="padding: 0px 0px;" onkeyup="loadProduct(0,this.value,null)" id="searchtable" placeholder="Tìm kiếm" class="inputsearchtable">
+                                </div>
                             </div>
                         </div>
-                        <table class="table table-striped tablefix">
-                            <thead class="thead-tablefix">
+                        <table class="table table-bordered">
+                            <thead class="thead-bordered">
                             <tr>
                                 <th>Id</th>
                                 <th>Ảnh</th>
