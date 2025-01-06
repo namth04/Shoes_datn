@@ -254,7 +254,7 @@ p {
 }
 
 .owl-2-style .owl-dots .owl-dot.active span {
-    background: #007bff;
+    background: #FCAF17;
 }
 
 .owl-2-style .owl-dots .owl-dot:active,
@@ -2479,7 +2479,7 @@ tr {
 }
 
 .chat-button {
-    background-color: #007bff;
+    background-color: #FCAF17;
     color: white;
     padding: 10px 20px;
     border: none;
@@ -2501,7 +2501,7 @@ tr {
 }
 
 .chat-header {
-    background-color: #007bff;
+    background-color: #FCAF17;
     color: white;
     padding: 10px;
     border-top-left-radius: 10px;
@@ -2539,7 +2539,7 @@ tr {
 }
 
 .chat-footer button {
-    background-color: #007bff;
+    background-color: #FCAF17;
     color: white;
     border: none;
     padding: 8px 12px;
