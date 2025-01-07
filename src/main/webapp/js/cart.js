@@ -408,7 +408,7 @@ async function productLqCart() {
 
         var listimg = ''
         for (j = 0; j < list[i].productImages.length; j++) {
-            listimg += `<div class="divimgsmpro"><img class="imgsmpro" src="${list[i].productImages[j].linkImage}"></div>`
+            listimg += `<div class="divimgsmpro"><img class="imgsmpro" src="../image/${list[i].productImages[j].linkImage}"></div>`
         }
         main += `<div class="col-lg-3 col-md-3 col-sm-6 col-6">
                 <a href="detail?id=${list[i].id}&name=${list[i].alias}" class="linkpro">

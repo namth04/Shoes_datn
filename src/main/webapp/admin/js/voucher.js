@@ -103,32 +103,39 @@ function validateVoucherForm() {
     if (!code) {
         toastr.error("Mã voucher không được để trống");
         isValid = false;
+        return;
     } else if (code.length < 3 || code.length > 20) {
         toastr.error("Mã voucher phải từ 3-20 ký tự");
         isValid = false;
+        return;
     } else if (!/^[A-Z0-9]+$/.test(code)) {
         toastr.error("Mã voucher chỉ được chứa chữ in hoa và số");
         isValid = false;
+        return;
     }
 
     // Validate name
     if (!name) {
         toastr.error("Tên voucher không được để trống");
         isValid = false;
+        return;
     } else if (name.length < 5 || name.length > 100) {
         toastr.error("Tên voucher phải từ 5-100 ký tự");
         isValid = false;
+        return;
     }
 
     // Validate minimum amount
     if (!minAmount) {
         toastr.error("Giá trị đơn hàng tối thiểu không được để trống");
         isValid = false;
+        return;
     } else {
         const minAmountNum = parseFloat(minAmount);
         if (isNaN(minAmountNum) || minAmountNum < 0) {
             toastr.error("Giá trị đơn hàng tối thiểu phải là số dương");
             isValid = false;
+            return;
         }
     }
 
@@ -136,26 +143,31 @@ function validateVoucherForm() {
     if (!discount) {
         toastr.error("Giá trị giảm không được để trống");
         isValid = false;
+        return;
     } else {
         const discountNum = parseFloat(discount);
         const minAmountNum = parseFloat(minAmount);
         if (isNaN(discountNum) || discountNum <= 0) {
             toastr.error("Giá trị giảm phải là số dương");
             isValid = false;
+            return;
         } else if (discountNum >= minAmountNum) {
             toastr.error("Giá trị giảm phải nhỏ hơn giá trị đơn hàng tối thiểu");
             isValid = false;
+            return;
         }
     }
 
     if (!startDate) {
         toastr.error("Ngày bắt đầu không được để trống");
         isValid = false;
+        return;
     }
 
     if (!endDate) {
         toastr.error("Ngày kết thúc không được để trống");
         isValid = false;
+        return;
     }
 
     if (startDate && endDate) {
@@ -167,11 +179,13 @@ function validateVoucherForm() {
         if (start < now) {
             toastr.error("Ngày bắt đầu phải lớn hơn hoặc bằng ngày hiện tại");
             isValid = false;
+            return;
         }
 
         if (end <= start) {
             toastr.error("Ngày kết thúc phải lớn hơn ngày bắt đầu");
             isValid = false;
+            return;
         }
     }
 

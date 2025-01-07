@@ -2195,7 +2195,9 @@ tr {
     overflow: hidden;
     margin-top: 50px;
 }
-
+input:checked{
+    accent-color: #ff9900!important;
+}
 .headersection h4{
     padding: 5px 60px 6px 35px;
     margin: 0 0 0 60px;
