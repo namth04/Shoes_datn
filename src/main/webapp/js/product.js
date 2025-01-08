@@ -31,9 +31,14 @@ async function loadProductIndex(page) {
 
     var mainpage = ''
     for (i = 1; i <= totalPage; i++) {
-        mainpage += `<li onclick="loadProductIndex(${(Number(i) - 1)})" class="page-item"><a class="page-link" href="#listsp">${i}</a></li>`
+        mainpage += `<li class="page-item"><a class="page-link" onclick="handlePageClick(event, ${(Number(i) - 1)})">${i}</a></li>`
     }
     document.getElementById("pageable").innerHTML = mainpage
+}
+
+function handlePageClick(event, page) {
+    event.preventDefault();
+    loadProductIndex(page);
 }
 
 
@@ -94,7 +99,7 @@ async function loadAProduct() {
         var result = await response.json();
         document.getElementById("detailnamepro").innerHTML = result.name
         document.getElementById("codepro").innerHTML = result.code
-        document.getElementById("quansale").innerHTML = 'Đã bán ' + result.quantitySold
+        document.getElementById("quansale").innerHTML = 'Đã bán : ' + result.quantitySold
         document.getElementById("pricedetail").innerHTML = formatmoney(result.price)
         document.getElementById("imgdetailpro").src = result.imageBanner
         document.getElementById("quantityA").innerHTML = result.quantity
@@ -417,7 +422,7 @@ function renderPagination(totalPage, loadFunction) {
     document.getElementById("pageable").innerHTML = mainpage;
 }
 
-var size = 8;
+var size = 4;
 var currentFilterType = 1;
 
 function sortProduct() {
@@ -540,6 +545,96 @@ function formatmoney(price) {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 }
 
+async function searchFull(page, sort) {
+    currentFilterType = 2;
+    var min_price = parseFloat(document.getElementById("min_price").value) || 0;
+    var max_price = parseFloat(document.getElementById("max_price").value) || Number.MAX_SAFE_INTEGER;
+
+
+    const parentCategories = document.querySelectorAll('.cateparent input.inputcheck');
+    let selectedCategories = [];
+
+    parentCategories.forEach(parentCheckbox => {
+        const singleListMenu = parentCheckbox.closest('.singlelistmenu');
+        const childCheckboxes = singleListMenu.querySelectorAll('.listsubcate .inputcheck');
+
+        if (parentCheckbox.checked) {
+            selectedCategories.push(parentCheckbox.value);
+
+            childCheckboxes.forEach(childCheckbox => {
+                if (childCheckbox.checked) {
+                    selectedCategories.push(childCheckbox.value);
+                }
+            });
+        } else {
+            childCheckboxes.forEach(childCheckbox => {
+                if (childCheckbox.checked) {
+
+                    if (!selectedCategories.includes(parentCheckbox.value)) {
+                        selectedCategories.push(parentCheckbox.value);
+                    }
+                    selectedCategories.push(childCheckbox.value);
+                }
+            });
+        }
+    });
+
+
+    var listTra = document.getElementById("listthuonghieu").getElementsByClassName("inputchecktrademark");
+    var listTrademark = Array.from(listTra).filter(input => input.checked).map(input => input.value);
+
+    var payload = {
+        "listIdCategory": selectedCategories,
+        "listIdTrademark": listTrademark
+    };
+
+    var url = `http://localhost:8080/api/product/public/searchFull?page=${page}&size=${size}&smallPrice=${min_price}&largePrice=${max_price}`;
+
+    if (sort) {
+        url += `&sort=${sort}`;
+    }
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        var result = await response.json();
+        renderProductList(result);
+        renderPagination(result.totalPages, searchFull);
+    } catch (error) {
+        console.error("Error in full search:", error);
+    }
+}
+
+function handleCategoryChange(checkbox) {
+    const allCheckedBoxes = document.querySelectorAll('.inputcheck:checked, .inputchecktrademark:checked');
+
+    if (allCheckedBoxes.length === 0) {
+        return;
+    }
+
+    searchFull(0, null);
+}
+
+function clickOpenSubMenu(e) {
+    var sing = e.closest('.singlelistmenu');
+    var subCate = sing.querySelector('.listsubcate');
+    var parentCheckbox = sing.querySelector('.cateparent input');
+
+    subCate.classList.toggle('show');
+
+    if (!subCate.classList.contains('show')) {
+        var listInput = subCate.querySelectorAll('.inputcheck');
+        listInput.forEach(input => input.checked = false);
+    }
+
+    handleCategoryChange();
+}
 
 async function postData(page) {
     const size = 2;
@@ -631,26 +726,8 @@ async function loadCategorySub() {
         console.error("Error loading categories:", error);
     }
 }
-function clickOpenSubMenu(e) {
-    var sing = e.closest('.singlelistmenu');
-    var subCate = sing.querySelector('.listsubcate');
 
-    subCate.classList.toggle('show');
 
-    if (!subCate.classList.contains('show')) {
-        var listInput = subCate.querySelectorAll('.inputcheck');
-        listInput.forEach(input => input.checked = false);
-    }
-}
-function handleCategoryChange(checkbox) {
-    const allCheckedBoxes = document.querySelectorAll('.inputcheck:checked, .inputchecktrademark:checked');
-
-    if (allCheckedBoxes.length === 0) {
-        return;
-    }
-
-    searchFull(0, null);
-}
 
 async function loadAllProductList() {
     var search = document.getElementById("search").value;
