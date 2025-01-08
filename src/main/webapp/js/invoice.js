@@ -81,6 +81,7 @@ async function loadMyInvoice() {
         </tr>`
     }
     document.getElementById("listinvoicemb").innerHTML = mobile;
+    loadCartMenu();
 }
 
 async function loadDetailInvoice(id) {
@@ -135,7 +136,6 @@ async function loadDetailInvoice(id) {
 
     document.getElementById("ttvanchuyen").innerHTML = result.status.name;
 
-    // Cập nhật loại thanh toán
     let paymentDisplay;
     if (result.payType === "PAYMENT_DELIVERY") {
         if (result.status.name === "Đã nhận đơn hàng") {
@@ -143,11 +143,7 @@ async function loadDetailInvoice(id) {
         } else {
             paymentDisplay = "Thanh toán khi nhận hàng (COD)";
         }
-    } else if (result.payType === "PAYMENT_MOMO") {
-        paymentDisplay = "Thanh toán qua momo";
-    } else if (result.payType === "PAYMENT_VNPAY") {
-        paymentDisplay = "Thanh toán qua vnpay";
-    } else if (result.payType === "PAYMENT_GPAY") {
+    }else if (result.payType === "PAYMENT_GPAY") {
         paymentDisplay = "Thanh toán qua gpay";
     } else if (result.payType === "PAY_COUNTER") {
         paymentDisplay = "Thanh toán tại quầy";

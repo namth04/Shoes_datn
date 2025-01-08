@@ -594,9 +594,6 @@ async function deleteProduct(productId) {
 
         const product = await response.json();
 
-
-
-
         const confirmDelete = confirm("Bạn chắc chắn muốn xóa sản phẩm này?");
         if (!confirmDelete) {
             return;
@@ -869,7 +866,11 @@ async function loadAllProductList(){
                   <td>${list[i].code}</td>
                   <td>${list[i].name}</td>
                   <td>${formatmoney(list[i].price)}</td>
-                  <td><button onclick="loadChiTietMauSac(${list[i].id})" data-bs-toggle="modal" data-bs-target="#addtk" class="btn btn-primary">Chọn</button></td>
+<td>
+    <button onclick="loadChiTietMauSac(${list[i].id})" data-bs-toggle="modal" data-bs-target="#addtk" class="btn btn-success">
+        <i class="bx bx-plus"></i>
+    </button>
+</td>
                 </tr>`
     }
     document.getElementById("listproduct").innerHTML = main;
@@ -1011,6 +1012,7 @@ function loadSizeProduct(){
         tongtientt = Number(tongtientt) + Number(listProductTam[i].product.price) * Number(listProductTam[i].quantity);
         const colorName = listProductTam[i].productColor.colorName;
         const sizeName = listProductTam[i].productSize.sizeName;
+        const maxQuantity = listProductTam[i].productSize.quantity;
 
         main += `<tr>
             <td>Size: ${sizeName}, Màu: ${colorName}<br>${listProductTam[i].product.name}</td>
@@ -1018,7 +1020,10 @@ function loadSizeProduct(){
             <td>
                 <div class="clusinp">
                     <button onclick="upDownQuantity(${listProductTam[i].productSize.id},-1)" class="cartbtn"> - </button>
-                    <input value="${listProductTam[i].quantity}" class="inputslcart">
+                    <input type="number" value="${listProductTam[i].quantity}" 
+                           onchange="validateInputQuantity(${listProductTam[i].productSize.id}, this)" 
+                           min="1" max="${maxQuantity}" 
+                           class="inputslcart no-spinners">
                     <button onclick="upDownQuantity(${listProductTam[i].productSize.id},1)" class="cartbtn"> + </button>
                 </div>
             </td>
@@ -1029,16 +1034,66 @@ function loadSizeProduct(){
     document.getElementById("tongtientt").innerHTML = formatmoney(tongtientt);
 }
 
-function upDownQuantity(idsize, quantity){
-    for(i=0; i< listProductTam.length; i++){
-        if(listProductTam[i].productSize.id == idsize){
-            listProductTam[i].quantity = Number(listProductTam[i].quantity) + Number(quantity);
-            if(listProductTam[i].quantity == 0){
-                removeTam(idsize)
-            }
-            break;
-        }
+const style = document.createElement('style');
+style.textContent = `
+    .no-spinners::-webkit-inner-spin-button, 
+    .no-spinners::-webkit-outer-spin-button { 
+        -webkit-appearance: none;
+        margin: 0;
     }
+    .no-spinners {
+        -moz-appearance: textfield;
+    }
+`;
+document.head.appendChild(style);
+
+function validateInputQuantity(idsize, input) {
+    const newQuantity = parseInt(input.value);
+    const item = listProductTam.find(item => item.productSize.id === idsize);
+
+    if (!item) return;
+
+    if (isNaN(newQuantity)) {
+        input.value = 1;
+        item.quantity = 1;
+        toastr.error("Vui lòng nhập số");
+        return;
+    }
+
+    if (newQuantity < 1) {
+        input.value = 1;
+        item.quantity = 1;
+        toastr.error("Số lượng không thể nhỏ hơn 1");
+        return;
+    }
+    if (newQuantity > item.productSize.quantity) {
+        input.value = item.productSize.quantity;
+        item.quantity = item.productSize.quantity;
+        toastr.error(`Số lượng sản phẩm chỉ còn ${item.productSize.quantity}`);
+        return;
+    }
+
+    item.quantity = newQuantity;
+    loadSizeProduct();
+}
+
+function upDownQuantity(idsize, quantity){
+    const item = listProductTam.find(item => item.productSize.id === idsize);
+    if (!item) return;
+
+    const newQuantity = Number(item.quantity) + Number(quantity);
+
+    if (newQuantity < 1) {
+        toastr.error("Số lượng không thể nhỏ hơn 1");
+        return;
+    }
+
+    if (newQuantity > item.productSize.quantity) {
+        toastr.error(`Số lượng sản phẩm chỉ còn ${item.productSize.quantity}`);
+        return;
+    }
+
+    item.quantity = newQuantity;
     loadSizeProduct();
 }
 async function loadSelect() {

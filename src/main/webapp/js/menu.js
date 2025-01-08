@@ -189,7 +189,7 @@ function loadFooter() {
     </div>`
     document.getElementById("footer").innerHTML = foo;
     try {
-        loadMyChat();
+        // loadMyChat();
     }
     catch (e){
 
