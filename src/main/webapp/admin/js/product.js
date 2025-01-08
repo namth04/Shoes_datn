@@ -446,7 +446,13 @@ async function saveProduct() {
                 window.location.href = 'http://localhost:8080/admin/product';
             });
         } else {
-            throw new Error('Server error');
+            const errorData = await response.json();
+            if (errorData.message && errorData.message.includes("Mã sản phẩm")) {
+                toastr.warning(errorData.message);
+            } else {
+                toastr.error("Mã sản phẩm đã tồn tại!");
+            }
+            document.getElementById("loading").style.display = 'none';
         }
 
 
@@ -458,7 +464,7 @@ async function saveProduct() {
             type: "error"
         }, () => {
             document.getElementById("loading").style.display = 'none';
-            window.location.reload();
+            // window.location.reload();
         });
     }
 }
