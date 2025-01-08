@@ -240,16 +240,21 @@ async function loadAllCart() {
     document.getElementById("slcart").innerHTML = list.length;
     document.getElementById("tonggiatien").innerHTML = formatmoney(total);
 
+    // Checkbox cha: chọn/tắt tất cả
     document.getElementById("select-all").addEventListener("change", function () {
         const checkboxes = document.querySelectorAll(".product-checkbox");
+        const isChecked = this.checked;
+
         checkboxes.forEach((checkbox) => {
-            checkbox.checked = this.checked;
+            checkbox.checked = isChecked;
             const index = checkbox.dataset.index;
-            updateSelectedItems(index, this.checked);
+            updateSelectedItems(index, isChecked);
         });
+
         updateTotal();
     });
 
+    // Checkbox con: đồng bộ hóa với checkbox cha
     const checkboxes = document.querySelectorAll(".product-checkbox");
     checkboxes.forEach((checkbox) => {
         checkbox.addEventListener("change", function () {
@@ -355,19 +360,32 @@ function updateSelectedItems(index, isSelected) {
     }
 
     localStorage.setItem("selected_items", JSON.stringify(selectedItems));
+
+    // Check if all child checkboxes are selected
+    const totalCheckboxes = document.querySelectorAll(".product-checkbox").length;
+    const checkedCheckboxes = document.querySelectorAll(".product-checkbox:checked").length;
+
+    const selectAllCheckbox = document.getElementById("select-all");
+    selectAllCheckbox.checked = (totalCheckboxes === checkedCheckboxes);
+    selectAllCheckbox.indeterminate = (checkedCheckboxes > 0 && checkedCheckboxes < totalCheckboxes);
 }
 updateSelectedItems();
 function updateTotal() {
-    const selectedItems = JSON.parse(localStorage.getItem("selected_items") || "[]");
-    const listcart = JSON.parse(localStorage.getItem("product_cart") || "[]");
-
     let total = 0;
-    selectedItems.forEach((index) => {
-        const product = listcart[index];
-        total += Number(product.quantiy * product.product.price);
+    const checkboxes = document.querySelectorAll(".product-checkbox");
+    const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked); // Kiểm tra tất cả checkbox con
+
+    document.getElementById("select-all").checked = allChecked; // Cập nhật trạng thái checkbox cha
+
+    checkboxes.forEach((checkbox) => {
+        if (checkbox.checked) {
+            const index = parseInt(checkbox.dataset.index);
+            const product = JSON.parse(localStorage.getItem("product_cart"))[index];
+            total += Number(product.quantiy * product.product.price);
+        }
     });
 
-    document.getElementById("tonggiatien").innerHTML = formatmoney(total);
+    document.getElementById("tonggiatien").innerHTML = formatmoney(total); // Cập nhật tổng tiền
 }
 updateTotal();
 async function loadAllCartMobile() {
