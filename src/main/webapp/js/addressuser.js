@@ -147,7 +147,7 @@ async function addAddressUser() {
         } else {
             toastr.error("Đã xảy ra lỗi khi gửi yêu cầu.");
         }
-    } catch (error) {va
+    } catch (error) {
         toastr.error("Không thể kết nối đến máy chủ.");
     }
 }
