@@ -461,99 +461,60 @@ async function loadProductByCategory(page, sort) {
     }
 }
 
-async function searchFull(page, sort) {
-    currentFilterType = 2;
-    var min_price = parseFloat(document.getElementById("min_price").value) || 0;
-    var max_price = parseFloat(document.getElementById("max_price").value) || Number.MAX_SAFE_INTEGER;
-
-    var listCa = document.getElementById("listsearchCategory").getElementsByClassName("inputcheck");
-    var listcate = Array.from(listCa).filter(input => input.checked).map(input => input.value);
-
-    var listTra = document.getElementById("listthuonghieu").getElementsByClassName("inputchecktrademark");
-    var listTrademark = Array.from(listTra).filter(input => input.checked).map(input => input.value);
-
-    var payload = {
-        "listIdCategory": listcate,
-        "listIdTrademark": listTrademark
-    };
-
-    var url = `http://localhost:8080/api/product/public/searchFull?page=${page}&size=${size}&smallPrice=${min_price}&largePrice=${max_price}`;
-
-    if (sort) {
-        url += `&sort=${sort}`;
-    }
-
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
-
-        var result = await response.json();
-        renderProductList(result);
-        renderPagination(result.totalPages, searchFull);
-    } catch (error) {
-        console.error("Error in full search:", error);
-    }
-}
-
-async function searchFullmobile(page, sort) {
-    currentFilterType = 3;
-    $("#modalfilter").modal("hide");
-
-    var min_price = parseFloat(document.getElementById("min_price_mobile").value) || 0;
-    var max_price = parseFloat(document.getElementById("max_price_mobile").value) || Number.MAX_SAFE_INTEGER;
-
-    var listCa = document.getElementById("listsearchCategoryMobile").getElementsByClassName("inputcheck");
-    var listcate = Array.from(listCa).filter(input => input.checked).map(input => input.value);
-
-    var listTra = document.getElementById("listthuonghieuMobile").getElementsByClassName("inputchecktrademark");
-    var listTrademark = Array.from(listTra).filter(input => input.checked).map(input => input.value);
-
-    var payload = {
-        "listIdCategory": listcate,
-        "listIdTrademark": listTrademark
-    };
-
-    var url = `http://localhost:8080/api/product/public/searchFull?page=${page}&size=${size}&smallPrice=${min_price}&largePrice=${max_price}`;
-
-    if (sort) {
-        url += `&sort=${sort}`;
-    }
-
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
-
-        var result = await response.json();
-        renderProductList(result);
-        renderPagination(result.totalPages, searchFullmobile);
-    } catch (error) {
-        console.error("Error in mobile search:", error);
-    }
-}
-
 function formatmoney(price) {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 }
+function validatePriceInputs(input) {
+    input.value = input.value.replace(/[^\d]/g, '');
+
+    // Convert to number for comparison
+    const value = parseInt(input.value) || 0;
+
+
+    if (value < 0) {
+        input.value = '0';
+    }
+}
+
+function validatePriceInputs(event) {
+    // Chỉ cho phép nhập số, không cho phép nhập ký tự khác
+    let value = event.target.value;
+
+    // Chỉ giữ lại các ký tự số
+    let numericValue = value.replace(/[^0-9]/g, '');
+
+    // Nếu giá trị đã thay đổi (có ký tự không phải số), cập nhật lại input
+    if (value !== numericValue) {
+        event.target.value = numericValue;
+    }
+}
+
+function validatePriceRange() {
+    const minPrice = parseFloat(document.getElementById("min_price").value) || 0;
+    const maxPrice = parseFloat(document.getElementById("max_price").value) || 0;
+
+    if (maxPrice < minPrice) {
+        alert("Giá tối đa phải lớn hơn giá tối thiểu!");
+        return false;
+    }
+    return true;
+}
 
 async function searchFull(page, sort) {
+    // Validate price range before proceeding
+    if (!validatePriceRange()) {
+        return;
+    }
+
     currentFilterType = 2;
     var min_price = parseFloat(document.getElementById("min_price").value) || 0;
     var max_price = parseFloat(document.getElementById("max_price").value) || Number.MAX_SAFE_INTEGER;
 
-
+    // Get parent categories
     const parentCategories = document.querySelectorAll('.cateparent input.inputcheck');
     let selectedCategories = [];
 
+    // Process parent and child categories
     parentCategories.forEach(parentCheckbox => {
         const singleListMenu = parentCheckbox.closest('.singlelistmenu');
         const childCheckboxes = singleListMenu.querySelectorAll('.listsubcate .inputcheck');
@@ -569,7 +530,6 @@ async function searchFull(page, sort) {
         } else {
             childCheckboxes.forEach(childCheckbox => {
                 if (childCheckbox.checked) {
-
                     if (!selectedCategories.includes(parentCheckbox.value)) {
                         selectedCategories.push(parentCheckbox.value);
                     }
@@ -579,15 +539,17 @@ async function searchFull(page, sort) {
         }
     });
 
-
+    // Get selected trademarks
     var listTra = document.getElementById("listthuonghieu").getElementsByClassName("inputchecktrademark");
     var listTrademark = Array.from(listTra).filter(input => input.checked).map(input => input.value);
 
+    // Prepare payload
     var payload = {
         "listIdCategory": selectedCategories,
         "listIdTrademark": listTrademark
     };
 
+    // Build URL with query parameters
     var url = `http://localhost:8080/api/product/public/searchFull?page=${page}&size=${size}&smallPrice=${min_price}&largePrice=${max_price}`;
 
     if (sort) {
@@ -595,6 +557,7 @@ async function searchFull(page, sort) {
     }
 
     try {
+        // Make API request
         const response = await fetch(url, {
             method: 'POST',
             headers: {
@@ -603,6 +566,7 @@ async function searchFull(page, sort) {
             body: JSON.stringify(payload)
         });
 
+        // Process response
         var result = await response.json();
         renderProductList(result);
         renderPagination(result.totalPages, searchFull);
@@ -610,6 +574,28 @@ async function searchFull(page, sort) {
         console.error("Error in full search:", error);
     }
 }
+
+// Add event listeners when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    const minPriceInput = document.getElementById("min_price");
+    const maxPriceInput = document.getElementById("max_price");
+
+    // Sử dụng sự kiện input để kiểm tra ngay khi người dùng nhập
+    minPriceInput.addEventListener('input', validatePriceInputs);
+    maxPriceInput.addEventListener('input', validatePriceInputs);
+});
+document.addEventListener('DOMContentLoaded', function() {
+    const minPriceInput = document.getElementById("min_price");
+    const maxPriceInput = document.getElementById("max_price");
+
+    minPriceInput.addEventListener('input', function() {
+        validatePriceInputs(this);
+    });
+
+    maxPriceInput.addEventListener('input', function() {
+        validatePriceInputs(this);
+    });
+});
 
 function handleCategoryChange(checkbox) {
     const allCheckedBoxes = document.querySelectorAll('.inputcheck:checked, .inputchecktrademark:checked');
