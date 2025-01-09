@@ -217,14 +217,23 @@ async function createInvoice() {
 
         const fullName = document.getElementById("fullname").value.trim();
         const phone = document.getElementById("phone").value.trim();
+        const customerPaidInput = document.getElementById('customerPaid').value.trim();
 
-        if (!fullName) {
-            toastr.warning('Vui lòng nhập tên khách hàng');
+        // Allow phone to be empty, but validate format if entered
+        const phoneRegex = /^[0-9]{10}$/;
+        if (phone && !phoneRegex.test(phone)) {
+            toastr.warning('Số điện thoại không hợp lệ. Vui lòng nhập đúng định dạng (10 chữ số).');
             return;
         }
 
-        if (!phone) {
-            toastr.warning('Vui lòng nhập số điện thoại');
+        if (!customerPaidInput) {
+            toastr.warning('Vui lòng nhập số tiền khách đưa.');
+            return;
+        }
+
+        const customerPaid = parseFloat(customerPaidInput);
+        if (isNaN(customerPaid) || customerPaid <= 0) {
+            toastr.warning('Số tiền khách đưa không hợp lệ. Vui lòng nhập giá trị hợp lệ.');
             return;
         }
 
@@ -234,10 +243,8 @@ async function createInvoice() {
         }
 
         const totalAmount = parseFloat(document.getElementById('tongtientt').innerText.replace(/[^\d]/g, '')) || 0;
-        const customerPaid = parseFloat(document.getElementById('customerPaid').value) || 0;
-
         if (customerPaid < totalAmount) {
-            toastr.dang('Tiền khách đưa không đủ để thanh toán!');
+            toastr.warning('Tiền khách đưa không đủ để thanh toán!');
             return;
         }
 
@@ -275,7 +282,7 @@ async function createInvoice() {
                     try {
                         invoiceResponse = await res.json();
                     } catch (parseError) {
-                        console.warn('No JSON response, generating placeholder invoice details');
+                        console.warn('Không có dữ liệu');
                     }
                 }
 
@@ -299,12 +306,16 @@ async function createInvoice() {
                     closeOnConfirm: true
                 }, function() {
                     if (invoiceCreated) {
+
+                        listProductTam = [];
+                        localStorage.removeItem("listProductTam");
+
                         resetInvoiceForm();
-                        window.location.href = '/admin/invoice';
+
+                        window.location.href = '/admin/create-invoice';
                     }
                 });
             } else {
-
                 const errorResult = await res.json();
                 if (res.status === exceptionCode) {
                     toastr.warning(errorResult.defaultMessage || 'Có lỗi xảy ra');
@@ -314,7 +325,7 @@ async function createInvoice() {
             }
         } catch (error) {
             console.error("Lỗi khi tạo hóa đơn:", error);
-            toastr.error ('Đã xảy ra lỗi khi tạo hóa đơn. Vui lòng thử lại.');
+            toastr.error('Đã xảy ra lỗi khi tạo hóa đơn. Vui lòng thử lại.');
         }
 
     } catch (unexpectedError) {
@@ -322,6 +333,8 @@ async function createInvoice() {
         toastr.error('Đã xảy ra lỗi không mong muốn. Vui lòng thử lại.');
     }
 }
+
+
 
 function resetInvoiceForm() {
     document.getElementById("fullname").value = '';

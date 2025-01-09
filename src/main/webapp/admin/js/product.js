@@ -955,16 +955,16 @@ async function loadChiTietMauSac(idproduct){
     }
 }
 
-var listProductTam = [];
-async function addTam(idsize, e){
-    if(e.checked == false){
-        removeTam(idsize)
+var listProductTam = JSON.parse(localStorage.getItem("listProductTam")) || [];
+async function addTam(idsize, e) {
+    if (e.checked == false) {
+        removeTam(idsize);
         return;
     }
-    if(checkTonTai(idsize) == true){
+    if (checkTonTai(idsize) == true) {
         return;
     }
-    var url = 'http://localhost:8080/api/product-size/public/find-by-id?id=' + idsize
+    var url = 'http://localhost:8080/api/product-size/public/find-by-id?id=' + idsize;
     const response = await fetch(url, {
         method: 'GET'
     });
@@ -985,16 +985,38 @@ async function addTam(idsize, e){
     };
 
     listProductTam.push(formattedResult);
+    saveToLocalStorage();
     loadSizeProduct();
 }
-function checkTonTai(idsize){
-    for(var k=0; k< listProductTam.length; k++){
-        if(listProductTam[k].productSize.id == idsize){
+
+function removeTam(idsize) {
+    listProductTam = listProductTam.filter(item => item.productSize.id !== idsize);
+    saveToLocalStorage();
+    loadSizeProduct();
+}
+
+function checkTonTai(idsize) {
+    for (var k = 0; k < listProductTam.length; k++) {
+        if (listProductTam[k].productSize.id == idsize) {
             return true;
         }
     }
     return false;
 }
+
+function saveToLocalStorage() {
+    localStorage.setItem("listProductTam", JSON.stringify(listProductTam));
+}
+
+function loadSizeProduct() {
+    console.log(listProductTam);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    listProductTam = JSON.parse(localStorage.getItem("listProductTam")) || [];
+    loadSizeProduct();
+});
+
 
 function removeTam(idsize){
     for(i=0; i< listProductTam.length; i++){
