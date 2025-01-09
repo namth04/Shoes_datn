@@ -80,35 +80,11 @@ function clearData() {
 
 async function addAddressUser() {
     var id = document.getElementById("idadduser").value;
-    var fullnameadd = document.getElementById("fullnameadd").value.trim();
-    var phoneadd = document.getElementById("phoneadd").value.trim();
-    var stressadd = document.getElementById("stressadd").value.trim();
+    var fullnameadd = document.getElementById("fullnameadd").value;
+    var phoneadd = document.getElementById("phoneadd").value;
+    var stressadd = document.getElementById("stressadd").value;
     var ward = document.getElementById("xa").value;
     var primaryadd = document.getElementById("primaryadd").checked;
-
-    // Validate fieldsa
-    if (!fullnameadd) {
-        toastr.error("Họ và tên không được để trống.");
-        return;
-    }
-    if (!phoneadd) {
-        toastr.error("Số điện thoại không được để trống.");
-        return;
-    }
-    if (!/^\d{10}$/.test(phoneadd)) {
-        toastr.error("Số điện thoại không đúng định dạng. Số điện thoại phải là 10 chữ số.");
-        return;
-    }
-    if (!stressadd) {
-        toastr.error("Địa chỉ đường không được để trống.");
-        return;
-    }
-    if (!ward) {
-        toastr.error("Vui lòng chọn xã/phường.");
-        return;
-    }
-
-    // Create the address object
     var addu = {
         "id": id,
         "fullname": fullnameadd,
@@ -118,39 +94,35 @@ async function addAddressUser() {
         "wards": {
             id: ward
         }
-    };
-
-    // Determine URL based on id
-    var url = id ? 'http://localhost:8080/api/user-address/user/update' : 'http://localhost:8080/api/user-address/user/create';
-
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: new Headers({
-                'Authorization': 'Bearer ' + token,
-                'Content-Type': 'application/json'
-            }),
-            body: JSON.stringify(addu)
-        });
-
-        if (response.ok) {
-            swal({
+    }
+    var url = 'http://localhost:8080/api/user-address/user/create';
+    if (id != "" && id != null) {
+        url = 'http://localhost:8080/api/user-address/user/update';
+    }
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: new Headers({
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json'
+        }),
+        body: JSON.stringify(addu)
+    });
+    if (response.status < 300) {
+        swal({
                 title: "Thông báo",
                 text: "Thành công",
                 type: "success"
-            }, function() {
+            },
+            function() {
                 window.location.reload();
             });
-        } else if (response.status == exceptionCode) {
-            var result = await response.json();
-            toastr.warning(result.defaultMessage);
-        } else {
-            toastr.error("Đã xảy ra lỗi khi gửi yêu cầu.");
-        }
-    } catch (error) {
-        toastr.error("Không thể kết nối đến máy chủ.");
+    }
+    if (response.status == exceptionCode) {
+        var result = await response.json()
+        toastr.warning(result.defaultMessage);
     }
 }
+
 
 async function deleteAddressUser(id) {
     var con = confirm("Bạn chắc chắn muốn xóa địa chỉ này?");

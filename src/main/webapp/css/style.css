@@ -1794,42 +1794,6 @@ voucher-item.disabled {
     background-color: #f8f8f8;
     cursor: not-allowed;
 }
-.avaaccount {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-}
-
-.username-display {
-    text-align: center;
-    margin: 10px 0;
-}
-
-.user-fullname {
-    font-weight: bold;
-    color: #333;
-    font-size: 1.1em;
-}
-
-.tableadd {
-    margin-bottom: 0;
-}
-
-.tableadd td {
-    padding: 12px;
-    border-bottom: 1px solid #eee;
-}
-
-.tdleft {
-    font-weight: 600;
-    width: 150px;
-    color: #666;
-}
-
-.tdright {
-    color: #333;
-}
 .listimgcontent {
     display: flex;
     margin-top: 10px;

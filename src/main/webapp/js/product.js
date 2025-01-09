@@ -507,7 +507,7 @@ async function searchFull(page, sort) {
     }
 
     currentFilterType = 2;
-    var min_price = parseFloat(document.getElementById("min_price").value) || 0;
+    var min_price = Math.max(parseFloat(document.getElementById("min_price").value) || 0,0) ;
     var max_price = parseFloat(document.getElementById("max_price").value) || Number.MAX_SAFE_INTEGER;
 
     // Get parent categories

@@ -446,13 +446,7 @@ async function saveProduct() {
                 window.location.href = 'http://localhost:8080/admin/product';
             });
         } else {
-            const errorData = await response.json();
-            if (errorData.message && errorData.message.includes("Mã sản phẩm")) {
-                toastr.warning(errorData.message);
-            } else {
-                toastr.error("Mã sản phẩm đã tồn tại!");
-            }
-            document.getElementById("loading").style.display = 'none';
+            throw new Error('Server error');
         }
 
 
@@ -464,7 +458,7 @@ async function saveProduct() {
             type: "error"
         }, () => {
             document.getElementById("loading").style.display = 'none';
-            // window.location.reload();
+            window.location.reload();
         });
     }
 }
@@ -961,16 +955,16 @@ async function loadChiTietMauSac(idproduct){
     }
 }
 
-var listProductTam = JSON.parse(localStorage.getItem("listProductTam")) || [];
-async function addTam(idsize, e) {
-    if (e.checked == false) {
-        removeTam(idsize);
+var listProductTam = [];
+async function addTam(idsize, e){
+    if(e.checked == false){
+        removeTam(idsize)
         return;
     }
-    if (checkTonTai(idsize) == true) {
+    if(checkTonTai(idsize) == true){
         return;
     }
-    var url = 'http://localhost:8080/api/product-size/public/find-by-id?id=' + idsize;
+    var url = 'http://localhost:8080/api/product-size/public/find-by-id?id=' + idsize
     const response = await fetch(url, {
         method: 'GET'
     });
@@ -991,38 +985,16 @@ async function addTam(idsize, e) {
     };
 
     listProductTam.push(formattedResult);
-    saveToLocalStorage();
     loadSizeProduct();
 }
-
-function removeTam(idsize) {
-    listProductTam = listProductTam.filter(item => item.productSize.id !== idsize);
-    saveToLocalStorage();
-    loadSizeProduct();
-}
-
-function checkTonTai(idsize) {
-    for (var k = 0; k < listProductTam.length; k++) {
-        if (listProductTam[k].productSize.id == idsize) {
+function checkTonTai(idsize){
+    for(var k=0; k< listProductTam.length; k++){
+        if(listProductTam[k].productSize.id == idsize){
             return true;
         }
     }
     return false;
 }
-
-function saveToLocalStorage() {
-    localStorage.setItem("listProductTam", JSON.stringify(listProductTam));
-}
-
-function loadSizeProduct() {
-    console.log(listProductTam);
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-    listProductTam = JSON.parse(localStorage.getItem("listProductTam")) || [];
-    loadSizeProduct();
-});
-
 
 function removeTam(idsize){
     for(i=0; i< listProductTam.length; i++){

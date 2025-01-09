@@ -89,7 +89,7 @@ async function loadAVoucher() {
 }
 
 function validateVoucherForm() {
-
+    // Get all form values
     const code = document.getElementById("code").value.trim();
     const name = document.getElementById("namevoucher").value.trim();
     const minAmount = document.getElementById("minamount").value;
@@ -125,7 +125,7 @@ function validateVoucherForm() {
         return;
     }
 
-    // Validate min amount
+    // Validate minimum amount
     if (!minAmount) {
         toastr.error("Giá trị đơn hàng tối thiểu không được để trống");
         isValid = false;
@@ -193,6 +193,7 @@ function validateVoucherForm() {
 }
 
 async function saveVoucher() {
+    // Validate form before proceeding
     if (!validateVoucherForm()) {
         return;
     }

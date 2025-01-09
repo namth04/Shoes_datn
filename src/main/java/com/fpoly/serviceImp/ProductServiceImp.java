@@ -70,9 +70,6 @@ public class ProductServiceImp implements ProductService {
         if(product.getId() != null){
             throw new MessageException("id must null");
         }
-        if (productRepository.existsByCode(productRequest.getCode())) {
-            throw new MessageException("Mã sản phẩm " + productRequest.getCode() + " đã tồn tại");
-        }
         product.setCreatedDate(new Date(System.currentTimeMillis()));
         product.setCreatedTime(new Time(System.currentTimeMillis()));
         product.setQuantitySold(0);
