@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.sql.Date;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -69,8 +70,31 @@ public class VoucherApi {
 
     @GetMapping("/public/findByCode")
     public ResponseEntity<?> findById(@RequestParam("code") String code, @RequestParam("amount") Double amount) {
-        Optional<Voucher> result = voucherService.findByCode(code, amount);
-        return new ResponseEntity<>(result.get(), HttpStatus.OK);
+        Optional<Voucher> optionalVoucher = voucherService.findByCode(code, amount);
+
+        if (optionalVoucher.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "defaultMessage", "Mã voucher không tồn tại hoặc không hợp lệ!"
+            ));
+        }
+
+        Voucher voucher = optionalVoucher.get();
+
+        Date currentDate = new Date(System.currentTimeMillis());
+
+        if (voucher.getBlock() || (voucher.getEndDate() != null && voucher.getEndDate().before(currentDate))) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "defaultMessage", "Mã voucher đã hết hạn hoặc bị chặn!"
+            ));
+        }
+
+        if (amount < voucher.getMinAmount()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "defaultMessage", "Tổng đơn hàng không đủ điều kiện để áp dụng mã giảm giá!"
+            ));
+        }
+
+        return ResponseEntity.ok(voucher);
     }
 
     @PutMapping("/admin/auto-block")
@@ -78,25 +102,33 @@ public class VoucherApi {
         Optional<Voucher> optionalVoucher = voucherService.findById(id);
         optionalVoucher.ifPresent(voucher -> {
             if (voucher.getEndDate() != null) {
-                // Tạo Calendar để kiểm tra thời gian chính xác
+
                 Calendar endDateTime = Calendar.getInstance();
                 endDateTime.setTime(voucher.getEndDate());
 
-                // Đặt giờ là 12:00:00
-                endDateTime.set(Calendar.HOUR_OF_DAY, 12);
+
+                endDateTime.set(Calendar.HOUR_OF_DAY, 23);
                 endDateTime.set(Calendar.MINUTE, 0);
                 endDateTime.set(Calendar.SECOND, 0);
                 endDateTime.set(Calendar.MILLISECOND, 0);
 
-                // So sánh với thời gian hiện tại
                 Calendar now = Calendar.getInstance();
 
                 if (now.getTime().compareTo(endDateTime.getTime()) >= 0) {
-                    voucher.setBlock(true); // Khóa voucher nếu đã đến 12h trưa của ngày hết hạn
+                    voucher.setBlock(true);
                     voucherService.update(voucher);
                 }
             }
         });
         return new ResponseEntity<>(HttpStatus.OK);
     }
+    @GetMapping("/public/findAll")
+    public ResponseEntity<?> findAllPublic() {
+        List<Voucher> vouchers = voucherService.findAll(null, null);
+        if (vouchers.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Không có voucher nào khả dụng.");
+        }
+        return ResponseEntity.ok(vouchers);
+    }
+
 }
