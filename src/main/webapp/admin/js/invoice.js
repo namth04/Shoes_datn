@@ -632,9 +632,16 @@ function calculateChange() {
         toastr.warning('Tổng tiền không thể là số âm. Vui lòng kiểm tra lại.');
         totalAmount = 0;  // Đặt lại tổng tiền về 0 nếu giá trị là âm
     }
+    // Lấy giá trị khách trả từ ô nhập
     const customerPaidInput = document.getElementById('customerPaid').value.trim();
-    const customerPaid = customerPaidInput ? parseFloat(customerPaidInput) : 0;
+    let customerPaid = customerPaidInput ? parseFloat(customerPaidInput) : 0;
 
+    // Kiểm tra và đảm bảo không cho phép số âm
+    if (customerPaid < 0) {
+        customerPaid = 0;  // Nếu giá trị âm, gán lại bằng 0
+        document.getElementById('customerPaid').value = 0;  // Đặt lại giá trị trong ô nhập
+    }
+    // Tính toán số tiền thừa hoặc thiếu
     let change = customerPaid - totalAmount;
 
     // Nếu tiền khách trả ít hơn tổng tiền, hiển thị giá trị âm
@@ -642,6 +649,7 @@ function calculateChange() {
         ? `${Math.abs(change).toLocaleString()}đ (Còn thiếu)`
         : `${change.toLocaleString()}đ`;
 
+    // Hiển thị số tiền thừa hoặc thiếu
     document.getElementById('changeAmount').value = formattedChange;
 }
 
