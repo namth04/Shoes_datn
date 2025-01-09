@@ -2543,7 +2543,22 @@ textarea.form-control-lg {
     height: 1.5em;
     border-radius: 0.25rem;
 }
+.profile-info {
+    padding: 10px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
 
+.profile-info .name {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.profile-info .role {
+    color: #666;
+    font-size: 14px;
+}
 .form-control-color::-webkit-color-swatch {
     height: 1.5em;
     border-radius: 0.25rem;
