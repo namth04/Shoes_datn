@@ -422,7 +422,7 @@ a {
 /* When the checkbox is checked, add a blue background */
 
 .checkbox-custom input:checked~.checkmark-checkbox {
-    background-color: #ee4d2d;
+    background-color: #ff9900;
 }
 
 
@@ -457,16 +457,22 @@ a {
 }
 
 .lb-chon-danhmuc {
-    margin-bottom: 15px;
+    /*margin-bottom: 15px;*/
 }
 
 .btn-apdung {
-    background-color: #fff;
-    border-radius: 20px;
-    border: 1px solid blue;
-    float: right;
+    background-color: #ff9900;
+    border-radius: 5px;
+    border: none;
+    /*float: right;*/
+    /*padding: 6px 6px !important;*/
+    height: 40px;
+    line-height: 20px;
+    transition: all 1s ease-in-out;linear-gradient(45deg, #ffa7a7, #ffd800)
 }
-
+.btn-apdung:hover{
+    background: linear-gradient(45deg, #ffa7a7, #ffd800);
+}
 .price-range-field {
     width: 40%;
     display: inline;
