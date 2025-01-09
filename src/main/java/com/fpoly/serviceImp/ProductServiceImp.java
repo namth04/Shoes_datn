@@ -142,6 +142,9 @@ public class ProductServiceImp implements ProductService {
         if(product.getAlias() == ""){
             product.setAlias(CharacterUtils.change(product.getName()));
         }
+        if (productRepository.existsByCode(productRequest.getCode())) {
+            throw new MessageException("Mã sản phẩm " + productRequest.getCode() + " đã tồn tại");
+        }
         Product result = productRepository.save(product);
 
         productCategoryRepository.deleteByProduct(result.getId());

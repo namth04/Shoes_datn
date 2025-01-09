@@ -114,8 +114,14 @@ async function addAdmin() {
         toastr.warning("Tên không được để trống!");
         return;
     }
-    if (!phone){
+    if (!phone) {
         toastr.warning("Số điện thoại không để trống!");
+        return;
+    }
+
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(phone)) {
+        toastr.warning("Số điện thoại không hợp lệ!");
         return;
     }
     if (password != repassword) {
