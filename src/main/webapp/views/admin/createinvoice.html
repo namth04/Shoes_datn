@@ -139,7 +139,7 @@
             <!-- New section for payment details -->
             <div class="mt-3">
               <label>Tiền khách đưa</label>
-              <input type="number" class="form-control" id="customerPaid" onkeyup="calculateChange()">
+              <input type="number" class="form-control" id="customerPaid" onkeyup="calculateChange()" min="0">
               <label class="mt-2">Tiền thối lại</label>
               <input type="text" class="form-control" id="changeAmount" readonly>
             </div>

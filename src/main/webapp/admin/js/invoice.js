@@ -623,14 +623,34 @@ function createInvoiceHTML(invoiceDetails) {
 }
 
 function calculateChange() {
-    const totalAmountText = document.getElementById('tongtientt').innerText;
-    const totalAmount = parseFloat(totalAmountText.replace(/[^\d]/g, ''));
+    let totalAmountText = document.getElementById('tongtientt').innerText;
 
-    const customerPaid = parseFloat(document.getElementById('customerPaid').value);
+    // Chuyển đổi totalAmountText thành số sau khi loại bỏ ký tự không phải là số
+    let totalAmount = parseFloat(totalAmountText.replace(/[^\d]/g, ''));
+    // Kiểm tra nếu giá trị tổng tiền là âm hoặc không phải là số hợp lệ
+    if (isNaN(totalAmount) || totalAmount < 0) {
+        toastr.warning('Tổng tiền không thể là số âm. Vui lòng kiểm tra lại.');
+        totalAmount = 0;  // Đặt lại tổng tiền về 0 nếu giá trị là âm
+    }
+    // Lấy giá trị khách trả từ ô nhập
+    const customerPaidInput = document.getElementById('customerPaid').value.trim();
+    let customerPaid = customerPaidInput ? parseFloat(customerPaidInput) : 0;
 
+    // Kiểm tra và đảm bảo không cho phép số âm
+    if (customerPaid < 0) {
+        customerPaid = 0;  // Nếu giá trị âm, gán lại bằng 0
+        document.getElementById('customerPaid').value = 0;  // Đặt lại giá trị trong ô nhập
+    }
+    // Tính toán số tiền thừa hoặc thiếu
     let change = customerPaid - totalAmount;
 
-    const formattedChange = change < 0 ? '0đ' : `${change.toLocaleString()}đ`;
+    // Nếu tiền khách trả ít hơn tổng tiền, hiển thị giá trị âm
+    const formattedChange = change < 0
+        ? `${Math.abs(change).toLocaleString()}đ (Còn thiếu)`
+        : `${change.toLocaleString()}đ`;
+
+    // Hiển thị số tiền thừa hoặc thiếu
     document.getElementById('changeAmount').value = formattedChange;
 }
+
 
