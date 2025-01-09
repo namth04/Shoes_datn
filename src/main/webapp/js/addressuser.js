@@ -86,7 +86,7 @@ async function addAddressUser() {
     var ward = document.getElementById("xa").value;
     var primaryadd = document.getElementById("primaryadd").checked;
 
-    // Validate fields
+    // Validate fieldsa
     if (!fullnameadd) {
         toastr.error("Họ và tên không được để trống.");
         return;
