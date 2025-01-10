@@ -35,6 +35,7 @@
             loadAddress();
             loadAddressUser();
             loadMyInvoice();
+            loadUserInfo();
         }
     </script>
 </head>
@@ -349,37 +350,11 @@
         </div>
     </div>
 </body>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js" integrity="sha512-bPs7Ae6pVvhOSiIcyUClR7/q2OAsRiovw4vAkX+zJbw3ShAeeqezq50RIIcIURq7Oa20rW2n2q+fyXBNcU9lrw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="js/carousel.js"></script>
 <!-- <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script> -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-<script>
-    function changeLink(e, link) {
-        var tabs = document.getElementsByClassName("tabdv");
-        for (i = 0; i < tabs.length; i++) {
-            document.getElementsByClassName("tabdv")[i].classList.remove("activetabdv");
-        }
-        e.classList.add('activetabdv')
 
-        var tabb = document.getElementsByClassName("tab-pane");
-        for (i = 0; i < tabb.length; i++) {
-            document.getElementsByClassName("tab-pane")[i].classList.remove("active");
-        }
-        document.getElementById(link).classList.add('active')
-    }
-
-    var hash = location.hash.substr(1);
-    if (hash != "") {
-        var tabb = document.getElementsByClassName("tab-pane");
-        for (i = 0; i < tabb.length; i++) {
-            document.getElementsByClassName("tab-pane")[i].classList.remove("active");
-        }
-        var tabs = document.getElementsByClassName("tabdv");
-        for (i = 0; i < tabs.length; i++) {
-            document.getElementsByClassName("tabdv")[i].classList.remove("activetabdv");
-        }
-        document.getElementById(hash).classList.add('active')
-    }
-</script>
 
 </html>

@@ -82,6 +82,109 @@ async function login() {
     }
 }
 
+
+
+
+function getRole(role) {
+    switch(role) {
+        case 'ROLE_ADMIN':
+            return 'Quản trị viên';
+        case 'ROLE_USER':
+            return 'Người dùng';
+        default:
+            return role;
+    }
+}
+
+function loadUserInfo() {
+    var userData = localStorage.getItem("user");
+    if (!userData) {
+        window.location.href = 'login';
+        return;
+    }
+
+    var user = JSON.parse(userData);
+
+
+    var avaaccount = document.querySelector('.avaaccount');
+    if (avaaccount) {
+        var usernameDiv = document.createElement('div');
+        usernameDiv.className = 'username-display';
+        usernameDiv.innerHTML = `<span class="user-fullname">${user.fullname || 'Người dùng'}</span>`;
+        avaaccount.insertBefore(usernameDiv, avaaccount.querySelector('.btnlogoutacc'));
+    }
+
+
+    var infoHtml = `
+    <div role="tabpanel" class="tab-pane" id="infor">
+        <div class="headeraccount">
+            <p class="fontyel">Thông tin cá nhân</p>
+           
+        </div>
+        <div class="contentacc">
+            <div class="row singleadd">
+                <div class="col-lg-11 col-md-11 col-sm-12 col-12">
+                    <table class="table tableadd">
+                        <tr>
+                            <td class="tdleft">Họ tên:</td>
+                            <td class="tdright">${user.fullname || 'Chưa cập nhật'}</td>
+                        </tr>
+                        <tr>
+                            <td class="tdleft">Email:</td>
+                            <td class="tdright">${user.email || 'Chưa cập nhật'}</td>
+                        </tr>
+                        <tr>
+                            <td class="tdleft">Số điện thoại:</td>
+                            <td class="tdright">${user.phone || 'Chưa cập nhật'}</td>
+                        </tr>
+                        <tr>
+                            <td class="tdleft">Vai trò:</td>
+                            <td class="tdright">${getRole(user.authorities.name)}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>`;
+
+
+    var navTabs = document.querySelector('.sinv');
+    if (navTabs) {
+        var infoTabHtml = `
+        <div nofi="infor" onclick="changeLink(this,'infor')" class="tabdv">
+            <a data-toggle="tab" href="#infor"><img class="imgau" src="image/user.svg"> Tài khoản của tôi</a>
+        </div>`;
+        navTabs.insertAdjacentHTML('afterbegin', infoTabHtml);
+    }
+
+
+    var contentTab = document.querySelector('.contentab');
+    if (contentTab) {
+        contentTab.insertAdjacentHTML('afterbegin', infoHtml);
+    }
+
+    document.getElementById('edit-fullname').value = user.fullname || '';
+    document.getElementById('edit-phone').value = user.phone || '';
+}
+
+
+function changeLink(e, link) {
+    var tabs = document.getElementsByClassName("tabdv");
+    for (var i = 0; i < tabs.length; i++) {
+        tabs[i].classList.remove("activetabdv");
+    }
+
+    e.classList.add('activetabdv');
+
+    var tabPanes = document.getElementsByClassName("tab-pane");
+    for (var i = 0; i < tabPanes.length; i++) {
+        tabPanes[i].classList.remove("active");
+    }
+    document.getElementById(link).classList.add('active');
+}
+
+
+
 async function regis() {
     var url = 'http://localhost:8080/api/regis'
     var email = document.getElementById("email").value
@@ -93,6 +196,23 @@ async function regis() {
         "email": email,
         "phone": phone,
         "password": password
+    }
+    if(!email){
+        toastr.warning('Vui lòng nhập email!');
+        return;
+    }
+    if(!fullname){
+        toastr.warning('Vui lòng nhập họ tên!');
+        return;
+    }
+    if(!phone){
+        toastr.warning('Vui lòng nhập điện thoại!');
+        return;
+    }
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(phone)) {
+        toastr.warning("Số điện thoại không hợp lệ!");
+        return;
     }
     const response = await fetch(url, {
         method: 'POST',
@@ -115,6 +235,7 @@ async function regis() {
     if (response.status == exceptionCode) {
         toastr.warning(result.defaultMessage);
     }
+
 }
 
 

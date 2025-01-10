@@ -2554,7 +2554,20 @@ textarea.form-control-lg {
     font-weight: bold;
     font-size: 16px;
 }
-
+.headertable {
+    margin-bottom: 15px;
+}
+.search-box {
+    float: right;
+    width: 200px;
+}
+.search-input {
+    width: 100%;
+    padding: 8px 15px;
+    border: 1px solid #ddd;
+    border-radius: 15px;
+    outline: none;
+}
 .profile-info .role {
     color: #666;
     font-size: 14px;
