@@ -8,7 +8,21 @@
     background: #fff;
     box-shadow: 0 4px 2px -2px #bfbfbf;
 }
+#voucher-info-block {
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
 
+#voucher-info-block .yls {
+    color: #ff0000;
+    font-weight: bold;
+}
+
+#voucher-info-block .blockinfor {
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
 .content {
     padding-top: 70px;
     padding-left: 42px;

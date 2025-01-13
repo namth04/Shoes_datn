@@ -59,7 +59,6 @@ async function loadCartCheckOut() {
             return;
         }
     }
-    // Xử lý trường hợp mua từ giỏ hàng
     else {
         var listcart = localStorage.getItem("product_cart");
         var selectedItems = JSON.parse(localStorage.getItem("selected_items") || "[]");
