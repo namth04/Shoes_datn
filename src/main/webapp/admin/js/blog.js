@@ -64,6 +64,21 @@ async function saveBlog() {
         "imageBanner": linkImage,
         "primaryBlog": primaryBlog
     }
+    if (!title){
+        toastr.warning("không đển trống tiêu đề")
+        return;
+    }
+    if (!linkImage){
+        toastr.warning("không đển trống ảnh bài viết")
+        return;
+    }
+    if (!description){
+        toastr.warning("không đển trống mô tả")
+        return;
+    }
+    if (!content){
+        toastr.warning("không đển trống nội dung")
+    }
 
     const response = await fetch(url, {
         method: 'POST',
