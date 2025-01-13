@@ -57,17 +57,20 @@
                             </div>
                         </div>
                         <div class="col-lg-12 col-md-12 col-sm-6 col-6 sinv">
-                            <!-- <div nofi="infor" onclick="changeLink(this,'infor')" class="tabdv activetabdv">
-                                <a data-toggle="tab" href="#infor"><img class="imgau" src="image/user.svg"> Tài khoản của tôi</a>
-                            </div> -->
-                            <div onclick="changeLink(this,'address')" class="tabdv activetabdv">
-                                <a data-toggle="tab" href="#address"><img class="imgau" src="image/add.svg"> Sổ địa chỉ</a>
+                            <div onclick="changeLink(this,'invoice')" class="tabdv activetabdv">
+                                <a data-toggle="tab" href="#invoice">
+                                    <img class="imgau" src="image/invoice.svg"> Đơn hàng của tôi
+                                </a>
                             </div>
-                            <div onclick="changeLink(this,'invoice')" class="tabdv">
-                                <a data-toggle="tab" href="#invoice"><img class="imgau" src="image/invoice.svg"> Đơn hàng của tôi</a>
+                            <div onclick="changeLink(this,'address')" class="tabdv">
+                                <a data-toggle="tab" href="#address">
+                                    <img class="imgau" src="image/add.svg"> Sổ địa chỉ
+                                </a>
                             </div>
                             <div onclick="changeLink(this,'changepass')" class="tabdv">
-                                <a data-toggle="tab" href="#changepass"><img class="imgau" src="image/pass.svg"> Đổi mật khẩu</a>
+                                <a data-toggle="tab" href="#changepass">
+                                    <img class="imgau" src="image/pass.svg"> Đổi mật khẩu
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -95,7 +98,7 @@
                                 </div>
                             </div>
                         </div> -->
-                        <div role="tabpanel" class="tab-pane" id="invoice">
+                        <div role="tabpanel" class="tab-pane active" id="invoice">
                             <div class="headeraccount">
                                 <p class="fontyel">Đơn hàng của tôi</p>
                                 <span>(Nhấp vào mã đơn hàng để xem chi tiêt)</span>
@@ -176,7 +179,7 @@
                                 </form>
                             </div>
                         </div>
-                        <div role="tabpanel" class="tab-pane active" id="address">
+                        <div role="tabpanel" class="tab-pane" id="address">
                             <div class="headeraccount">
                                 <p class="fontyel">Địa chỉ của bạn</p>
                                 <div class="right_flex">

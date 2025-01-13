@@ -39,51 +39,65 @@ async function sendLoginRequestToBackend(accessToken) {
     }
 }
 
-
 async function login() {
-    var url = 'http://localhost:8080/api/login'
-    var username = document.getElementById("username").value
-    var password = document.getElementById("password").value
+    var url = 'http://localhost:8080/api/login';
+    var username = document.getElementById("username").value.trim();
+    var password = document.getElementById("password").value.trim();
     var user = {
         "username": username,
         "password": password,
-        "tokenFcm":tokenFcm
+        "tokenFcm": tokenFcm
+    };
+
+    if (!username) {
+        toastr.warning('Vui lòng nhập email!');
+        return;
     }
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: new Headers({
-            'Content-Type': 'application/json'
-        }),
-        body: JSON.stringify(user)
-    });
-    var result = await response.json();
-    if (response.status < 300) {
-        localStorage.setItem("user", JSON.stringify(result.user));
-        localStorage.setItem("token", result.token);
-        if (result.user.authorities.name === "ROLE_ADMIN") {
-            window.location.href = 'admin/index';
-        }
-        if (result.user.authorities.name === "ROLE_USER") {
-            window.location.href = 'index';
-        }
+
+    if (!password) {
+        toastr.warning('Vui lòng nhập mật khẩu!');
+        return;
     }
-    if (response.status == exceptionCode) {
-        if (result.errorCode == 300) {
-            swal({
-                title: "Thông báo",
-                text: "Tài khoản chưa được kích hoạt, đi tới kích hoạt tài khoản!",
-                type: "warning"
-            }, function() {
-                window.location.href = 'confirm?email=' + username
-            });
-        } else {
-            toastr.warning(result.defaultMessage);
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: new Headers({
+                'Content-Type': 'application/json'
+            }),
+            body: JSON.stringify(user)
+        });
+
+        var result = await response.json();
+
+        if (response.status < 300) {
+            localStorage.setItem("user", JSON.stringify(result.user));
+            localStorage.setItem("token", result.token);
+            if (result.user.authorities.name === "ROLE_ADMIN") {
+                window.location.href = 'admin/index';
+            }
+            if (result.user.authorities.name === "ROLE_USER") {
+                window.location.href = 'index';
+            }
         }
+
+        if (response.status == exceptionCode) {
+            if (result.errorCode == 300) {
+                swal({
+                    title: "Thông báo",
+                    text: "Tài khoản chưa được kích hoạt, đi tới kích hoạt tài khoản!",
+                    type: "warning"
+                }, function() {
+                    window.location.href = 'confirm?email=' + username;
+                });
+            } else {
+                toastr.warning(result.defaultMessage);
+            }
+        }
+    } catch (error) {
+        toastr.error('Đã xảy ra lỗi, vui lòng thử lại!');
     }
 }
-
-
-
 
 function getRole(role) {
     switch(role) {
@@ -167,75 +181,116 @@ function loadUserInfo() {
     document.getElementById('edit-phone').value = user.phone || '';
 }
 
+function changeLink(element, tab) {
+    document.querySelectorAll('.tabdv').forEach(el => {
+        el.classList.remove('activetabdv');
+    });
 
-function changeLink(e, link) {
-    var tabs = document.getElementsByClassName("tabdv");
-    for (var i = 0; i < tabs.length; i++) {
-        tabs[i].classList.remove("activetabdv");
-    }
+    element.classList.add('activetabdv');
 
-    e.classList.add('activetabdv');
+    document.querySelectorAll('.tab-pane').forEach(el => {
+        el.classList.remove('active');
+    });
 
-    var tabPanes = document.getElementsByClassName("tab-pane");
-    for (var i = 0; i < tabPanes.length; i++) {
-        tabPanes[i].classList.remove("active");
-    }
-    document.getElementById(link).classList.add('active');
+    document.getElementById(tab).classList.add('active');
 }
+function activateTab(tabName) {
+    const tabElement = document.querySelector(`[onclick="changeLink(this,'${tabName}')"]`);
+    if (tabElement) {
+        changeLink(tabElement, tabName);
+    }
+}
+
+window.onload = function() {
+    loadMenu();
+    loadAddress();
+    loadAddressUser();
+    loadMyInvoice();
+    loadUserInfo();
+
+
+    const hash = window.location.hash.substring(1);
+    if (hash) {
+        activateTab(hash);
+    } else {
+        activateTab('invoice');
+    }
+}
+
+window.addEventListener('hashchange', function() {
+    const hash = window.location.hash.substring(1);
+    if (hash) {
+        activateTab(hash);
+    }
+});
 
 
 
 async function regis() {
-    var url = 'http://localhost:8080/api/regis'
-    var email = document.getElementById("email").value
-    var fullname = document.getElementById("fullname").value
-    var phone = document.getElementById("phone").value
-    var password = document.getElementById("password").value
+    var url = 'http://localhost:8080/api/regis';
+    var email = document.getElementById("email").value.trim();
+    var fullname = document.getElementById("fullname").value.trim();
+    var phone = document.getElementById("phone").value.trim();
+    var password = document.getElementById("password").value.trim();
+
     var user = {
         "fullname": fullname,
         "email": email,
         "phone": phone,
         "password": password
-    }
-    if(!email){
-        toastr.warning('Vui lòng nhập email!');
-        return;
-    }
-    if(!fullname){
+    };
+
+    if (!fullname) {
         toastr.warning('Vui lòng nhập họ tên!');
         return;
     }
-    if(!phone){
+    if (!phone) {
         toastr.warning('Vui lòng nhập điện thoại!');
         return;
     }
     const phoneRegex = /^[0-9]{10}$/;
     if (!phoneRegex.test(phone)) {
-        toastr.warning("Số điện thoại không hợp lệ!");
+        toastr.warning(" Vui lòng nhập số điện thoại hợp lệ!");
         return;
     }
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: new Headers({
-            'Content-Type': 'application/json'
-        }),
-        body: JSON.stringify(user)
-    });
-    var result = await response.json();
-    if (response.status < 300) {
-        swal({
+    if (!email) {
+        toastr.warning('Vui lòng nhập email!');
+        return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        toastr.warning('Vui lòng nhập email hợp lệ!');
+        return;
+    }
+    if (!password) {
+        toastr.warning('Vui lòng nhập mật khẩu');
+        return;
+    }
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: new Headers({
+                'Content-Type': 'application/json'
+            }),
+            body: JSON.stringify(user)
+        });
+        var result = await response.json();
+
+        if (response.ok) {
+            swal({
                 title: "Thông báo",
                 text: "Đăng ký thành công! Hãy check email của bạn!",
                 type: "success"
-            },
-            function() {
-                window.location.href = 'confirm?email=' + result.email
+            }, function() {
+                window.location.href = 'confirm?email=' + result.email;
             });
+        } else if (response.status === exceptionCode) {
+            toastr.warning(result.defaultMessage);
+        }
+    } catch (error) {
+        toastr.error('Đã xảy ra lỗi, vui lòng thử lại!');
     }
-    if (response.status == exceptionCode) {
-        toastr.warning(result.defaultMessage);
-    }
-
 }
 
 
@@ -263,12 +318,16 @@ async function confirmAccount() {
     }
 }
 
-async function forgorPassword() {
-    var email = document.getElementById("email").value
+async function forgotPassword() {
+    var email = document.getElementById("email").value.trim();
     var url = 'http://localhost:8080/api/forgot-password?email=' + email
     const res = await fetch(url, {
         method: 'POST'
     });
+    if(!email){
+        toastr.warning('Vui lòng nhập email!');
+        return;
+    }
     if (res.status < 300) {
         swal({
                 title: "",
@@ -287,38 +346,59 @@ async function forgorPassword() {
 
 async function changePassword() {
     var token = localStorage.getItem("token");
-    var oldpass = document.getElementById("oldpass").value
-    var newpass = document.getElementById("newpass").value
-    var renewpass = document.getElementById("renewpass").value
+    var oldpass = document.getElementById("oldpass").value;
+    var newpass = document.getElementById("newpass").value;
+    var renewpass = document.getElementById("renewpass").value;
     var url = 'http://localhost:8080/api/user/change-password';
-    if (newpass != renewpass) {
-        alert("Mật khẩu mới không trùng khớp");
+
+
+    if (!oldpass) {
+        toastr.warning("Vui lòng nhập mật khẩu cũ.");
         return;
     }
+    if (!newpass) {
+        toastr.warning("Vui lòng nhập mật khẩu mới.");
+        return;
+    }
+    if (!renewpass) {
+        toastr.warning("Vui lòng nhập lại mật khẩu mới.");
+        return;
+    }
+
+
+    if (newpass !== renewpass) {
+        toastr.warning("Mật khẩu mới không trùng khớp.");
+        return;
+    }
+
     var passw = {
         "oldPass": oldpass,
         "newPass": newpass
-    }
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: new Headers({
-            'Authorization': 'Bearer ' + token,
-            'Content-Type': 'application/json'
-        }),
-        body: JSON.stringify(passw)
-    });
-    if (response.status < 300) {
-        swal({
+    };
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: new Headers({
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            }),
+            body: JSON.stringify(passw)
+        });
+
+        if (response.status < 300) {
+            swal({
                 title: "Thông báo",
                 text: "Cập nhật mật khẩu thành công, hãy đăng nhập lại",
                 type: "success"
-            },
-            function() {
+            }, function() {
                 window.location.reload();
             });
-    }
-    if (response.status == exceptionCode) {
-        var result = await response.json()
-        toastr.warning(result.defaultMessage);
+        } else if (response.status == exceptionCode) {
+            var result = await response.json();
+            toastr.warning(result.defaultMessage);
+        }
+    } catch (error) {
+        toastr.error("Có lỗi xảy ra, vui lòng thử lại.");
     }
 }
