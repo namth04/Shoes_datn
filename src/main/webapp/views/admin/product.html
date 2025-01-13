@@ -12,7 +12,10 @@
             loadProduct(0, "", null);
         }
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 </head>
+
 
 <body>
 <section class="body">
@@ -23,28 +26,19 @@
             <th:block th:replace="fragment/sidebarAdmin :: pageHeader"></th:block>
             <div class="row">
                 <div class="col-sm-12 header-sp">
-                    <div class="row" style="margin-bottom: 20px;">
-
-                        <div class="col-md-2 col-sm-12">
-                            <div style="background: white; padding: 6px 12px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center;">
-                                <a href="addproduct" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 5px; padding: 8px 12px;">
-                                    <i class="fa fa-plus"></i>
-                                    <span>Thêm sản phẩm</span>
-                                </a>
+                    <div class="border-radius-container" style="border-radius: 10px; border: 1px solid #ddd; padding: 15px; overflow: hidden;">
+                        <div class="row">
+                            <div class="col-md-3 col-sm-12">
+                                <label class="lb-form" style="display: block">Thêm sản phẩm</label>
+                                <a href="addproduct" class="btn btn-primary"><i class="fa fa-plus"></i> Thêm sản phẩm</a>
                             </div>
-                        </div>
-
-                        <div class="col-md-4 col-sm-12">
-                            <div style="background: white; padding: 6px 12px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 10px;">
-                                <!-- Category Filter Dropdown -->
-                                <select id="listdpar" class="form-control" multiple style="width: 45%; border: 1px solid #dee2e6; padding: 6px;">
-                                </select>
-
-                                <!-- Filter Button -->
-                                <button onclick="filterByCate()" class="btn btn-primary" style="padding: 8px 12px; display: inline-flex; align-items: center; gap: 5px; margin-left: 10px;">
-                                    <i class="fa fa-filter"></i>
-                                    <span>Lọc</span>
-                                </button>
+                            <div class="col-md-3 col-sm-6 col-6">
+                                <label class="lb-form">Chọn danh mục</label>
+                                <select id="listdpar" class="form-control" multiple style="width: 100%;"></select>
+                            </div>
+                            <div class="col-md-3 col-sm-6 col-6">
+                                <label class="lb-form" style="display: block;">&ThinSpace;</label>
+                                <button onclick="filterByCate()" class="btn btn-primary"><i class="fa fa-filter"></i> Lọc</button>
                             </div>
                         </div>
                     </div>
