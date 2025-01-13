@@ -321,16 +321,25 @@ function showError(message) {
 }
 
 async function paymentCod() {
+    // Check if there are products selected
     if (!listSize || listSize.length === 0) {
         toastr.error("Không có sản phẩm nào được chọn!");
         return;
     }
 
+    // Get the selected address
+    var userAddressId = document.getElementById("sodiachi").value;
+    if (!userAddressId || userAddressId.trim() === "") {
+        toastr.error("Vui lòng chọn địa chỉ giao hàng!");
+        return;
+    }
+
+    // Prepare the order data
     var orderDto = {
         "payType": "PAYMENT_DELIVERY",
-        "userAddressId": document.getElementById("sodiachi").value,
+        "userAddressId": userAddressId,
         "voucherCode": voucherCode,
-        "note": document.getElementById("ghichudonhang").value,
+        "note": document.getElementById("ghichudonhang").value.trim(),
         "listProductSize": listSize
     };
 
@@ -341,20 +350,19 @@ async function paymentCod() {
         const res = await fetch(url, {
             method: 'POST',
             headers: new Headers({
-                'Authorization': 'Bearer ' + token,
+                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             }),
             body: JSON.stringify(orderDto)
         });
 
-        if (res.status < 300) {
-
-            var currentCart = JSON.parse(localStorage.getItem("product_cart"));
+        if (res.ok) {
+            // Successfully placed order
+            var currentCart = JSON.parse(localStorage.getItem("product_cart")) || [];
             var selectedItems = JSON.parse(localStorage.getItem("selected_items") || "[]");
 
+            // Remove selected items from cart
             var remainingCart = currentCart.filter((_, index) => !selectedItems.includes(index));
-
-
             localStorage.setItem("product_cart", JSON.stringify(remainingCart));
             localStorage.removeItem("selected_items");
 
@@ -363,15 +371,18 @@ async function paymentCod() {
                 text: "Đặt hàng thành công!",
                 type: "success"
             }, function () {
-                window.location.replace("account#invoice")
+                window.location.replace("account#invoice");
             });
+        } else {
+            // Handle errors from the server response
+            const errorData = await res.json();
+            toastr.error(errorData.message || "Có lỗi xảy ra khi đặt hàng!");
         }
     } catch (error) {
         console.error("Lỗi khi đặt hàng:", error);
-        toastr.error("Có lỗi xảy ra khi đặt hàng!");
+        toastr.error("Không thể kết nối tới server! Vui lòng thử lại.");
     }
-}
-async function paymentOnline() {
+}async function paymentOnline() {
     var uls = new URL(document.URL);
     var statusGpay = uls.searchParams.get("status");
     var merchantOrderId = uls.searchParams.get("merchant_order_id");
