@@ -326,11 +326,19 @@ async function paymentCod() {
         return;
     }
 
+    // Get the selected address
+    var userAddressId = document.getElementById("sodiachi").value;
+    if (!userAddressId || userAddressId.trim() === "") {
+        toastr.error("Vui lòng chọn địa chỉ giao hàng!");
+        return;
+    }
+
+    // Prepare the order data
     var orderDto = {
         "payType": "PAYMENT_DELIVERY",
-        "userAddressId": document.getElementById("sodiachi").value,
+        "userAddressId": userAddressId,
         "voucherCode": voucherCode,
-        "note": document.getElementById("ghichudonhang").value,
+        "note": document.getElementById("ghichudonhang").value.trim(),
         "listProductSize": listSize
     };
 
@@ -347,10 +355,14 @@ async function paymentCod() {
             body: JSON.stringify(orderDto)
         });
 
-        if (res.status < 300) {
-            var currentCart = JSON.parse(localStorage.getItem("product_cart"));
+        if (res.ok) {
+            // Successfully placed order
+            var currentCart = JSON.parse(localStorage.getItem("product_cart")) || [];
             var selectedItems = JSON.parse(localStorage.getItem("selected_items") || "[]");
+
+            // Remove selected items from cart
             var remainingCart = currentCart.filter((_, index) => !selectedItems.includes(index));
+
 
             localStorage.setItem("product_cart", JSON.stringify(remainingCart));
             localStorage.removeItem("selected_items");
@@ -359,18 +371,18 @@ async function paymentCod() {
                 title: "Thông báo",
                 text: "Đặt hàng thành công!",
                 type: "success"
-            }, function() {
-                window.location.href = 'account#invoice';
-            });
+            }, function () {
+                window.location.href = 'account#invoice';            });
+        } else {
+            // Handle errors from the server response
+            const errorData = await res.json();
+            toastr.error(errorData.message || "Có lỗi xảy ra khi đặt hàng!");
         }
     } catch (error) {
         console.error("Lỗi khi đặt hàng:", error);
         toastr.error("Có lỗi xảy ra khi đặt hàng!");
     }
-}
-
-
-async function paymentOnline() {
+}async function paymentOnline() {
     var uls = new URL(document.URL);
     var statusGpay = uls.searchParams.get("status");
     var merchantOrderId = uls.searchParams.get("merchant_order_id");
@@ -439,7 +451,6 @@ async function paymentOnline() {
                 localStorage.removeItem("selected_items");
             }
 
-            // Xóa các session storage
             sessionStorage.removeItem("ghichudonhang");
             sessionStorage.removeItem("voucherCode");
             sessionStorage.removeItem("paytype");
