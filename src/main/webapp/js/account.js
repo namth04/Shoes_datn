@@ -253,22 +253,13 @@ async function regis() {
         return;
     }
 
-// Valid prefixes for Vietnamese phone numbers
-    const validPhonePrefixes = [
-        "03", "05", "07", "08", "09" // Common prefixes for Vietnamese SIM cards
-    ];
-
-// Regex to validate phone numbers: starts with 0, followed by valid prefixes, and exactly 10 digits
-    const phoneRegex = /^0[35789]\d{8}$/;
+    const phoneRegex = /^0\d{9}$/;
 
     if (!phoneRegex.test(phone)) {
-        toastr.warning(
-            `Vui lòng nhập số điện thoại hợp lệ! Số điện thoại phải bắt đầu bằng ${validPhonePrefixes.join(
-                ", "
-            )} và có đúng 10 chữ số.`
-        );
+        toastr.warning("Vui lòng nhập số điện thoại hợp lệ! Số điện thoại phải bắt đầu bằng 0 và có đúng 10 chữ số.");
         return;
     }
+
 
     if (!email) {
         toastr.warning('Vui lòng nhập email!');
