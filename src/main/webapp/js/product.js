@@ -43,21 +43,20 @@ function handlePageClick(event, page) {
 
 
 async function loadSanPhamBanChay(page) {
-    var size= 5;
+    var size = 5;
     var url = 'http://localhost:8080/api/product/public/findAll?page=' + page + '&size=' + size + '&sort=quantitySold,desc';
     const response = await fetch(url, {
         method: 'GET'
     });
     var result = await response.json();
-    console.log(result)
+    console.log(result);
     var list = result.content;
-    var totalPage = result.totalPages;
 
     var main = '';
-    for (i = 0; i < list.length; i++) {
-        var listimg = ''
-        for (j = 0; j < list[i].productImages.length; j++) {
-            listimg += `<div class="divimgsmpro"><img class="imgsmpro" src="${list[i].productImages[j].linkImage}"></div>`
+    for (let i = 0; i < list.length; i++) {
+        var listimg = '';
+        for (let j = 0; j < list[i].productImages.length; j++) {
+            listimg += `<div class="divimgsmpro"><img class="imgsmpro" src="${list[i].productImages[j].linkImage}"></div>`;
         }
         main += `<div class="col-lg-20p col-md-3 col-sm-6 col-6">
                     <a href="detail?id=${list[i].id}&name=${list[i].alias}" class="linkpro">
@@ -69,21 +68,21 @@ async function loadSanPhamBanChay(page) {
                             <div class="listimgpro">${listimg}</div>
                         </div>
                     </a>
-                </div>`
+                </div>`;
     }
-    document.getElementById("listproductbanchay").innerHTML = main
+    document.getElementById("listproductbanchay").innerHTML = main;
 
-    if (result.last == false) {
+    if (!result.last) {
         document.getElementById("btnsanphambanchay").onclick = function () {
-            loadSanPhamBanChay(Number(page) + Number(1));
-        }
+            loadSanPhamBanChay(Number(page) + 1);
+        };
     } else {
         document.getElementById("btnsanphambanchay").onclick = function () {
-            toastr.warning("Đã hết kết quả tìm kiếm");
-        }
+            toastr.warning("Đã hết kết quả tìm kiếm. Quay lại trang đầu.");
+            loadSanPhamBanChay(0);
+        };
     }
 }
-
 
 async function loadAProduct() {
     var uls = new URL(document.URL)

@@ -151,8 +151,8 @@ async function openStatus(idinvoice, idstatus) {
 }
 
 async function updateStatus() {
-    var idtrangthai = document.getElementById("trangthaiupdate").value
-    var idinvoice = document.getElementById("iddonhangupdate").value
+    var idtrangthai = document.getElementById("trangthaiupdate").value;
+    var idinvoice = document.getElementById("iddonhangupdate").value;
     var url = 'http://localhost:8080/api/invoice/admin/update-status?idInvoice=' + idinvoice + '&idStatus=' + idtrangthai;
 
     const res = await fetch(url, {
@@ -164,14 +164,17 @@ async function updateStatus() {
 
     if (res.status < 300) {
         toastr.success("Cập nhật trạng thái đơn hàng thành công!");
-        $("#capnhatdonhang").modal("hide")
-    }
+        $("#capnhatdonhang").modal("hide");
 
-    if (res.status == exceptionCode) {
-        var result = await res.json()
+        // Lấy trang hiện tại từ giao diện
+        let currentPage = document.querySelector('.page-item.active')?.textContent?.trim() || 1;
+        loadInvoice(currentPage - 1); // Gọi lại loadInvoice để làm mới dữ liệu
+    } else if (res.status === exceptionCode) {
+        var result = await res.json();
         toastr.warning(result.defaultMessage);
     }
 }
+
 
 async function loadStatusUpdate() {
     var url = 'http://localhost:8080/api/status/admin/all';

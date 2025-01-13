@@ -348,12 +348,9 @@ async function paymentCod() {
         });
 
         if (res.status < 300) {
-
             var currentCart = JSON.parse(localStorage.getItem("product_cart"));
             var selectedItems = JSON.parse(localStorage.getItem("selected_items") || "[]");
-
             var remainingCart = currentCart.filter((_, index) => !selectedItems.includes(index));
-
 
             localStorage.setItem("product_cart", JSON.stringify(remainingCart));
             localStorage.removeItem("selected_items");
@@ -362,8 +359,8 @@ async function paymentCod() {
                 title: "Thông báo",
                 text: "Đặt hàng thành công!",
                 type: "success"
-            }, function () {
-                window.location.replace("account#invoice")
+            }, function() {
+                window.location.href = 'account#invoice';
             });
         }
     } catch (error) {
@@ -371,6 +368,8 @@ async function paymentCod() {
         toastr.error("Có lỗi xảy ra khi đặt hàng!");
     }
 }
+
+
 async function paymentOnline() {
     var uls = new URL(document.URL);
     var statusGpay = uls.searchParams.get("status");
@@ -406,15 +405,11 @@ async function paymentOnline() {
         return;
     }
 
-    var note = sessionStorage.getItem("ghichudonhang");
-    var sodiachi = sessionStorage.getItem("sodiachi");
-    var voucherCode = sessionStorage.getItem("voucherCode");
-
     var orderDto = {
         "payType": "PAYMENT_GPAY",
-        "userAddressId": sodiachi,
-        "voucherCode": voucherCode,
-        "note": note,
+        "userAddressId": sessionStorage.getItem("sodiachi"),
+        "voucherCode": sessionStorage.getItem("voucherCode"),
+        "note": sessionStorage.getItem("ghichudonhang"),
         "statusGpay": statusGpay,
         "merchantOrderId": merchantOrderId,
         "listProductSize": listSize
@@ -444,6 +439,7 @@ async function paymentOnline() {
                 localStorage.removeItem("selected_items");
             }
 
+            // Xóa các session storage
             sessionStorage.removeItem("ghichudonhang");
             sessionStorage.removeItem("voucherCode");
             sessionStorage.removeItem("paytype");
@@ -453,7 +449,11 @@ async function paymentOnline() {
 
             document.getElementById("thanhcong").style.display = 'block';
             document.getElementById("thatbai").style.display = 'none';
-        } else if (res.status == exceptionCode) {
+
+            setTimeout(() => {
+                window.location.href = 'account#invoice';
+            }, 2000);
+        } else {
             document.getElementById("thatbai").style.display = 'block';
             document.getElementById("thanhcong").style.display = 'none';
             document.getElementById("errormess").innerHTML = result.defaultMessage;
@@ -479,79 +479,145 @@ function checkout() {
         }
     }
 async function requestPayMentGpay() {
-        var ghichu = document.getElementById("ghichudonhang").value;
-        var sodiachi = document.getElementById("sodiachi").value;
-        var returnurl = 'http://localhost:8080/payment';
+    var ghichu = document.getElementById("ghichudonhang").value;
+    var sodiachi = document.getElementById("sodiachi").value;
+    var returnurl = 'http://localhost:8080/payment';
 
+    // Save necessary data to session storage
+    sessionStorage.setItem('ghichudonhang', ghichu);
+    sessionStorage.setItem('voucherCode', voucherCode);
+    sessionStorage.setItem('paytype', "GPAY");
+    sessionStorage.setItem('sodiachi', sodiachi);
 
-        sessionStorage.setItem('ghichudonhang', ghichu);
-        sessionStorage.setItem('voucherCode', voucherCode);
-        sessionStorage.setItem('paytype', "GPAY");
-        sessionStorage.setItem('sodiachi', sodiachi);
+    let paymentDto;
+    const urlParams = new URLSearchParams(window.location.search);
+    const isBuyNow = urlParams.get('type') === 'buynow';
 
-        let paymentDto;
-        const urlParams = new URLSearchParams(window.location.search);
-        const isBuyNow = urlParams.get('type') === 'buynow';
+    // Show loading state
+    showLoadingOverlay();
 
-        if (isBuyNow) {
-            var buyNowData = sessionStorage.getItem("buy_now_item");
-            if (!buyNowData) {
-                toastr.error("Không tìm thấy thông tin sản phẩm!");
-                return;
-            }
-
-            var buyNowList = JSON.parse(buyNowData);
-            sessionStorage.setItem('payment_type', 'buy_now');
-            sessionStorage.setItem('buy_now_data', buyNowData);
-
-            paymentDto = {
-                "content": "Thanh toán đơn hàng mua ngay",
-                "returnUrl": returnurl,
-                "notifyUrl": returnurl,
-                "codeVoucher": voucherCode,
-                "listProductSize": buyNowList.map(item => ({
-                    "idProductSize": item.size.id,
-                    "quantity": item.quantiy
-                }))
-            };
-        } else {
-
-            if (!listSize || listSize.length === 0) {
-                toastr.error("Không có sản phẩm nào được chọn!");
-                return;
-            }
-
-            sessionStorage.setItem('payment_type', 'cart');
-
-            sessionStorage.setItem('cart_list_size', JSON.stringify(listSize));
-
-            paymentDto = {
-                "content": "Thanh toán đơn hàng từ giỏ hàng",
-                "returnUrl": returnurl,
-                "notifyUrl": returnurl,
-                "codeVoucher": voucherCode,
-                "listProductSize": listSize
-            };
+    if (isBuyNow) {
+        var buyNowData = sessionStorage.getItem("buy_now_item");
+        if (!buyNowData) {
+            hideLoadingOverlay();
+            toastr.error("Không tìm thấy thông tin sản phẩm!");
+            return;
         }
-        try {
-            const res = await fetch('http://localhost:8080/api/gpay/urlpayment', {
-                method: 'POST',
-                headers: new Headers({
-                    'Authorization': 'Bearer ' + token,
-                    'Content-Type': 'application/json'
-                }),
-                body: JSON.stringify(paymentDto)
-            });
 
-            var result = await res.json();
-            if (res.status < 300) {
-                window.open(result.url, '_blank');
-            }
-            if (res.status == exceptionCode) {
-                toastr.warning(result.defaultMessage);
-            }
-        } catch (error) {
-            console.error("Lỗi khi thực hiện thanh toán qua GPay:", error);
-            toastr.error("Có lỗi xảy ra khi thực hiện thanh toán!");
+        var buyNowList = JSON.parse(buyNowData);
+        sessionStorage.setItem('payment_type', 'buy_now');
+        sessionStorage.setItem('buy_now_data', buyNowData);
+
+        paymentDto = {
+            "content": "Thanh toán đơn hàng mua ngay",
+            "returnUrl": returnurl,
+            "notifyUrl": returnurl,
+            "codeVoucher": voucherCode,
+            "listProductSize": buyNowList.map(item => ({
+                "idProductSize": item.size.id,
+                "quantity": item.quantiy
+            }))
+        };
+    } else {
+        if (!listSize || listSize.length === 0) {
+            hideLoadingOverlay();
+            toastr.error("Không có sản phẩm nào được chọn!");
+            return;
         }
+
+        sessionStorage.setItem('payment_type', 'cart');
+        sessionStorage.setItem('cart_list_size', JSON.stringify(listSize));
+
+        paymentDto = {
+            "content": "Thanh toán đơn hàng từ giỏ hàng",
+            "returnUrl": returnurl,
+            "notifyUrl": returnurl,
+            "codeVoucher": voucherCode,
+            "listProductSize": listSize
+        };
     }
+
+    try {
+        const res = await fetch('http://localhost:8080/api/gpay/urlpayment', {
+            method: 'POST',
+            headers: new Headers({
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            }),
+            body: JSON.stringify(paymentDto)
+        });
+
+        var result = await res.json();
+        if (res.status < 300) {
+            // Instead of opening in new window, redirect current window
+            window.location.href = result.url;
+        }
+        if (res.status == exceptionCode) {
+            hideLoadingOverlay();
+            toastr.warning(result.defaultMessage);
+        }
+    } catch (error) {
+        console.error("Lỗi khi thực hiện thanh toán qua GPay:", error);
+        hideLoadingOverlay();
+        toastr.error("Có lỗi xảy ra khi thực hiện thanh toán!");
+    }
+}
+
+function showLoadingOverlay() {
+    // Create loading overlay if it doesn't exist
+    if (!document.getElementById('loadingOverlay')) {
+        const overlay = document.createElement('div');
+        overlay.id = 'loadingOverlay';
+        overlay.innerHTML = `
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Đang xử lý thanh toán...</div>
+        `;
+        document.body.appendChild(overlay);
+    }
+    document.getElementById('loadingOverlay').style.display = 'flex';
+}
+
+function hideLoadingOverlay() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.style.display = 'none';
+    }
+}
+
+const style = document.createElement('style');
+style.textContent = `
+    #loadingOverlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.9);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        z-index: 9999;
+    }
+
+    .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 20px;
+    }
+
+    .loading-text {
+        font-size: 18px;
+        color: #333;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+`;
+document.head.appendChild(style);
