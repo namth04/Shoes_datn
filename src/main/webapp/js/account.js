@@ -248,11 +248,28 @@ async function regis() {
         toastr.warning('Vui lòng nhập điện thoại!');
         return;
     }
-    const phoneRegex = /^[0-9]{10}$/;
-    if (!phoneRegex.test(phone)) {
-        toastr.warning(" Vui lòng nhập số điện thoại hợp lệ!");
+    if (!phone) {
+        toastr.warning("Số điện thoại không được để trống!");
         return;
     }
+
+// Valid prefixes for Vietnamese phone numbers
+    const validPhonePrefixes = [
+        "03", "05", "07", "08", "09" // Common prefixes for Vietnamese SIM cards
+    ];
+
+// Regex to validate phone numbers: starts with 0, followed by valid prefixes, and exactly 10 digits
+    const phoneRegex = /^0[35789]\d{8}$/;
+
+    if (!phoneRegex.test(phone)) {
+        toastr.warning(
+            `Vui lòng nhập số điện thoại hợp lệ! Số điện thoại phải bắt đầu bằng ${validPhonePrefixes.join(
+                ", "
+            )} và có đúng 10 chữ số.`
+        );
+        return;
+    }
+
     if (!email) {
         toastr.warning('Vui lòng nhập email!');
         return;
@@ -289,7 +306,7 @@ async function regis() {
             toastr.warning(result.defaultMessage);
         }
     } catch (error) {
-        toastr.error('Đã xảy ra lỗi, vui lòng thử lại!');
+        toastr.warning('Đã xảy ra lỗi, vui lòng thử lại!');
     }
 }
 
