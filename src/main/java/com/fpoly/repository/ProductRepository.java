@@ -12,6 +12,10 @@ import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product,Long>, JpaSpecificationExecutor<Product> {
 
+    @Query("select p from Product p where p.code = ?1")
+    Optional<Product> findByCode(String code);
+
+    boolean existsByCode(String code);
     @Query("select p from Product p where p.name = ?1")
     public Optional<Product> findByName(String name);
 

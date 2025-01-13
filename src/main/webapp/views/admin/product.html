@@ -12,7 +12,10 @@
             loadProduct(0, "", null);
         }
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 </head>
+
 
 <body>
 <section class="body">
@@ -23,32 +26,32 @@
             <th:block th:replace="fragment/sidebarAdmin :: pageHeader"></th:block>
             <div class="row">
                 <div class="col-sm-12 header-sp">
-                    <div class="row">
-                        <div class="col-md-3 col-sm-12">
-                            <label class="lb-form" style="display: block">Thêm sản phẩm</label>
-                            <a href="addproduct" class="btn btn-primary"><i class="fa fa-plus"></i> Thêm sản phẩm</a>
-                        </div>
-                        <div class="col-md-3 col-sm-6 col-6">
-                            <label class="lb-form">Chọn danh mục</label>
-                            <select id="listdpar" class="form-control" multiple style="width: 100%;">
-                            </select>
-                        </div>
-                        <div class="col-md-3 col-sm-6 col-6">
-                            <label class="lb-form" style="display: block;">&ThinSpace;</label>
-                            <button onclick="filterByCate()" class="btn btn-primary"><i class="fa fa-filter"></i>Lọc</button>
+                    <div class="border-radius-container" style="border-radius: 10px; border: 1px solid #ddd; padding: 15px; overflow: hidden;">
+                        <div class="row">
+                            <div class="col-md-3 col-sm-12">
+                                <label class="lb-form" style="display: block">Thêm sản phẩm</label>
+                                <a href="addproduct" class="btn btn-primary"><i class="fa fa-plus"></i> Thêm sản phẩm</a>
+                            </div>
+                            <div class="col-md-3 col-sm-6 col-6">
+                                <label class="lb-form">Chọn danh mục</label>
+                                <select id="listdpar" class="form-control" multiple style="width: 100%;"></select>
+                            </div>
+                            <div class="col-md-3 col-sm-6 col-6">
+                                <label class="lb-form" style="display: block;">&ThinSpace;</label>
+                                <button onclick="filterByCate()" class="btn btn-primary"><i class="fa fa-filter"></i> Lọc</button>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="col-sm-12">
                     <div class="wrapper">
                         <div class="headertable">
-                            <div class="divsearchtb">
-                                <label>search: </label>
-                                <input onkeyup="loadProduct(0,this.value,null)" id="searchtable" placeholder="Tìm kiếm" class="inputsearchtable">
+                            <div class="search-box">
+                                <input type="text" class="search-input" id="searchtable" placeholder="Tìm kiếm..." onkeyup="loadProduct(0,this.value,null)">
                             </div>
                         </div>
-                        <table class="table table-striped tablefix">
-                            <thead class="thead-tablefix">
+                        <table class="table table-bordered">
+                            <thead class="thead-bordered">
                             <tr>
                                 <th>Id</th>
                                 <th>Ảnh</th>

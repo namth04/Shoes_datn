@@ -29,6 +29,7 @@ import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 @Repository
@@ -69,6 +70,9 @@ public class ProductServiceImp implements ProductService {
         Product product = productMapper.productRequestToProduct(productRequest);
         if(product.getId() != null){
             throw new MessageException("id must null");
+        }
+        if (productRepository.existsByCode(productRequest.getCode())) {
+            throw new MessageException("Mã sản phẩm " + productRequest.getCode() + " đã tồn tại");
         }
         product.setCreatedDate(new Date(System.currentTimeMillis()));
         product.setCreatedTime(new Time(System.currentTimeMillis()));
@@ -125,63 +129,85 @@ public class ProductServiceImp implements ProductService {
         if(product.getId() == null){
             throw new MessageException("id product require");
         }
+
         Optional<Product> exist = productRepository.findById(product.getId());
         if(exist.isEmpty()){
             throw new MessageException("product not found");
         }
 
+        Optional<Product> productWithSameCode = productRepository.findByCode(productRequest.getCode());
+        if (productWithSameCode.isPresent() && !productWithSameCode.get().getId().equals(product.getId())) {
+            throw new MessageException("Mã sản phẩm " + productRequest.getCode() + " đã tồn tại");
+        }
+
         product.setCreatedDate(exist.get().getCreatedDate());
         product.setCreatedTime(exist.get().getCreatedTime());
         product.setQuantitySold(exist.get().getQuantitySold());
-        if (product.getAlias() == null) {
+
+        if (product.getAlias() == null || product.getAlias().isEmpty()) {
             product.setAlias(CharacterUtils.change(product.getName()));
         }
-        if(product.getAlias() == ""){
-            product.setAlias(CharacterUtils.change(product.getName()));
-        }
+
         Product result = productRepository.save(product);
 
         productCategoryRepository.deleteByProduct(result.getId());
-        for(Long id : productRequest.getListCategoryIds()){
-            ProductCategory productCategory = new ProductCategory();
-            productCategory.setProduct(result);
-            Category category = new Category();
-            category.setId(id);
-            productCategory.setCategory(category);
-            productCategoryRepository.save(productCategory);
-        }
-        for(String link : productRequest.getLinkLinkImages()){
-            ProductImage productImage = new ProductImage();
-            productImage.setProduct(result);
-            productImage.setLinkImage(link);
-            productImageRepository.save(productImage);
-        }
-        for(ColorRequest color : productRequest.getColors()){
+        List<ProductCategory> categories = productRequest.getListCategoryIds().stream()
+                .map(id -> {
+                    ProductCategory productCategory = new ProductCategory();
+                    productCategory.setProduct(result);
+                    Category category = new Category();
+                    category.setId(id);
+                    productCategory.setCategory(category);
+                    return productCategory;
+                })
+                .collect(Collectors.toList());
+        productCategoryRepository.saveAll(categories);
+
+        List<ProductImage> images = productRequest.getLinkLinkImages().stream()
+                .map(link -> {
+                    ProductImage productImage = new ProductImage();
+                    productImage.setProduct(result);
+                    productImage.setLinkImage(link);
+                    return productImage;
+                })
+                .collect(Collectors.toList());
+        productImageRepository.saveAll(images);
+
+
+        for(ColorRequest color : productRequest.getColors()) {
             ProductColor productColor = new ProductColor();
             productColor.setId(color.getId());
             productColor.setProduct(result);
             productColor.setColorName(color.getColorName());
             productColor.setLinkImage(color.getLinkImage());
-            if(color.getLinkImage() == null){
-                if(color.getId() != null){
-                    Optional<ProductColor> ex = productColorRepository.findById(color.getId());
-                    if(ex.isPresent()){
-                        productColor.setLinkImage(ex.get().getLinkImage());
-                    }
-                }
+
+            if(color.getLinkImage() == null && color.getId() != null) {
+                productColorRepository.findById(color.getId())
+                        .ifPresent(existingColor ->
+                                productColor.setLinkImage(existingColor.getLinkImage())
+                        );
             }
+
             ProductColor colorResult = productColorRepository.save(productColor);
-            for(SizeRequest size : color.getSize()){
-                ProductSize productSize = new ProductSize();
-                productSize.setId(size.getId());
-                productSize.setProductColor(colorResult);
-                productSize.setSizeName(size.getSizeName());
-                productSize.setQuantity(size.getQuantity());
-                productSizeRepository.save(productSize);
-            }
+
+            // Cập nhật kích thước
+            List<ProductSize> sizes = color.getSize().stream()
+                    .map(size -> {
+                        ProductSize productSize = new ProductSize();
+                        productSize.setId(size.getId());
+                        productSize.setProductColor(colorResult);
+                        productSize.setSizeName(size.getSizeName());
+                        productSize.setQuantity(size.getQuantity());
+                        return productSize;
+                    })
+                    .collect(Collectors.toList());
+            productSizeRepository.saveAll(sizes);
         }
-        ProductResponse response = productMapper.productToProResponse(productRepository.findById(result.getId()).get());
-        return response;
+
+        return productMapper.productToProResponse(
+                productRepository.findById(result.getId())
+                        .orElseThrow(() -> new MessageException("Cannot find updated product"))
+        );
     }
 
     @Override

@@ -151,8 +151,8 @@ async function openStatus(idinvoice, idstatus) {
 }
 
 async function updateStatus() {
-    var idtrangthai = document.getElementById("trangthaiupdate").value
-    var idinvoice = document.getElementById("iddonhangupdate").value
+    var idtrangthai = document.getElementById("trangthaiupdate").value;
+    var idinvoice = document.getElementById("iddonhangupdate").value;
     var url = 'http://localhost:8080/api/invoice/admin/update-status?idInvoice=' + idinvoice + '&idStatus=' + idtrangthai;
 
     const res = await fetch(url, {
@@ -164,14 +164,17 @@ async function updateStatus() {
 
     if (res.status < 300) {
         toastr.success("Cập nhật trạng thái đơn hàng thành công!");
-        $("#capnhatdonhang").modal("hide")
-    }
+        $("#capnhatdonhang").modal("hide");
 
-    if (res.status == exceptionCode) {
-        var result = await res.json()
+        // Lấy trang hiện tại từ giao diện
+        let currentPage = document.querySelector('.page-item.active')?.textContent?.trim() || 1;
+        loadInvoice(currentPage - 1); // Gọi lại loadInvoice để làm mới dữ liệu
+    } else if (res.status === exceptionCode) {
+        var result = await res.json();
         toastr.warning(result.defaultMessage);
     }
 }
+
 
 async function loadStatusUpdate() {
     var url = 'http://localhost:8080/api/status/admin/all';
@@ -217,14 +220,23 @@ async function createInvoice() {
 
         const fullName = document.getElementById("fullname").value.trim();
         const phone = document.getElementById("phone").value.trim();
+        const customerPaidInput = document.getElementById('customerPaid').value.trim();
 
-        if (!fullName) {
-            toastr.warning('Vui lòng nhập tên khách hàng');
+        // Allow phone to be empty, but validate format if entered
+        const phoneRegex = /^[0-9]{10}$/;
+        if (phone && !phoneRegex.test(phone)) {
+            toastr.warning('Số điện thoại không hợp lệ. Vui lòng nhập đúng định dạng (10 chữ số).');
             return;
         }
 
-        if (!phone) {
-            toastr.warning('Vui lòng nhập số điện thoại');
+        if (!customerPaidInput) {
+            toastr.warning('Vui lòng nhập số tiền khách đưa.');
+            return;
+        }
+
+        const customerPaid = parseFloat(customerPaidInput);
+        if (isNaN(customerPaid) || customerPaid <= 0) {
+            toastr.warning('Số tiền khách đưa không hợp lệ. Vui lòng nhập giá trị hợp lệ.');
             return;
         }
 
@@ -234,10 +246,8 @@ async function createInvoice() {
         }
 
         const totalAmount = parseFloat(document.getElementById('tongtientt').innerText.replace(/[^\d]/g, '')) || 0;
-        const customerPaid = parseFloat(document.getElementById('customerPaid').value) || 0;
-
         if (customerPaid < totalAmount) {
-            toastr.dang('Tiền khách đưa không đủ để thanh toán!');
+            toastr.warning('Tiền khách đưa không đủ để thanh toán!');
             return;
         }
 
@@ -275,7 +285,7 @@ async function createInvoice() {
                     try {
                         invoiceResponse = await res.json();
                     } catch (parseError) {
-                        console.warn('No JSON response, generating placeholder invoice details');
+                        console.warn('Không có dữ liệu');
                     }
                 }
 
@@ -299,12 +309,16 @@ async function createInvoice() {
                     closeOnConfirm: true
                 }, function() {
                     if (invoiceCreated) {
+
+                        listProductTam = [];
+                        localStorage.removeItem("listProductTam");
+
                         resetInvoiceForm();
-                        window.location.href = '/admin/invoice';
+
+                        window.location.href = '/admin/create-invoice';
                     }
                 });
             } else {
-
                 const errorResult = await res.json();
                 if (res.status === exceptionCode) {
                     toastr.warning(errorResult.defaultMessage || 'Có lỗi xảy ra');
@@ -314,7 +328,7 @@ async function createInvoice() {
             }
         } catch (error) {
             console.error("Lỗi khi tạo hóa đơn:", error);
-            toastr.error ('Đã xảy ra lỗi khi tạo hóa đơn. Vui lòng thử lại.');
+            toastr.error('Đã xảy ra lỗi khi tạo hóa đơn. Vui lòng thử lại.');
         }
 
     } catch (unexpectedError) {
@@ -322,6 +336,8 @@ async function createInvoice() {
         toastr.error('Đã xảy ra lỗi không mong muốn. Vui lòng thử lại.');
     }
 }
+
+
 
 function resetInvoiceForm() {
     document.getElementById("fullname").value = '';
@@ -610,14 +626,34 @@ function createInvoiceHTML(invoiceDetails) {
 }
 
 function calculateChange() {
-    const totalAmountText = document.getElementById('tongtientt').innerText;
-    const totalAmount = parseFloat(totalAmountText.replace(/[^\d]/g, ''));
+    let totalAmountText = document.getElementById('tongtientt').innerText;
 
-    const customerPaid = parseFloat(document.getElementById('customerPaid').value);
+    let totalAmount = parseFloat(totalAmountText.replace(/[^\d]/g, ''));
 
+    if (isNaN(totalAmount) || totalAmount < 0) {
+        toastr.warning('Tổng tiền không thể là số âm. Vui lòng kiểm tra lại.');
+        totalAmount = 0;
+    }
+    const customerPaidInput = document.getElementById('customerPaid').value.trim();
+    let customerPaid = customerPaidInput ? parseFloat(customerPaidInput) : 0;
+
+
+    if (customerPaid < 0) {
+        customerPaid = 0;
+        document.getElementById('customerPaid').value = 0;
+    }
+    if (!customerPaidInput) {
+        document.getElementById('changeAmount').value = "";
+        return;
+    }
     let change = customerPaid - totalAmount;
 
-    const formattedChange = change < 0 ? '0đ' : `${change.toLocaleString()}đ`;
+    const formattedChange = change < 0
+        ? `- ${Math.abs(change).toLocaleString()}đ`
+        : `${change.toLocaleString()}đ`;
+
+
     document.getElementById('changeAmount').value = formattedChange;
 }
+
 

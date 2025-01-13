@@ -4,7 +4,9 @@ import com.fpoly.dto.request.ProductRequest;
 import com.fpoly.dto.request.ProductSearch;
 import com.fpoly.dto.response.ProductResponse;
 import com.fpoly.entity.Product;
+import com.fpoly.exception.MessageException;
 import com.fpoly.mapper.ProductMapper;
+import com.fpoly.repository.InvoiceDetailRepository;
 import com.fpoly.servive.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -30,6 +32,10 @@ public class ProductApi {
     @Autowired
     private ProductMapper productMapper;
 
+    @Autowired
+    private InvoiceDetailRepository invoiceDetailRepository;
+
+
     @PostMapping("/admin/create")
     public ResponseEntity<?> save(@Valid @RequestBody ProductRequest productRequest, BindingResult bindingResult){
         if(bindingResult.hasErrors()){
@@ -51,7 +57,7 @@ public class ProductApi {
 
     @DeleteMapping("/admin/delete")
     public ResponseEntity<?> delete(@RequestParam("id") Long id){
-        productService.delete(id);
+            productService.delete(id);
         return new ResponseEntity<>("delete success", HttpStatus.OK);
     }
 

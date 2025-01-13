@@ -23,27 +23,24 @@ async function loadCartCheckOut() {
     var list;
 
     if (isBuyNow) {
-        // Thêm debug log
         console.log("Đang xử lý mua ngay...");
-
         var buyNowData = sessionStorage.getItem("buy_now_item");
-        console.log("Buy Now Data:", buyNowData); // Debug
+        console.log("Buy Now Data:", buyNowData);
 
         if (!buyNowData) {
-            alert("Có lỗi xảy ra!");
-            window.location.replace("cart");
+            toastr.error("Có lỗi xảy ra!");
+            setTimeout(() => window.location.replace("cart"), 2000);
             return;
         }
 
         try {
             list = JSON.parse(buyNowData);
-            console.log("Parsed Buy Now List:", list); // Debug
+            console.log("Parsed Buy Now List:", list);
 
             if (!Array.isArray(list) || list.length === 0) {
                 throw new Error("Dữ liệu mua ngay không hợp lệ");
             }
 
-            // Kiểm tra cấu trúc dữ liệu
             const validItem = list.every(item =>
                 item.product &&
                 item.color &&
@@ -57,22 +54,24 @@ async function loadCartCheckOut() {
             }
         } catch (error) {
             console.error("Lỗi khi xử lý dữ liệu mua ngay:", error);
-            alert("Có lỗi xảy ra khi xử lý dữ liệu!");
-            window.location.replace("cart");
+            toastr.error("Có lỗi xảy ra khi xử lý dữ liệu!");
+            setTimeout(() => window.location.replace("cart"), 2000);
             return;
         }
-    } else {
+    }
+    else {
         var listcart = localStorage.getItem("product_cart");
         var selectedItems = JSON.parse(localStorage.getItem("selected_items") || "[]");
 
         if (!listcart) {
-            alert("Bạn chưa có sản phẩm nào trong giỏ hàng!");
-            window.location.replace("cart");
+            toastr.error("Bạn chưa có sản phẩm nào trong giỏ hàng!");
+            setTimeout(() => window.location.replace("cart"), 2000);
             return;
         }
-        if (!isBuyNow && selectedItems.length === 0) {
-            alert("Vui lòng chọn sản phẩm để thanh toán!");
-            window.location.replace("cart");
+
+        if (selectedItems.length === 0) {
+            toastr.error("Vui lòng chọn sản phẩm để thanh toán!");
+            setTimeout(() => window.location.replace("cart"), 2000);
             return;
         }
 
@@ -114,7 +113,6 @@ async function loadCartCheckOut() {
     };
 
     if (isBuyNow) {
-        console.log("List mua ngay:", list);
         main = list.map((item, index) => processItem(item, index)).join('');
     } else {
         main = list
@@ -124,8 +122,8 @@ async function loadCartCheckOut() {
     }
 
     if (main === '') {
-        alert("Không có sản phẩm nào được chọn.");
-        window.location.replace("cart");
+        toastr.error("Không có sản phẩm nào được chọn.");
+        setTimeout(() => window.location.replace("cart"), 2000);
         return;
     }
 
@@ -153,142 +151,194 @@ var voucherId = null;
 var voucherCode = null;
 var discountVou = 0;
 async function loadVoucher() {
-    var code = document.getElementById("codevoucher").value
+    var code = document.getElementById("codevoucher").value.trim();
 
-    var url = 'http://localhost:8080/api/voucher/public/findByCode?code=' + code + '&amount=' + total;
-    const response = await fetch(url, {});
-    var result = await response.json();
-    if (response.status == exceptionCode) {
-        var mess = result.defaultMessage
-        document.getElementById("messerr").innerHTML = mess;
-        document.getElementById("blockmessErr").style.display = 'block';
-        document.getElementById("blockmess").style.display = 'none';
-        voucherCode = null;
-        voucherId = null;
-        discountVou = 0;
-        document.getElementById("moneyDiscount").innerHTML = formatmoneyCheck(0);
-        document.getElementById("totalfi").innerHTML = formatmoneyCheck(total + 0); // Changed from +20000 to +0
+    if (!code) {
+        showError("Vui lòng nhập mã voucher!");
+        return;
     }
-    if (response.status < 300) {
+
+    var url = `http://localhost:8080/api/voucher/public/findByCode?code=${code}&amount=${total}`;
+    try {
+        const response = await fetch(url);
+        const result = await response.json();
+
+        if (response.status >= 400) {
+            const errorMessage = result.defaultMessage || "Mã voucher không hợp lệ!";
+            showError(errorMessage);
+            resetVoucherState();
+            return;
+        }
+
+        // Nếu API trả về voucher hợp lệ
         voucherId = result.id;
         voucherCode = result.code;
         discountVou = result.discount;
-        document.getElementById("blockmessErr").style.display = 'none';
-        document.getElementById("blockmess").style.display = 'block';
-        document.getElementById("moneyDiscount").innerHTML = formatmoneyCheck(result.discount);
-        document.getElementById("totalfi").innerHTML = formatmoneyCheck(total - result.discount + 0); // Changed from +20000 to +0
+
+        const blockMessErr = document.getElementById("blockmessErr");
+        const blockMess = document.getElementById("blockmess");
+        const moneyDiscount = document.getElementById("moneyDiscount");
+        const totalFi = document.getElementById("totalfi");
+
+        if (blockMessErr) blockMessErr.style.display = "none";
+        if (blockMess) blockMess.style.display = "block";
+        if (moneyDiscount) moneyDiscount.innerHTML = formatmoneyCheck(discountVou);
+        if (totalFi) totalFi.innerHTML = formatmoneyCheck(total - discountVou);
+
+    } catch (error) {
+        console.error("Lỗi khi gọi API voucher:", error);
+        showError("Không thể kết nối tới server!");
+        resetVoucherState();
     }
 }
-function checkout() {
-    var con = confirm("Xác nhận đặt hàng!");
-    if (con == false) {
-        return;
-    }
-    var paytype = $('input[name=paytype]:checked').val()
-    if (paytype == "momo") {
-        requestPayMentMomo()
-    }
-    if (paytype == "cod") {
-        paymentCod();
-    }
-    if (paytype == "vnpay") {
-        requestPayMentVnpay();
-    }
-    if (paytype == "gpay") {
-        requestPayMentGpay();
-    }
-}
+function showError(message) {
+    const errorElement = document.getElementById("blockmessErr");
+    const messageElement = document.getElementById("messerr");
 
-async function requestPayMentGpay() {
-    var ghichu = document.getElementById("ghichudonhang").value;
-    var sodiachi = document.getElementById("sodiachi").value;
-    var returnurl = 'http://localhost:8080/payment';
-
-    // Lưu thông tin chung
-    sessionStorage.setItem('ghichudonhang', ghichu);
-    sessionStorage.setItem('voucherCode', voucherCode);
-    sessionStorage.setItem('paytype', "GPAY");
-    sessionStorage.setItem('sodiachi', sodiachi);
-
-    let paymentDto;
-    const urlParams = new URLSearchParams(window.location.search);
-    const isBuyNow = urlParams.get('type') === 'buynow';
-
-    if (isBuyNow) {
-        // Xử lý mua ngay
-        var buyNowData = sessionStorage.getItem("buy_now_item");
-        if (!buyNowData) {
-            toastr.error("Không tìm thấy thông tin sản phẩm!");
-            return;
-        }
-
-        var buyNowList = JSON.parse(buyNowData);
-        sessionStorage.setItem('payment_type', 'buy_now');
-        sessionStorage.setItem('buy_now_data', buyNowData);
-
-        paymentDto = {
-            "content": "Thanh toán đơn hàng mua ngay",
-            "returnUrl": returnurl,
-            "notifyUrl": returnurl,
-            "codeVoucher": voucherCode,
-            "listProductSize": buyNowList.map(item => ({
-                "idProductSize": item.size.id,
-                "quantity": item.quantiy
-            }))
-        };
+    if (errorElement && messageElement) {
+        messageElement.textContent = message;
+        errorElement.style.display = "block";
     } else {
-        // Xử lý mua từ giỏ hàng
-        if (!listSize || listSize.length === 0) {
-            toastr.error("Không có sản phẩm nào được chọn!");
+        console.error("Element blockmessErr or messerr not found in DOM.");
+    }
+}
+
+function resetVoucherState() {
+    voucherId = null;
+    voucherCode = null;
+    discountVou = 0;
+
+    const moneyDiscount = document.getElementById("moneyDiscount");
+    const totalFi = document.getElementById("totalfi");
+
+    if (moneyDiscount) {
+        moneyDiscount.innerHTML = formatmoneyCheck(0);
+    }
+
+    if (totalFi) {
+        totalFi.innerHTML = formatmoneyCheck(total);
+    }
+}
+
+
+function resetVoucherState() {
+    voucherId = null;
+    voucherCode = null;
+    discountVou = 0;
+    document.getElementById("moneyDiscount").innerHTML = formatmoneyCheck(0);
+    document.getElementById("totalfi").innerHTML = formatmoneyCheck(total);
+}
+
+function toggleVoucherList() {
+    const voucherList = document.getElementById('voucherList');
+    if (!voucherList.classList.contains('show')) {
+        loadVoucherList();
+        voucherList.classList.add('show');
+    } else {
+        voucherList.classList.remove('show');
+    }
+}
+async function loadVoucherList() {
+    try {
+        const response = await fetch('http://localhost:8080/api/voucher/public/findAll');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const vouchers = await response.json();
+
+        if (!Array.isArray(vouchers)) {
+            throw new Error("Không nhận được dữ liệu hợp lệ từ server.");
+        }
+
+        const voucherList = document.getElementById("voucherList");
+        if (!voucherList) {
+            console.error("Element voucherList not found in DOM.");
             return;
         }
 
-        sessionStorage.setItem('payment_type', 'cart');
-        // Lưu listSize hiện tại để dùng sau này
-        sessionStorage.setItem('cart_list_size', JSON.stringify(listSize));
+        const currentDate = new Date();
+        let html = "";
 
-        paymentDto = {
-            "content": "Thanh toán đơn hàng từ giỏ hàng",
-            "returnUrl": returnurl,
-            "notifyUrl": returnurl,
-            "codeVoucher": voucherCode,
-            "listProductSize": listSize
-        };
-    }
+        vouchers.forEach(voucher => {
+            if (!voucher || !voucher.endDate || voucher.discount === undefined || voucher.minAmount === undefined) {
+                return;
+            }
 
-    try {
-        const res = await fetch('http://localhost:8080/api/gpay/urlpayment', {
-            method: 'POST',
-            headers: new Headers({
-                'Authorization': 'Bearer ' + token,
-                'Content-Type': 'application/json'
-            }),
-            body: JSON.stringify(paymentDto)
+            const endDate = new Date(voucher.endDate);
+            const isExpired = endDate < currentDate;
+            const isDisabled = voucher.block || isExpired || total < voucher.minAmount;
+
+            html += `
+                <div class="voucher-item ${isDisabled ? 'disabled' : ''}">
+                    <div class="voucher-info">
+                        <div class="shop-badge">Shop Voucher</div>
+                        <div class="voucher-discount">Giảm ${formatmoneyCheck(voucher.discount)}</div>
+                        <div class="voucher-min">Đơn tối thiểu ${formatmoneyCheck(voucher.minAmount)}</div>
+                        <div class="voucher-expiry">HSD: ${endDate.toLocaleDateString('vi-VN')}</div>
+                        ${isExpired ? '<div class="voucher-expired">Đã hết hạn</div>' : ''}
+                        ${voucher.block ? '<div class="voucher-blocked">Không khả dụng</div>' : ''}
+                    </div>
+                    <button class="save-btn" 
+                            onclick="selectVoucher('${voucher.code}')"
+                            ${isDisabled ? 'disabled' : ''}>
+                        ${isDisabled ? 'Không khả dụng' : 'Áp dụng'}
+                    </button>
+                </div>
+            `;
         });
 
-        var result = await res.json();
-        if (res.status < 300) {
-            window.open(result.url, '_blank');
-        }
-        if (res.status == exceptionCode) {
-            toastr.warning(result.defaultMessage);
-        }
+        voucherList.innerHTML = html || '<div class="no-vouchers">Không có voucher khả dụng</div>';
     } catch (error) {
-        console.error("Lỗi khi thực hiện thanh toán qua GPay:", error);
-        toastr.error("Có lỗi xảy ra khi thực hiện thanh toán!");
+        console.error("Lỗi khi tải danh sách voucher:", error);
+        const voucherList = document.getElementById("voucherList");
+        if (voucherList) {
+            voucherList.innerHTML = '<div class="error-message">Không thể tải danh sách voucher. Vui lòng thử lại sau.</div>';
+        }
     }
 }
+
+
+
+function selectVoucher(code) {
+    if (!code) {
+        showError("Mã voucher không hợp lệ");
+        return;
+    }
+
+    document.getElementById("codevoucher").value = code;
+    loadVoucher();
+    const voucherModal = bootstrap.Modal.getInstance(document.getElementById("voucherModal"));
+    voucherModal.hide();
+}
+
+
+function showError(message) {
+    const errorElement = document.getElementById('blockmessErr');
+    const messageElement = document.getElementById('messerr');
+    messageElement.textContent = message;
+    errorElement.style.display = 'block';
+}
+
 async function paymentCod() {
     if (!listSize || listSize.length === 0) {
         toastr.error("Không có sản phẩm nào được chọn!");
         return;
     }
 
+    // Get the selected address
+    var userAddressId = document.getElementById("sodiachi").value;
+    if (!userAddressId || userAddressId.trim() === "") {
+        toastr.error("Vui lòng chọn địa chỉ giao hàng!");
+        return;
+    }
+
+    // Prepare the order data
     var orderDto = {
         "payType": "PAYMENT_DELIVERY",
-        "userAddressId": document.getElementById("sodiachi").value,
+        "userAddressId": userAddressId,
         "voucherCode": voucherCode,
-        "note": document.getElementById("ghichudonhang").value,
+        "note": document.getElementById("ghichudonhang").value.trim(),
         "listProductSize": listSize
     };
 
@@ -305,11 +355,12 @@ async function paymentCod() {
             body: JSON.stringify(orderDto)
         });
 
-        if (res.status < 300) {
-
-            var currentCart = JSON.parse(localStorage.getItem("product_cart"));
+        if (res.ok) {
+            // Successfully placed order
+            var currentCart = JSON.parse(localStorage.getItem("product_cart")) || [];
             var selectedItems = JSON.parse(localStorage.getItem("selected_items") || "[]");
 
+            // Remove selected items from cart
             var remainingCart = currentCart.filter((_, index) => !selectedItems.includes(index));
 
 
@@ -321,15 +372,17 @@ async function paymentCod() {
                 text: "Đặt hàng thành công!",
                 type: "success"
             }, function () {
-                window.location.replace("account#invoice")
-            });
+                window.location.href = 'account#invoice';            });
+        } else {
+            // Handle errors from the server response
+            const errorData = await res.json();
+            toastr.error(errorData.message || "Có lỗi xảy ra khi đặt hàng!");
         }
     } catch (error) {
         console.error("Lỗi khi đặt hàng:", error);
         toastr.error("Có lỗi xảy ra khi đặt hàng!");
     }
-}
-async function paymentOnline() {
+}async function paymentOnline() {
     var uls = new URL(document.URL);
     var statusGpay = uls.searchParams.get("status");
     var merchantOrderId = uls.searchParams.get("merchant_order_id");
@@ -340,7 +393,6 @@ async function paymentOnline() {
 
     if (paytype === "GPAY") {
         if (paymentType === 'buy_now') {
-            // Xử lý mua ngay
             var buyNowData = sessionStorage.getItem("buy_now_data");
             if (buyNowData) {
                 var buyNowList = JSON.parse(buyNowData);
@@ -350,7 +402,6 @@ async function paymentOnline() {
                 }));
             }
         } else {
-            // Xử lý mua từ giỏ hàng
             var savedListSize = sessionStorage.getItem("cart_list_size");
             if (savedListSize) {
                 listSize = JSON.parse(savedListSize);
@@ -358,7 +409,6 @@ async function paymentOnline() {
         }
     }
 
-    // Kiểm tra listSize
     if (!Array.isArray(listSize) || listSize.length === 0) {
         console.error("ListSize không hợp lệ:", listSize);
         document.getElementById("thatbai").style.display = 'block';
@@ -367,15 +417,11 @@ async function paymentOnline() {
         return;
     }
 
-    var note = sessionStorage.getItem("ghichudonhang");
-    var sodiachi = sessionStorage.getItem("sodiachi");
-    var voucherCode = sessionStorage.getItem("voucherCode");
-
     var orderDto = {
         "payType": "PAYMENT_GPAY",
-        "userAddressId": sodiachi,
-        "voucherCode": voucherCode,
-        "note": note,
+        "userAddressId": sessionStorage.getItem("sodiachi"),
+        "voucherCode": sessionStorage.getItem("voucherCode"),
+        "note": sessionStorage.getItem("ghichudonhang"),
         "statusGpay": statusGpay,
         "merchantOrderId": merchantOrderId,
         "listProductSize": listSize
@@ -414,7 +460,11 @@ async function paymentOnline() {
 
             document.getElementById("thanhcong").style.display = 'block';
             document.getElementById("thatbai").style.display = 'none';
-        } else if (res.status == exceptionCode) {
+
+            setTimeout(() => {
+                window.location.href = 'account#invoice';
+            }, 2000);
+        } else {
             document.getElementById("thatbai").style.display = 'block';
             document.getElementById("thanhcong").style.display = 'none';
             document.getElementById("errormess").innerHTML = result.defaultMessage;
@@ -426,3 +476,159 @@ async function paymentOnline() {
         document.getElementById("errormess").innerHTML = "Có lỗi xảy ra khi xử lý thanh toán!";
     }
 }
+function checkout() {
+        var con = confirm("Xác nhận đặt hàng!");
+        if (con == false) {
+            return;
+        }
+        var paytype = $('input[name=paytype]:checked').val()
+        if (paytype == "cod") {
+            paymentCod();
+        }
+        if (paytype == "gpay") {
+            requestPayMentGpay();
+        }
+    }
+async function requestPayMentGpay() {
+    var ghichu = document.getElementById("ghichudonhang").value;
+    var sodiachi = document.getElementById("sodiachi").value;
+    var returnurl = 'http://localhost:8080/payment';
+
+    // Save necessary data to session storage
+    sessionStorage.setItem('ghichudonhang', ghichu);
+    sessionStorage.setItem('voucherCode', voucherCode);
+    sessionStorage.setItem('paytype', "GPAY");
+    sessionStorage.setItem('sodiachi', sodiachi);
+
+    let paymentDto;
+    const urlParams = new URLSearchParams(window.location.search);
+    const isBuyNow = urlParams.get('type') === 'buynow';
+
+    // Show loading state
+    showLoadingOverlay();
+
+    if (isBuyNow) {
+        var buyNowData = sessionStorage.getItem("buy_now_item");
+        if (!buyNowData) {
+            hideLoadingOverlay();
+            toastr.error("Không tìm thấy thông tin sản phẩm!");
+            return;
+        }
+
+        var buyNowList = JSON.parse(buyNowData);
+        sessionStorage.setItem('payment_type', 'buy_now');
+        sessionStorage.setItem('buy_now_data', buyNowData);
+
+        paymentDto = {
+            "content": "Thanh toán đơn hàng mua ngay",
+            "returnUrl": returnurl,
+            "notifyUrl": returnurl,
+            "codeVoucher": voucherCode,
+            "listProductSize": buyNowList.map(item => ({
+                "idProductSize": item.size.id,
+                "quantity": item.quantiy
+            }))
+        };
+    } else {
+        if (!listSize || listSize.length === 0) {
+            hideLoadingOverlay();
+            toastr.error("Không có sản phẩm nào được chọn!");
+            return;
+        }
+
+        sessionStorage.setItem('payment_type', 'cart');
+        sessionStorage.setItem('cart_list_size', JSON.stringify(listSize));
+
+        paymentDto = {
+            "content": "Thanh toán đơn hàng từ giỏ hàng",
+            "returnUrl": returnurl,
+            "notifyUrl": returnurl,
+            "codeVoucher": voucherCode,
+            "listProductSize": listSize
+        };
+    }
+
+    try {
+        const res = await fetch('http://localhost:8080/api/gpay/urlpayment', {
+            method: 'POST',
+            headers: new Headers({
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            }),
+            body: JSON.stringify(paymentDto)
+        });
+
+        var result = await res.json();
+        if (res.status < 300) {
+            // Instead of opening in new window, redirect current window
+            window.location.href = result.url;
+        }
+        if (res.status == exceptionCode) {
+            hideLoadingOverlay();
+            toastr.warning(result.defaultMessage);
+        }
+    } catch (error) {
+        console.error("Lỗi khi thực hiện thanh toán qua GPay:", error);
+        hideLoadingOverlay();
+        toastr.error("Có lỗi xảy ra khi thực hiện thanh toán!");
+    }
+}
+
+function showLoadingOverlay() {
+    // Create loading overlay if it doesn't exist
+    if (!document.getElementById('loadingOverlay')) {
+        const overlay = document.createElement('div');
+        overlay.id = 'loadingOverlay';
+        overlay.innerHTML = `
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Đang xử lý thanh toán...</div>
+        `;
+        document.body.appendChild(overlay);
+    }
+    document.getElementById('loadingOverlay').style.display = 'flex';
+}
+
+function hideLoadingOverlay() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.style.display = 'none';
+    }
+}
+
+const style = document.createElement('style');
+style.textContent = `
+    #loadingOverlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.9);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        z-index: 9999;
+    }
+
+    .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 20px;
+    }
+
+    .loading-text {
+        font-size: 18px;
+        color: #333;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+`;
+document.head.appendChild(style);

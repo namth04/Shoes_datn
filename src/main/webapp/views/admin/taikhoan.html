@@ -39,13 +39,12 @@
                 <div class="col-sm-12">
                     <div class="wrapper">
                         <div class="headertable">
-                            <div class="divsearchtb">
-                                <label>search: </label>
-                                <input onkeyup="searchTable()" id="searchtable" placeholder="tìm kiếm" class="inputsearchtable">
+                            <div class="search-box">
+                                <input type="text" class="search-input" id="searchtable" placeholder="Tìm kiếm..." onkeyup="searchTable()">
                             </div>
                         </div>
-                        <table class="table table-striped tablefix">
-                            <thead class="thead-tablefix">
+                        <table class="table table-bordered">
+                            <thead class="thead-bordered">
                             <tr>
                                 <th>Id</th>
                                 <th>Email</th>

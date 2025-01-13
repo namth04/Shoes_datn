@@ -35,6 +35,7 @@
             loadAddress();
             loadAddressUser();
             loadMyInvoice();
+            loadUserInfo();
         }
     </script>
 </head>
@@ -56,17 +57,20 @@
                             </div>
                         </div>
                         <div class="col-lg-12 col-md-12 col-sm-6 col-6 sinv">
-                            <!-- <div nofi="infor" onclick="changeLink(this,'infor')" class="tabdv activetabdv">
-                                <a data-toggle="tab" href="#infor"><img class="imgau" src="image/user.svg"> Tài khoản của tôi</a>
-                            </div> -->
-                            <div onclick="changeLink(this,'address')" class="tabdv activetabdv">
-                                <a data-toggle="tab" href="#address"><img class="imgau" src="image/add.svg"> Sổ địa chỉ</a>
+                            <div onclick="changeLink(this,'invoice')" class="tabdv activetabdv">
+                                <a data-toggle="tab" href="#invoice">
+                                    <img class="imgau" src="image/invoice.svg"> Đơn hàng của tôi
+                                </a>
                             </div>
-                            <div onclick="changeLink(this,'invoice')" class="tabdv">
-                                <a data-toggle="tab" href="#invoice"><img class="imgau" src="image/invoice.svg"> Đơn hàng của tôi</a>
+                            <div onclick="changeLink(this,'address')" class="tabdv">
+                                <a data-toggle="tab" href="#address">
+                                    <img class="imgau" src="image/add.svg"> Sổ địa chỉ
+                                </a>
                             </div>
                             <div onclick="changeLink(this,'changepass')" class="tabdv">
-                                <a data-toggle="tab" href="#changepass"><img class="imgau" src="image/pass.svg"> Đổi mật khẩu</a>
+                                <a data-toggle="tab" href="#changepass">
+                                    <img class="imgau" src="image/pass.svg"> Đổi mật khẩu
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -94,7 +98,7 @@
                                 </div>
                             </div>
                         </div> -->
-                        <div role="tabpanel" class="tab-pane" id="invoice">
+                        <div role="tabpanel" class="tab-pane active" id="invoice">
                             <div class="headeraccount">
                                 <p class="fontyel">Đơn hàng của tôi</p>
                                 <span>(Nhấp vào mã đơn hàng để xem chi tiêt)</span>
@@ -175,7 +179,7 @@
                                 </form>
                             </div>
                         </div>
-                        <div role="tabpanel" class="tab-pane active" id="address">
+                        <div role="tabpanel" class="tab-pane" id="address">
                             <div class="headeraccount">
                                 <p class="fontyel">Địa chỉ của bạn</p>
                                 <div class="right_flex">
@@ -245,7 +249,7 @@
                             <label class="lbsa">Tên đường, số nhà</label>
                         </div>
                         <div class="col-lg-4 col-md-4 col-sm-12 col-12 formadd">
-                            <select onchange="loadHuyenOnchange()" id="tinh" class="form-control fomd">
+                            <select onclick="loadHuyenOnchange()" id="tinh" class="form-control fomd">
                                 <option value="" hidden="" disabled>---</option>
                                 <option value="haf npio">hà nội</option>
                             </select>
@@ -302,7 +306,7 @@
                             <span class="ttshipinfor">Địa chỉ giao hàng</span>
                             <div class="blockinfor">
                                 <p class="tennguoinhan" id="tennguoinhan">HIẾU TRẦN</p>
-                                <span>Địa chỉ: <span id="addnhan">gia lam, ha noi, viet nam, vietnam, Quận Đống Đa, Hà Nội</span></span>
+                                <span>Địa chỉ: <span id="addnhan">gia lam, ha noi</span></span>
                                 <br><span class="phoneacc">Số điện thoại: <span id="phonenhan">+84382267161</span></span>
                             </div>
                         </div>
@@ -318,7 +322,14 @@
                                 <span id="ghichunh">Không có ghi chú</span>
                             </div>
                         </div>
-                    </div><br><br>
+                    </div>
+                    <div id="voucher-info-block" style="display: none;">
+                        <span id="voucherDiscountAmount" class="voucher-details"></span>
+                        <div>
+                            <span id="totalAfterVoucher" class="voucher-details"></span>
+                        </div>
+                    </div>
+
                     <table class="table table-cart table-order" id="detailInvoice">
                         <thead class="thead-default theaddetail">
                             <tr>
@@ -349,37 +360,11 @@
         </div>
     </div>
 </body>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js" integrity="sha512-bPs7Ae6pVvhOSiIcyUClR7/q2OAsRiovw4vAkX+zJbw3ShAeeqezq50RIIcIURq7Oa20rW2n2q+fyXBNcU9lrw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="js/carousel.js"></script>
 <!-- <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script> -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-<script>
-    function changeLink(e, link) {
-        var tabs = document.getElementsByClassName("tabdv");
-        for (i = 0; i < tabs.length; i++) {
-            document.getElementsByClassName("tabdv")[i].classList.remove("activetabdv");
-        }
-        e.classList.add('activetabdv')
 
-        var tabb = document.getElementsByClassName("tab-pane");
-        for (i = 0; i < tabb.length; i++) {
-            document.getElementsByClassName("tab-pane")[i].classList.remove("active");
-        }
-        document.getElementById(link).classList.add('active')
-    }
-
-    var hash = location.hash.substr(1);
-    if (hash != "") {
-        var tabb = document.getElementsByClassName("tab-pane");
-        for (i = 0; i < tabb.length; i++) {
-            document.getElementsByClassName("tab-pane")[i].classList.remove("active");
-        }
-        var tabs = document.getElementsByClassName("tabdv");
-        for (i = 0; i < tabs.length; i++) {
-            document.getElementsByClassName("tabdv")[i].classList.remove("activetabdv");
-        }
-        document.getElementById(hash).classList.add('active')
-    }
-</script>
 
 </html>

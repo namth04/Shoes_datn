@@ -14,7 +14,6 @@ public interface InvoiceDetailRepository extends JpaRepository<InvoiceDetail,Lon
     @Query("select count(i.id) from InvoiceDetail i where i.productSize.productColor.product.id = ?1")
     public Long countByProduct(Long idProduct);
 
-
     @Query("select count(i.id) from InvoiceDetail i where i.productSize.productColor.id = ?1")
     public Long countByProductColor(Long idProductColor);
 

@@ -31,28 +31,32 @@ async function loadProductIndex(page) {
 
     var mainpage = ''
     for (i = 1; i <= totalPage; i++) {
-        mainpage += `<li onclick="loadProductIndex(${(Number(i) - 1)})" class="page-item"><a class="page-link" href="#listsp">${i}</a></li>`
+        mainpage += `<li class="page-item"><a class="page-link" onclick="handlePageClick(event, ${(Number(i) - 1)})">${i}</a></li>`
     }
     document.getElementById("pageable").innerHTML = mainpage
 }
 
+function handlePageClick(event, page) {
+    event.preventDefault();
+    loadProductIndex(page);
+}
+
 
 async function loadSanPhamBanChay(page) {
-    var size= 5;
+    var size = 5;
     var url = 'http://localhost:8080/api/product/public/findAll?page=' + page + '&size=' + size + '&sort=quantitySold,desc';
     const response = await fetch(url, {
         method: 'GET'
     });
     var result = await response.json();
-    console.log(result)
+    console.log(result);
     var list = result.content;
-    var totalPage = result.totalPages;
 
     var main = '';
-    for (i = 0; i < list.length; i++) {
-        var listimg = ''
-        for (j = 0; j < list[i].productImages.length; j++) {
-            listimg += `<div class="divimgsmpro"><img class="imgsmpro" src="${list[i].productImages[j].linkImage}"></div>`
+    for (let i = 0; i < list.length; i++) {
+        var listimg = '';
+        for (let j = 0; j < list[i].productImages.length; j++) {
+            listimg += `<div class="divimgsmpro"><img class="imgsmpro" src="${list[i].productImages[j].linkImage}"></div>`;
         }
         main += `<div class="col-lg-20p col-md-3 col-sm-6 col-6">
                     <a href="detail?id=${list[i].id}&name=${list[i].alias}" class="linkpro">
@@ -64,21 +68,21 @@ async function loadSanPhamBanChay(page) {
                             <div class="listimgpro">${listimg}</div>
                         </div>
                     </a>
-                </div>`
+                </div>`;
     }
-    document.getElementById("listproductbanchay").innerHTML = main
+    document.getElementById("listproductbanchay").innerHTML = main;
 
-    if (result.last == false) {
+    if (!result.last) {
         document.getElementById("btnsanphambanchay").onclick = function () {
-            loadSanPhamBanChay(Number(page) + Number(1));
-        }
+            loadSanPhamBanChay(Number(page) + 1);
+        };
     } else {
         document.getElementById("btnsanphambanchay").onclick = function () {
-            toastr.warning("Đã hết kết quả tìm kiếm");
-        }
+            toastr.warning("Đã hết kết quả tìm kiếm. Quay lại trang đầu.");
+            loadSanPhamBanChay(0);
+        };
     }
 }
-
 
 async function loadAProduct() {
     var uls = new URL(document.URL)
@@ -94,7 +98,7 @@ async function loadAProduct() {
         var result = await response.json();
         document.getElementById("detailnamepro").innerHTML = result.name
         document.getElementById("codepro").innerHTML = result.code
-        document.getElementById("quansale").innerHTML = 'Đã bán ' + result.quantitySold
+        document.getElementById("quansale").innerHTML = 'Đã bán : ' + result.quantitySold
         document.getElementById("pricedetail").innerHTML = formatmoney(result.price)
         document.getElementById("imgdetailpro").src = result.imageBanner
         document.getElementById("quantityA").innerHTML = result.quantity
@@ -113,7 +117,7 @@ async function loadAProduct() {
 
             var selectedSize = document.querySelector('input[name="sizepro"]:checked');
             if (!selectedSize) {
-                toastr.error("Vui lòng chọn kích thước");
+                toastr.error("Bạn chưa chọn kích thước sản phẩm");
                 return;
             }
 
@@ -417,7 +421,7 @@ function renderPagination(totalPage, loadFunction) {
     document.getElementById("pageable").innerHTML = mainpage;
 }
 
-var size = 8;
+var size = 4;
 var currentFilterType = 1;
 
 function sortProduct() {
@@ -456,22 +460,95 @@ async function loadProductByCategory(page, sort) {
     }
 }
 
+function formatmoney(price) {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+}
+function validatePriceInputs(input) {
+    input.value = input.value.replace(/[^\d]/g, '');
+
+    // Convert to number for comparison
+    const value = parseInt(input.value) || 0;
+
+
+    if (value < 0) {
+        input.value = '0';
+    }
+}
+
+function validatePriceInputs(event) {
+    // Chỉ cho phép nhập số, không cho phép nhập ký tự khác
+    let value = event.target.value;
+
+    // Chỉ giữ lại các ký tự số
+    let numericValue = value.replace(/[^0-9]/g, '');
+
+    // Nếu giá trị đã thay đổi (có ký tự không phải số), cập nhật lại input
+    if (value !== numericValue) {
+        event.target.value = numericValue;
+    }
+}
+
+function validatePriceRange() {
+    const minPrice = parseFloat(document.getElementById("min_price").value) || 0;
+    const maxPrice = parseFloat(document.getElementById("max_price").value) || 0;
+
+    if (maxPrice < minPrice) {
+        alert("Giá tối đa phải lớn hơn giá tối thiểu!");
+        return false;
+    }
+    return true;
+}
+
 async function searchFull(page, sort) {
+    // Validate price range before proceeding
+    if (!validatePriceRange()) {
+        return;
+    }
+
     currentFilterType = 2;
     var min_price = parseFloat(document.getElementById("min_price").value) || 0;
     var max_price = parseFloat(document.getElementById("max_price").value) || Number.MAX_SAFE_INTEGER;
 
-    var listCa = document.getElementById("listsearchCategory").getElementsByClassName("inputcheck");
-    var listcate = Array.from(listCa).filter(input => input.checked).map(input => input.value);
+    // Get parent categories
+    const parentCategories = document.querySelectorAll('.cateparent input.inputcheck');
+    let selectedCategories = [];
 
+    // Process parent and child categories
+    parentCategories.forEach(parentCheckbox => {
+        const singleListMenu = parentCheckbox.closest('.singlelistmenu');
+        const childCheckboxes = singleListMenu.querySelectorAll('.listsubcate .inputcheck');
+
+        if (parentCheckbox.checked) {
+            selectedCategories.push(parentCheckbox.value);
+
+            childCheckboxes.forEach(childCheckbox => {
+                if (childCheckbox.checked) {
+                    selectedCategories.push(childCheckbox.value);
+                }
+            });
+        } else {
+            childCheckboxes.forEach(childCheckbox => {
+                if (childCheckbox.checked) {
+                    if (!selectedCategories.includes(parentCheckbox.value)) {
+                        selectedCategories.push(parentCheckbox.value);
+                    }
+                    selectedCategories.push(childCheckbox.value);
+                }
+            });
+        }
+    });
+
+    // Get selected trademarks
     var listTra = document.getElementById("listthuonghieu").getElementsByClassName("inputchecktrademark");
     var listTrademark = Array.from(listTra).filter(input => input.checked).map(input => input.value);
 
+    // Prepare payload
     var payload = {
-        "listIdCategory": listcate,
+        "listIdCategory": selectedCategories,
         "listIdTrademark": listTrademark
     };
 
+    // Build URL with query parameters
     var url = `http://localhost:8080/api/product/public/searchFull?page=${page}&size=${size}&smallPrice=${min_price}&largePrice=${max_price}`;
 
     if (sort) {
@@ -479,6 +556,7 @@ async function searchFull(page, sort) {
     }
 
     try {
+        // Make API request
         const response = await fetch(url, {
             method: 'POST',
             headers: {
@@ -487,6 +565,7 @@ async function searchFull(page, sort) {
             body: JSON.stringify(payload)
         });
 
+        // Process response
         var result = await response.json();
         renderProductList(result);
         renderPagination(result.totalPages, searchFull);
@@ -495,51 +574,52 @@ async function searchFull(page, sort) {
     }
 }
 
-async function searchFullmobile(page, sort) {
-    currentFilterType = 3;
-    $("#modalfilter").modal("hide");
+// Add event listeners when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    const minPriceInput = document.getElementById("min_price");
+    const maxPriceInput = document.getElementById("max_price");
 
-    var min_price = parseFloat(document.getElementById("min_price_mobile").value) || 0;
-    var max_price = parseFloat(document.getElementById("max_price_mobile").value) || Number.MAX_SAFE_INTEGER;
+    // Sử dụng sự kiện input để kiểm tra ngay khi người dùng nhập
+    minPriceInput.addEventListener('input', validatePriceInputs);
+    maxPriceInput.addEventListener('input', validatePriceInputs);
+});
+document.addEventListener('DOMContentLoaded', function() {
+    const minPriceInput = document.getElementById("min_price");
+    const maxPriceInput = document.getElementById("max_price");
 
-    var listCa = document.getElementById("listsearchCategoryMobile").getElementsByClassName("inputcheck");
-    var listcate = Array.from(listCa).filter(input => input.checked).map(input => input.value);
+    minPriceInput.addEventListener('input', function() {
+        validatePriceInputs(this);
+    });
 
-    var listTra = document.getElementById("listthuonghieuMobile").getElementsByClassName("inputchecktrademark");
-    var listTrademark = Array.from(listTra).filter(input => input.checked).map(input => input.value);
+    maxPriceInput.addEventListener('input', function() {
+        validatePriceInputs(this);
+    });
+});
 
-    var payload = {
-        "listIdCategory": listcate,
-        "listIdTrademark": listTrademark
-    };
+function handleCategoryChange(checkbox) {
+    const allCheckedBoxes = document.querySelectorAll('.inputcheck:checked, .inputchecktrademark:checked');
 
-    var url = `http://localhost:8080/api/product/public/searchFull?page=${page}&size=${size}&smallPrice=${min_price}&largePrice=${max_price}`;
-
-    if (sort) {
-        url += `&sort=${sort}`;
+    if (allCheckedBoxes.length === 0) {
+        return;
     }
 
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
+    searchFull(0, null);
+}
 
-        var result = await response.json();
-        renderProductList(result);
-        renderPagination(result.totalPages, searchFullmobile);
-    } catch (error) {
-        console.error("Error in mobile search:", error);
+function clickOpenSubMenu(e) {
+    var sing = e.closest('.singlelistmenu');
+    var subCate = sing.querySelector('.listsubcate');
+    var parentCheckbox = sing.querySelector('.cateparent input');
+
+    subCate.classList.toggle('show');
+
+    if (!subCate.classList.contains('show')) {
+        var listInput = subCate.querySelectorAll('.inputcheck');
+        listInput.forEach(input => input.checked = false);
     }
-}
 
-function formatmoney(price) {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+    handleCategoryChange();
 }
-
 
 async function postData(page) {
     const size = 2;
@@ -580,32 +660,6 @@ async function postData(page) {
     }
 }
 
-// Hàm render danh sách sản phẩm
-// function renderProductList(products) {
-//     const productListContainer = document.getElementById("listproductpro");
-//     productListContainer.innerHTML = "";  // Xóa dữ liệu cũ
-//
-//     if (products && products.length > 0) {
-//         products.forEach(product => {
-//             const productItem = document.createElement("div");
-//             productItem.classList.add("product-item");
-//
-//             productItem.innerHTML = `
-//                         <img src="${product.imageUrl}" alt="${product.name}">
-//                         <h3>${product.name}</h3>
-//                         <p>Price: ${product.price}</p>
-//                         <p>Category: ${product.category}</p>
-//                         <p>Trademark: ${product.trademark}</p>
-//                     `;
-//
-//             productListContainer.appendChild(productItem);  // Thêm sản phẩm vào container
-//         });
-//     } else {
-//         // Nếu không có sản phẩm, hiển thị thông báo
-//         productListContainer.innerHTML = "<p>No products found.</p>";
-//     }
-// }
-
 async function loadTrademarkSub() {
     try {
         const response = await fetch('http://localhost:8080/api/trademark/public/all');
@@ -614,7 +668,7 @@ async function loadTrademarkSub() {
         var main = list.map(trademark => `
             <div class="singlelistmenu">
                 <label class="checkbox-custom cateparent">${trademark.name}
-                    <input value="${trademark.id}" class="inputchecktrademark" type="checkbox">
+                    <input value="${trademark.id}" class="inputchecktrademark" onchange="handleCategoryChange(this)" type="checkbox">
                     <span class="checkmark-checkbox"></span>
                 </label>
             </div>
@@ -633,7 +687,7 @@ async function loadCategorySub() {
         var main = list.map(category => {
             var mainChild = category.categories.map(child => `
                 <label class="checkbox-custom">${child.name}
-                    <input value="${child.id}" class="inputcheck" type="checkbox">
+                    <input value="${child.id}" class="inputcheck" onchange="handleCategoryChange(this)" type="checkbox">
                     <span class="checkmark-checkbox"></span>
                 </label>
             `).join('');
@@ -657,17 +711,8 @@ async function loadCategorySub() {
         console.error("Error loading categories:", error);
     }
 }
-function clickOpenSubMenu(e) {
-    var sing = e.closest('.singlelistmenu');
-    var subCate = sing.querySelector('.listsubcate');
 
-    subCate.classList.toggle('show');
 
-    if (!subCate.classList.contains('show')) {
-        var listInput = subCate.querySelectorAll('.inputcheck');
-        listInput.forEach(input => input.checked = false);
-    }
-}
 
 async function loadAllProductList() {
     var search = document.getElementById("search").value;

@@ -49,7 +49,7 @@
                         </div>
                         <div class="col-md-2">
                             <label>&ThinSpace;</label>
-                            <button onclick="loadInvoice(0)" class="btn btn-danger form-control"><i class="fa fa-filter"></i> Lọc</button>
+                            <button onclick="loadInvoice(0)" class="btn btn-warning form-control"><i class="fa fa-filter"></i> Lọc</button>
                         </div>
                     </div>
                 </div>
@@ -59,13 +59,13 @@
                             <div class="divsearchtb">
                                 <label>Sắp xếp theo: </label>
                                 <select onchange="loadInvoice(0)" id="sort">
-                                    <option value="id,asc">Cũ nhất</option>
                                     <option value="id,desc">Mới nhất</option>
+                                    <option value="id,asc">Cũ nhất</option>
                                 </select>
                             </div>
                         </div>
-                        <table class="table table-striped tablefix">
-                            <thead class="thead-tablefix">
+                        <table class="table table-bordered">
+                            <thead class="thead-bordered">
                             <tr>
                                 <th>Mã đơn hàng</th>
                                 <th class="floatr">Ngày đặt</th>

@@ -81,6 +81,7 @@ async function loadMyInvoice() {
         </tr>`
     }
     document.getElementById("listinvoicemb").innerHTML = mobile;
+    loadCartMenu();
 }
 
 async function loadDetailInvoice(id) {
@@ -92,8 +93,12 @@ async function loadDetailInvoice(id) {
         })
     });
     var list = await res.json();
+
     var main = '';
+    var subtotal = 0;
     for (i = 0; i < list.length; i++) {
+        const lineTotal = list[i].price * list[i].quantity;
+        subtotal += lineTotal;
         main += `<tr>
                     <td><img src="${list[i].product.imageBanner}" class="imgdetailacc"></td>
                     <td>
@@ -104,9 +109,10 @@ async function loadDetailInvoice(id) {
                     </td>
                     <td>${formatmoney(list[i].price)}</td>
                     <td class="sldetailacc">${list[i].quantity}</td>
-                    <td class="pricedetailacc yls">${formatmoney(list[i].price * list[i].quantity)}</td>
-                </tr>`
+                    <td class="pricedetailacc yls">${formatmoney(lineTotal)}</td>
+                </tr>`;
     }
+
     document.getElementById("listDetailinvoice").innerHTML = main;
 
     var url = 'http://localhost:8080/api/invoice/user/find-by-id?idInvoice=' + id;
@@ -117,8 +123,26 @@ async function loadDetailInvoice(id) {
         })
     });
     var result = await resp.json();
-    document.getElementById("ngaytaoinvoice").innerHTML = result.createdTime + " " + result.createdDate;
 
+    const voucherBlock = document.getElementById("voucher-info-block");
+    const voucherAmount = result.totalAmount - subtotal;
+
+    if (voucherAmount < 0) {
+        voucherBlock.style.display = "block";
+        const voucherDiscountText = result.voucherName ?
+            `Voucher "${result.voucherName}" giảm: ${formatmoney(Math.abs(voucherAmount))}` :
+            `Voucher giảm: ${formatmoney(Math.abs(voucherAmount))}`;
+        document.getElementById("voucherDiscountAmount").innerHTML = voucherDiscountText;
+        // Hiển thị tổng tiền sau khi trừ voucher
+        const totalAfterVoucher = result.totalAmount; // Tổng tiền sau giảm giá
+        document.getElementById("totalAfterVoucher").innerHTML =
+            `Tổng tiền: ${formatmoney(totalAfterVoucher)}`;
+    } else {
+        voucherBlock.style.display = "none";
+    }
+
+
+    document.getElementById("ngaytaoinvoice").innerHTML = result.createdTime + " " + result.createdDate;
 
     let paymentStatus;
     if (result.payType !== 'PAYMENT_DELIVERY') {
@@ -131,11 +155,8 @@ async function loadDetailInvoice(id) {
         }
     }
     document.getElementById("trangthaitt").innerHTML = paymentStatus;
-
-
     document.getElementById("ttvanchuyen").innerHTML = result.status.name;
 
-    // Cập nhật loại thanh toán
     let paymentDisplay;
     if (result.payType === "PAYMENT_DELIVERY") {
         if (result.status.name === "Đã nhận đơn hàng") {
@@ -143,10 +164,6 @@ async function loadDetailInvoice(id) {
         } else {
             paymentDisplay = "Thanh toán khi nhận hàng (COD)";
         }
-    } else if (result.payType === "PAYMENT_MOMO") {
-        paymentDisplay = "Thanh toán qua momo";
-    } else if (result.payType === "PAYMENT_VNPAY") {
-        paymentDisplay = "Thanh toán qua vnpay";
     } else if (result.payType === "PAYMENT_GPAY") {
         paymentDisplay = "Thanh toán qua gpay";
     } else if (result.payType === "PAY_COUNTER") {

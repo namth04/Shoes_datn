@@ -75,12 +75,17 @@
         </div>
         <div class="col-lg-3 col-md-3 col-filter">
             <div class="filter">
-                <label class="lb-chon-danhmuc">Chọn khoảng giá</label>
-                <button onclick="searchFull(0,null)" class="btn-apdung">Áp dụng</button>
-                <div id="slider-range" class="price-filter-range" name="rangeInput"></div>
+                <div class=" d-flex justify-content-between align-items-center">
+               <div class="h-auto" style="line-height: 20px">
+                   <label class="lb-chon-danhmuc">Chọn khoảng giá</label>
+
+               </div>
+                <button style="background-color: #ff9900" onclick="searchFull(0,null)" class="btn-apdung">Áp dụng</button>
+                </div>
+                    <div id="slider-range" class="price-filter-range" name="rangeInput"></div>
                 <div style="margin:10px auto">
-                    Từ: <input type="number" id="min_price" class="price-range-field" /> -
-                    <input type="number" id="max_price" class="price-range-field" />
+                    Từ: <input type="number" id="min_price" class="price-range-field" min="0" placeholder="0"/> -
+                    <input type="number" id="max_price" class="price-range-field" min="0" placeholder="0"/>
                 </div>
                 <label class="lb-chon-danhmuc">Chọn danh mục</label>
                 <div id="listsearchCategory">
@@ -138,7 +143,7 @@
                 <div class="filter">
                     <label class="lb-chon-danhmuc">Chọn khoảng giá</label>
                     <button onclick="searchFullmobile(0,null)" class="btn-apdung">Áp dụng</button>
-                    <div id="slider-range-mobile" class="price-filter-range" name="rangeInput"></div>
+<!--                    <div id="slider-range-mobile" class="price-filter-range" name="rangeInput"></div>-->
                     <div style="margin:10px auto">
                         Từ: <input type="number" id="min_price_mobile" class="price-range-field" /> -
                         <input type="number" id="max_price_mobile" class="price-range-field" />

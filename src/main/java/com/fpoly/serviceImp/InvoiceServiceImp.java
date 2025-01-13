@@ -245,30 +245,52 @@ public class InvoiceServiceImp implements InvoiceService {
     @Override
     public InvoiceResponse updateStatus(Long invoiceId, Long statusId) {
         Optional<Status> status = statusRepository.findById(statusId);
-        if(status.isEmpty()){
-            throw new MessageException("status id not found");
+        if (status.isEmpty()) {
+            throw new MessageException("Status ID not found");
         }
+
         Long idSt = status.get().getId();
-        if(idSt == StatusUtils.DANG_CHO_XAC_NHAN){
-            throw new MessageException("không thể cập nhật trạng thái này");
+        if (idSt == StatusUtils.DANG_CHO_XAC_NHAN) {
+            throw new MessageException("Không thể cập nhật trạng thái này");
         }
+
         Optional<Invoice> invoice = invoiceRepository.findById(invoiceId);
-        if(invoice.isEmpty()){
-            throw new MessageException("invoice id not found");
+        if (invoice.isEmpty()) {
+            throw new MessageException("Invoice ID not found");
         }
-        if(invoiceStatusRepository.findByInvoiceAndStatus(invoiceId, statusId).isPresent()){
+
+        if (invoiceStatusRepository.findByInvoiceAndStatus(invoiceId, statusId).isPresent()) {
             throw new MessageException("Trạng thái đơn hàng này đã được cập nhật");
         }
+
+        if (idSt == StatusUtils.KHONG_NHAN_HANG) {
+            List<InvoiceDetail> listInvoiceDetails = invoiceDetailRepository.findByInvoiceId(invoiceId);
+            for (InvoiceDetail detail : listInvoiceDetails) {
+                ProductSize productSize = detail.getProductSize();
+
+                productSize.setQuantity(productSize.getQuantity() + detail.getQuantity());
+                productSizeRepository.save(productSize);
+
+                productSize.getProductColor().getProduct().setQuantitySold(
+                        productSize.getProductColor().getProduct().getQuantitySold() - detail.getQuantity()
+                );
+                productRepository.save(productSize.getProductColor().getProduct());
+            }
+        }
+
         InvoiceStatus invoiceStatus = new InvoiceStatus();
         invoiceStatus.setInvoice(invoice.get());
         invoiceStatus.setCreatedDate(new Date(System.currentTimeMillis()));
         invoiceStatus.setCreatedTime(new Time(System.currentTimeMillis()));
-        invoiceStatus.setStatus(statusRepository.findById(statusId).get());
+        invoiceStatus.setStatus(status.get());
         invoiceStatusRepository.save(invoiceStatus);
+
         invoice.get().setStatus(status.get());
         invoiceRepository.save(invoice.get());
+
         return invoiceMapper.invoiceToInvoiceResponse(invoice.get());
     }
+
 
     @Override
     public List<InvoiceResponse> findByUser() {
@@ -306,24 +328,30 @@ public class InvoiceServiceImp implements InvoiceService {
             if (idSt != StatusUtils.DANG_CHO_XAC_NHAN) {
                 throw new MessageException("Đơn hàng đã được thanh toán qua GPay, không thể hủy");
             }
-        }
-        else if (!invoice.get().getPayType().equals(PayType.PAYMENT_DELIVERY)) {
+        } else if (!invoice.get().getPayType().equals(PayType.PAYMENT_DELIVERY)) {
             throw new MessageException("Đơn hàng đã được thanh toán, không thể hủy");
         }
+
         Long idSt = invoice.get().getStatus().getId();
         if (idSt == StatusUtils.DA_GUI || idSt == StatusUtils.DA_NHAN ||
                 idSt == StatusUtils.DA_HUY || idSt == StatusUtils.KHONG_NHAN_HANG) {
             throw new MessageException(invoice.get().getStatus().getName() + " không thể hủy hàng");
         }
 
-
         invoice.get().setStatus(statusRepository.findById(StatusUtils.DA_HUY).get());
         Invoice result = invoiceRepository.save(invoice.get());
 
         List<InvoiceDetail> list = invoiceDetailRepository.findByInvoiceId(invoiceId);
         for (InvoiceDetail i : list) {
+
             i.getProductSize().setQuantity(i.getQuantity() + i.getProductSize().getQuantity());
             productSizeRepository.save(i.getProductSize());
+
+
+            i.getProductSize().getProductColor().getProduct().setQuantitySold(
+                    i.getProductSize().getProductColor().getProduct().getQuantitySold() - i.getQuantity()
+            );
+            productRepository.save(i.getProductSize().getProductColor().getProduct());
         }
 
         InvoiceStatus invoiceStatus = new InvoiceStatus();

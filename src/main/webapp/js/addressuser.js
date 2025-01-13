@@ -79,12 +79,30 @@ function clearData() {
 
 
 async function addAddressUser() {
-    var id = document.getElementById("idadduser").value;
+    var id = document.getElementById("idadduser").value.trim();
     var fullnameadd = document.getElementById("fullnameadd").value;
     var phoneadd = document.getElementById("phoneadd").value;
     var stressadd = document.getElementById("stressadd").value;
     var ward = document.getElementById("xa").value;
     var primaryadd = document.getElementById("primaryadd").checked;
+
+    if (!fullnameadd) {
+        toastr.warning("Vui lòng nhập họ tên!");
+        return;
+    }
+    if (!phoneadd ) {
+        toastr.warning("Vui lòng nhập số điện thoại!");
+        return;
+    }
+    var phonePattern = /^(0[3|5|7|8|9])([0-9]{8})$/;
+    if (!phonePattern.test(phoneadd)) {
+        toastr.warning("Số điện thoại không đúng định dạng.");
+        return;
+    }if (!stressadd  ) {
+        toastr.warning("Vui lòng nhập tên đường,số nhà!");
+        return;
+    }
+
     var addu = {
         "id": id,
         "fullname": fullnameadd,
@@ -94,34 +112,40 @@ async function addAddressUser() {
         "wards": {
             id: ward
         }
-    }
+    };
+
     var url = 'http://localhost:8080/api/user-address/user/create';
     if (id != "" && id != null) {
         url = 'http://localhost:8080/api/user-address/user/update';
     }
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: new Headers({
-            'Authorization': 'Bearer ' + token,
-            'Content-Type': 'application/json'
-        }),
-        body: JSON.stringify(addu)
-    });
-    if (response.status < 300) {
-        swal({
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: new Headers({
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            }),
+            body: JSON.stringify(addu)
+        });
+
+        if (response.status < 300) {
+            swal({
                 title: "Thông báo",
                 text: "Thành công",
                 type: "success"
-            },
-            function() {
+            }, function() {
                 window.location.reload();
             });
-    }
-    if (response.status == exceptionCode) {
-        var result = await response.json()
-        toastr.warning(result.defaultMessage);
+        } else if (response.status == exceptionCode) {
+            var result = await response.json();
+            toastr.warning(result.defaultMessage);
+        }
+    } catch (error) {
+        toastr.error("Có lỗi xảy ra, vui lòng thử lại.");
     }
 }
+
 
 
 async function deleteAddressUser(id) {

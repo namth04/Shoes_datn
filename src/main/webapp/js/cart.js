@@ -124,16 +124,16 @@ async function addCart(product) {
             list.push(obj);
         }
 
-        window.localStorage.setItem('product_cart', JSON.stringify(list));
+            window.localStorage.setItem('product_cart', JSON.stringify(list));
+
+            totalQuantity -= quantityAdded;
+            totalQuantityElement.innerHTML = `Số lượng: ${totalQuantity}`;
+
+            toastr.success("Thêm giỏ hàng thành công");
+            loadAllCart();
+            loadCartMenu();
+        }
     }
-    totalQuantity -= quantityAdded;
-    totalQuantityElement.innerHTML = `Số lượng: ${totalQuantity}`;
-
-    localStorage.setItem("cart_message", "Thêm giỏ hàng thành công");
-
-    loadAllCart();
-    window.location.reload();
-}
 
 window.addEventListener("load", () => {
     const message = localStorage.getItem("cart_message");
@@ -240,16 +240,21 @@ async function loadAllCart() {
     document.getElementById("slcart").innerHTML = list.length;
     document.getElementById("tonggiatien").innerHTML = formatmoney(total);
 
+    // Checkbox cha: chọn/tắt tất cả
     document.getElementById("select-all").addEventListener("change", function () {
         const checkboxes = document.querySelectorAll(".product-checkbox");
+        const isChecked = this.checked;
+
         checkboxes.forEach((checkbox) => {
-            checkbox.checked = this.checked;
+            checkbox.checked = isChecked;
             const index = checkbox.dataset.index;
-            updateSelectedItems(index, this.checked);
+            updateSelectedItems(index, isChecked);
         });
+
         updateTotal();
     });
 
+    // Checkbox con: đồng bộ hóa với checkbox cha
     const checkboxes = document.querySelectorAll(".product-checkbox");
     checkboxes.forEach((checkbox) => {
         checkbox.addEventListener("change", function () {
@@ -258,6 +263,90 @@ async function loadAllCart() {
             updateTotal();
         });
     });
+}
+async function validateAndRedirectToCheckout() {
+    // 1. Kiểm tra giỏ hàng có dữ liệu không
+    const cartData = localStorage.getItem("product_cart");
+    if (!cartData) {
+        toastr.error("Giỏ hàng của bạn đang trống!");
+        return;
+    }
+
+    // 2. Kiểm tra có sản phẩm được chọn không
+    const selectedItems = JSON.parse(localStorage.getItem("selected_items") || "[]");
+    if (selectedItems.length === 0) {
+        toastr.error("Vui lòng chọn sản phẩm để thanh toán!");
+        return;
+    }
+
+    try {
+        const cart = JSON.parse(cartData);
+        const selectedProducts = cart.filter((_, index) => selectedItems.includes(index));
+        const errors = [];
+
+        // 3. Kiểm tra tính hợp lệ của từng sản phẩm được chọn
+        for (const item of selectedProducts) {
+            // 3.1 Kiểm tra cấu trúc dữ liệu sản phẩm
+            if (!item.product || !item.color || !item.size || !item.quantiy || !item.product.price) {
+                errors.push(`Sản phẩm "${item.product?.name || 'Không xác định'}" có dữ liệu không hợp lệ!`);
+                continue;
+            }
+
+            try {
+                // 3.2 Kiểm tra tồn tại và số lượng trong kho
+                const sizeUrl = `http://localhost:8080/api/product-size/public/find-quantity-by-color-and-size?colorId=${item.color.id}&sizeId=${item.size.id}`;
+                const response = await fetch(sizeUrl);
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                let availableQuantity;
+                try {
+                    availableQuantity = await response.json();
+                } catch (e) {
+                    errors.push(`Size ${item.size.sizeName} của sản phẩm "${item.product.name}" màu ${item.color.colorName} không còn tồn tại trong hệ thống!`);
+                    continue;
+                }
+
+                // 3.3 Kiểm tra số lượng
+                if (availableQuantity === null || availableQuantity === undefined) {
+                    errors.push(`Size ${item.size.sizeName} của sản phẩm "${item.product.name}" màu ${item.color.colorName} không còn tồn tại trong hệ thống!`);
+                    continue;
+                }
+
+                if (availableQuantity === 0) {
+                    errors.push(`Size ${item.size.sizeName} của sản phẩm "${item.product.name}" màu ${item.color.colorName} đã hết hàng!`);
+                    continue;
+                }
+
+                if (item.quantiy > availableQuantity) {
+                    errors.push(`Size ${item.size.sizeName} của sản phẩm "${item.product.name}" màu ${item.color.colorName} chỉ còn ${availableQuantity} sản phẩm!`);
+                    continue;
+                }
+
+            } catch (error) {
+                console.error("Lỗi kiểm tra sản phẩm với database:", error);
+                errors.push(`Không thể kiểm tra thông tin sản phẩm "${item.product.name}". Vui lòng thử lại sau!`);
+                continue;
+            }
+        }
+
+        // 4. Hiển thị lỗi nếu có
+        if (errors.length > 0) {
+            errors.forEach(error => {
+                toastr.error(error);
+            });
+            return;
+        }
+
+        // 5. Chỉ chuyển trang khi mọi thứ hợp lệ
+        window.location.href = 'checkout';
+
+    } catch (error) {
+        console.error("Lỗi kiểm tra giỏ hàng:", error);
+        toastr.error("Có lỗi xảy ra khi kiểm tra giỏ hàng!");
+    }
 }
 function updateSelectedItems(index, isSelected) {
     let selectedItems = JSON.parse(localStorage.getItem("selected_items") || "[]");
@@ -271,19 +360,32 @@ function updateSelectedItems(index, isSelected) {
     }
 
     localStorage.setItem("selected_items", JSON.stringify(selectedItems));
+
+    // Check if all child checkboxes are selected
+    const totalCheckboxes = document.querySelectorAll(".product-checkbox").length;
+    const checkedCheckboxes = document.querySelectorAll(".product-checkbox:checked").length;
+
+    const selectAllCheckbox = document.getElementById("select-all");
+    selectAllCheckbox.checked = (totalCheckboxes === checkedCheckboxes);
+    selectAllCheckbox.indeterminate = (checkedCheckboxes > 0 && checkedCheckboxes < totalCheckboxes);
 }
 updateSelectedItems();
 function updateTotal() {
-    const selectedItems = JSON.parse(localStorage.getItem("selected_items") || "[]");
-    const listcart = JSON.parse(localStorage.getItem("product_cart") || "[]");
-
     let total = 0;
-    selectedItems.forEach((index) => {
-        const product = listcart[index];
-        total += Number(product.quantiy * product.product.price);
+    const checkboxes = document.querySelectorAll(".product-checkbox");
+    const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked); // Kiểm tra tất cả checkbox con
+
+    document.getElementById("select-all").checked = allChecked; // Cập nhật trạng thái checkbox cha
+
+    checkboxes.forEach((checkbox) => {
+        if (checkbox.checked) {
+            const index = parseInt(checkbox.dataset.index);
+            const product = JSON.parse(localStorage.getItem("product_cart"))[index];
+            total += Number(product.quantiy * product.product.price);
+        }
     });
 
-    document.getElementById("tonggiatien").innerHTML = formatmoney(total);
+    document.getElementById("tonggiatien").innerHTML = formatmoney(total); // Cập nhật tổng tiền
 }
 updateTotal();
 async function loadAllCartMobile() {

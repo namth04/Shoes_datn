@@ -70,24 +70,12 @@
                     </div>
                     <br><span class="titlecheckout">Thanh toán</span>
                     <table class="table tablepay">
-<!--                        <tr onclick="momo.click()">-->
-<!--                            <td><label class="radiocustom">	Thanh toán qua Ví MoMo-->
-<!--                                <input value="momo" id="momo" type="radio" name="paytype" checked="checked">-->
-<!--                                <span class="checkmark"></span></label></td>-->
-<!--                            <td><img src="image/momo.webp" class="momopay"></td>-->
-<!--                        </tr>-->
                         <tr onclick="gpay.click()">
                             <td><label class="radiocustom">	Thanh toán qua Gpay
                                 <input value="gpay" id="gpay" type="radio" name="paytype" checked="checked">
                                 <span class="checkmark"></span></label></td>
                             <td><img src="image/gpay.png" class="momopay"></td>
                         </tr>
-                    <!--    <tr onclick="vnpay.click()">
-                            <td><label class="radiocustom">	Thanh toán qua Ví Vnpay
-                                <input value="vnpay" id="vnpay" type="radio" name="paytype">
-                                <span class="checkmark"></span></label></td>
-                            <td><img src="image/vnpay.jpg" class="momopay"></td>
-                        </tr>-->
                         <tr onclick="code.click()">
                             <td><label class="radiocustom">	Thanh toán khi nhận hàng (COD)
                                 <input value="cod" id="code" type="radio" name="paytype">
@@ -127,15 +115,30 @@
                     </div>
                 </div>
             </div>
-            <div class="row magg">
-                <div class="col-8"><input id="codevoucher" class="form-control" placeholder="Nhập voucher"></div>
-                <div class="col-4"><button onclick="loadVoucher()" class="btnmagg">Áp dụng</button></div>
-                <div class="col-12" id="blockmess">
-                    <span class="successvou">Mã giảm giá đã được áp dụng</span>
+            <div class="voucher-section">
+                <div class="voucher-header">
+                    <div class="voucher-header-left">
+                        <i class="fa fa-ticket"></i>
+                        Voucher của Shop
+                    </div>
+                    <div class="voucher-header-right" data-bs-toggle="modal" data-bs-target="#voucherModal" onclick="loadVoucherList()">
+                        Chọn Voucher
+                    </div>
+
                 </div>
-                <div class="col-12" id="blockmessErr">
-                    <br><i class="fa fa-warning"> <span id="messerr">Mã giảm giá không khả dụng</span></i>
+
+                <div class="voucher-input-section">
+                    <div class="voucher-input-group">
+                        <input type="text" class="voucher-input" id="codevoucher" placeholder="Nhập mã voucher của Shop">
+                        <button class="voucher-apply-btn" onclick="loadVoucher()">Áp dụng</button>
+                    </div>
+                    <div class="error-message" id="blockmessErr" style="display:none;">
+                        <i class="fa fa-warning"></i>
+                        <span id="messerr">Mã giảm giá không hợp lệ</span>
+                    </div>
                 </div>
+
+
             </div>
             <div class="magg">
                 <table class="table">
@@ -162,5 +165,24 @@
     </div>
 </div>
 </body>
+<!-- Modal -->
+<div class="modal fade" id="voucherModal" tabindex="-1" aria-labelledby="voucherModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="voucherModalLabel">Chọn Voucher</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="voucherList">
+                    <!-- Danh sách voucher sẽ được render tại đây -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 </html>

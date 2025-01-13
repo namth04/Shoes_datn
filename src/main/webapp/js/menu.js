@@ -137,7 +137,7 @@ function loadFooter() {
         <div class=" text-center text-md-start mt-5">
         <div class="row mt-3">
             <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4">
-            <h6 class="text-uppercase fw-bold mb-4"><i class="fas fa-gem me-3"></i>StepOn</h6>
+            <h6 class="text-uppercase fw-bold mb-4"><img src="image/logo.png" style="max-width: 140px"></h6>
             <p>
                 Chúng tôi cung cấp dịch vụ thời trang giá rẻ cho giới trẻ với phong cách bắt kịp trend hiện nay
             </p>
@@ -189,7 +189,7 @@ function loadFooter() {
     </div>`
     document.getElementById("footer").innerHTML = foo;
     try {
-        loadMyChat();
+        // loadMyChat();
     }
     catch (e){
 
