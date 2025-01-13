@@ -133,6 +133,10 @@ async function loadDetailInvoice(id) {
             `Voucher "${result.voucherName}" giảm: ${formatmoney(Math.abs(voucherAmount))}` :
             `Voucher giảm: ${formatmoney(Math.abs(voucherAmount))}`;
         document.getElementById("voucherDiscountAmount").innerHTML = voucherDiscountText;
+        // Hiển thị tổng tiền sau khi trừ voucher
+        const totalAfterVoucher = result.totalAmount; // Tổng tiền sau giảm giá
+        document.getElementById("totalAfterVoucher").innerHTML =
+            `Tổng tiền: ${formatmoney(totalAfterVoucher)}`;
     } else {
         voucherBlock.style.display = "none";
     }
