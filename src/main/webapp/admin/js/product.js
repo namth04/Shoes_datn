@@ -348,22 +348,12 @@ function isColorDuplicate(newColorName, currentColorBlock = null) {
     return false;
 }
 
-function validateColors() {
-    const colorBlocks = document.getElementById("listcolorblock").getElementsByClassName("singlecolor");
-    if (colorBlocks.length === 0) {
-        toastr.warning("Vui lòng thêm ít nhất một màu sắc!");
-        return false;
-    }
-    return true;
-}
-
-
 async function saveProduct() {
     try {
-
         document.getElementById("loading").style.display = 'block';
         const uls = new URL(document.URL);
         const id = uls.searchParams.get("id");
+
         const formData = {
             codesp: document.getElementById("codesp").value.trim(),
             namesp: document.getElementById("namesp").value.trim(),
@@ -376,16 +366,77 @@ async function saveProduct() {
             degiay: document.getElementById("degiay").value.trim()
         };
 
-        if (!validateProduct(formData)) {
+        // Basic validations first
+        if (!formData.codesp) {
+            toastr.warning('Vui lòng nhập mã sản phẩm!');
             document.getElementById("loading").style.display = 'none';
             return;
         }
-        await loadColor();
 
-        if (listColor.length === 0) {
+        if (!formData.namesp) {
+            toastr.warning('Vui lòng nhập tên sản phẩm!');
             document.getElementById("loading").style.display = 'none';
             return;
         }
+
+        if (!formData.alias) {
+            toastr.warning('Alias không được để trống!');
+            document.getElementById("loading").style.display = 'none';
+            return;
+        }
+
+        if (!formData.price || isNaN(formData.price) || Number(formData.price) <= 0) {
+            toastr.warning('Giá không hợp lệ!');
+            document.getElementById("loading").style.display = 'none';
+            return;
+        }
+
+        if (!formData.listdpar || formData.listdpar.length === 0) {
+            toastr.warning('Vui lòng chọn danh mục!');
+            document.getElementById("loading").style.display = 'none';
+            return;
+        }
+
+        if (!formData.chatlieu) {
+            toastr.warning('Vui lòng chọn chất liệu!');
+            document.getElementById("loading").style.display = 'none';
+            return;
+        }
+
+        if (!formData.thuonghieu) {
+            toastr.warning('Vui lòng chọn thương hiệu!');
+            document.getElementById("loading").style.display = 'none';
+            return;
+        }
+
+        if (!formData.degiay) {
+            toastr.warning('Vui lòng chọn đế giày!');
+            document.getElementById("loading").style.display = 'none';
+            return;
+        }
+
+        if (!formData.description) {
+            toastr.warning('Mô tả không được để trống!');
+            document.getElementById("loading").style.display = 'none';
+            return;
+        }
+
+        // Check if color blocks exist
+        const colorBlocks = document.getElementById("listcolorblock").getElementsByClassName("singlecolor");
+        if (colorBlocks.length === 0) {
+            toastr.warning('Danh sách màu sắc không được để trống!');
+            document.getElementById("loading").style.display = 'none';
+            return;
+        }
+
+        // Handle color validation and loading
+        const colorLoadSuccess = await loadColor();
+        if (!colorLoadSuccess) {
+            document.getElementById("loading").style.display = 'none';
+            return;
+        }
+
+        // Handle file uploads
         const [bannerResult, detailImagesResult] = await Promise.all([
             uploadFile(document.getElementById("imgbanner")),
             id == null ? uploadMultipleFileNotResp() : Promise.resolve([])
@@ -402,15 +453,12 @@ async function saveProduct() {
             document.getElementById("loading").style.display = 'none';
             return;
         }
-        if (!validateColors()) {
-            document.getElementById("loading").style.display = 'none';
-            return;
-        }
 
         const url = id != null
             ? 'http://localhost:8080/api/product/admin/update'
             : 'http://localhost:8080/api/product/admin/create';
 
+        // Prepare product data
         const product = {
             id: id,
             code: formData.codesp,
@@ -455,7 +503,6 @@ async function saveProduct() {
             document.getElementById("loading").style.display = 'none';
         }
 
-
     } catch (error) {
         console.error('Error:', error);
         swal({
@@ -464,7 +511,6 @@ async function saveProduct() {
             type: "error"
         }, () => {
             document.getElementById("loading").style.display = 'none';
-            // window.location.reload();
         });
     }
 }
@@ -560,29 +606,6 @@ function renderColorTable() {
         tableBody.appendChild(row);
     });
 }
-
-function validateProduct(data) {
-    const validations = [
-        { condition: !data.codesp, message: "Mã sản phẩm không được để trống!" },
-        { condition: !data.namesp, message: "Tên sản phẩm không được để trống!" },
-        { condition: !data.price || isNaN(data.price) || Number(data.price) <= 0, message: "Giá phải là số dương!" },
-        { condition: !data.alias, message: "Alias không được để trống!" },
-        { condition: !data.listdpar || data.listdpar.length === 0, message: "Vui lòng chọn danh mục!" },
-        { condition: !data.description, message: "Mô tả không được để trống!" },
-        { condition: !data.thuonghieu, message: "Vui lòng chọn thương hiệu!" },
-        { condition: !data.chatlieu, message: "Vui lòng chọn chất liệu!" },
-        { condition: !data.degiay, message: "Vui lòng chọn đế giày!" }
-    ];
-
-    for (const validation of validations) {
-        if (validation.condition) {
-            toastr.warning(validation.message);
-            return false;
-        }
-    }
-    return true;
-}
-
 async function deleteProduct(productId) {
     try {
         const url = `http://localhost:8080/api/product/admin/findById?id=${productId}`;
@@ -694,92 +717,97 @@ function checkDuplicateColors() {
 }
 
 async function loadColor() {
-    var list = document.getElementById("listcolorblock").getElementsByClassName("singlecolor");
-    var listF = [];
+    const list = document.getElementById("listcolorblock").getElementsByClassName("singlecolor");
     listColor = [];
 
     if (!checkDuplicateColors()) {
-        return;
+        return false;
     }
 
     for (let i = 0; i < list.length; i++) {
-        var singleColor = list[i];
-        var idcolor = singleColor.getElementsByClassName("idcolor")[0];
-        var colorName = singleColor.getElementsByClassName("colorName")[0];
+        const singleColor = list[i];
+        const idcolor = singleColor.getElementsByClassName("idcolor")[0];
+        const colorName = singleColor.getElementsByClassName("colorName")[0].value.trim();
 
-        if (!colorName.value.trim()) {
+        if (!colorName) {
             toastr.warning("Tên màu sắc không được để trống!");
-            return;
+            return false;
         }
 
-        listF.push(singleColor.getElementsByClassName("fileimgclo")[0]);
-        var obj = {
-            "id": idcolor.value == '' ? null : idcolor.value,
-            "colorName": colorName.value,
-            "hasFile": singleColor.getElementsByClassName("fileimgclo")[0].files.length == 0 ? false : true,
+        const obj = {
+            "id": idcolor.value || null,
+            "colorName": colorName,
+            "hasFile": singleColor.getElementsByClassName("fileimgclo")[0].files.length > 0,
             "linkImage": null
         };
 
-        var listsizes = [];
-        var sizeblockList = singleColor.getElementsByClassName("singelsizeblock");
+        const sizeblockList = singleColor.getElementsByClassName("singelsizeblock");
+        const existingSizeNames = new Set();
+        const listsizes = [];
 
-        var existingSizeNames = new Set();
         for (let j = 0; j < sizeblockList.length; j++) {
-            var size = sizeblockList[j];
-            var sizeName = size.getElementsByClassName("sizename")[0].value.trim();
-            var quantity = size.getElementsByClassName("sizequantity")[0].value;
+            const size = sizeblockList[j];
+            const sizeName = size.getElementsByClassName("sizename")[0].value.trim();
+            const quantity = size.getElementsByClassName("sizequantity")[0].value;
 
             if (!sizeName) {
                 toastr.warning("Tên kích thước không được để trống!");
-                return;
+                return false;
             }
 
             if (!quantity || isNaN(quantity) || Number(quantity) <= 0) {
                 toastr.warning("Số lượng phải là số dương!");
-                return;
+                return false;
             }
+
             if (existingSizeNames.has(sizeName)) {
                 toastr.warning(`Kích thước "${sizeName}" đã tồn tại!`);
-                return;
+                return false;
             }
+
             existingSizeNames.add(sizeName);
-            var objsize = {
-                "id": size.getElementsByClassName("idsize")[0].value == '' ? null : size.getElementsByClassName("idsize")[0].value,
+            listsizes.push({
+                "id": size.getElementsByClassName("idsize")[0].value || null,
                 "sizeName": sizeName,
                 "quantity": quantity,
-            };
-            listsizes.push(objsize);
+            });
         }
 
+        // Check if sizes exist
         if (listsizes.length === 0) {
             toastr.warning("Vui lòng thêm ít nhất một kích thước cho màu sắc này!");
-            return;
+            return false;
         }
 
         obj.size = listsizes;
         listColor.push(obj);
     }
 
+    // Handle file uploads after all validations pass
+    const listF = Array.from(list).map(singleColor =>
+        singleColor.getElementsByClassName("fileimgclo")[0]
+    );
 
-    if (listColor.length === 0) {
-        toastr.warning("Vui lòng thêm ít nhất một màu sắc!");
-        return;
-    }
+    try {
+        const listImg = await uploadMultipleFile(listF);
 
-    var listImg = await uploadMultipleFile(listF);
-
-    for (let i = 0; i < listImg.length; i++) {
-        for (let j = 0; j < listColor.length; j++) {
-            if (listColor[j].hasFile == true) {
-                if (listColor[j].linkImage == null) {
-                    listColor[j].linkImage = listImg[i].link;
-                    break;
+        // Assign images to colors
+        let imgIndex = 0;
+        for (const color of listColor) {
+            if (color.hasFile && color.linkImage === null) {
+                if (imgIndex < listImg.length) {
+                    color.linkImage = listImg[imgIndex].link;
+                    imgIndex++;
                 }
             }
         }
-    }
 
-    console.log(listColor);
+        return true;
+    } catch (error) {
+        console.error('Error uploading images:', error);
+        toastr.error("Lỗi khi tải lên hình ảnh!");
+        return false;
+    }
 }
 
 
