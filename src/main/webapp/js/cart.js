@@ -70,7 +70,13 @@ async function addCart(product) {
             size = listSize[i];
         }
     }
+    // Kiểm tra số lượng nhập
     var quantityAdded = Number(document.getElementById("inputslcart").value);
+    if (isNaN(quantityAdded) || quantityAdded < 1) {
+        toastr.error("Số lượng không hợp lệ. Vui lòng nhập số lượng lớn hơn hoặc bằng 1.");
+        document.getElementById("inputslcart").value = 1; // Đặt lại giá trị mặc định
+        return;
+    }
     console.log(quantityAdded);
     var totalQuantityElement = document.getElementById("quantityA");
     console.log(totalQuantityElement);

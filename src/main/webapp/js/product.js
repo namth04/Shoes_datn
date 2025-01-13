@@ -122,6 +122,12 @@ async function loadAProduct() {
             }
 
             var quantity = parseInt(document.getElementById("inputslcart").value) || 1;
+            // Kiểm tra nếu số lượng là số âm hoặc không hợp lệ
+            if (quantity < 1) {
+                toastr.error("Số lượng không hợp lệ. Vui lòng nhập số lượng lớn hơn hoặc bằng 1.");
+                document.getElementById("inputslcart").value = 1; // Đặt lại giá trị mặc định là 1
+                return;
+            }
             if (quantity > maxQuantity) {
                 toastr.error(`Số lượng tồn kho không đủ. Chỉ còn ${maxQuantity} sản phẩm`);
                 return;
