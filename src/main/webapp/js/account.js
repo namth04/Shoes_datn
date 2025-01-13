@@ -248,11 +248,19 @@ async function regis() {
         toastr.warning('Vui lòng nhập điện thoại!');
         return;
     }
-    const phoneRegex = /^[0-9]{10}$/;
-    if (!phoneRegex.test(phone)) {
-        toastr.warning(" Vui lòng nhập số điện thoại hợp lệ!");
+    if (!phone) {
+        toastr.warning("Số điện thoại không được để trống!");
         return;
     }
+
+    const phoneRegex = /^0\d{9}$/;
+
+    if (!phoneRegex.test(phone)) {
+        toastr.warning("Vui lòng nhập số điện thoại hợp lệ! Số điện thoại phải bắt đầu bằng 0 và có đúng 10 chữ số.");
+        return;
+    }
+
+
     if (!email) {
         toastr.warning('Vui lòng nhập email!');
         return;
@@ -289,7 +297,7 @@ async function regis() {
             toastr.warning(result.defaultMessage);
         }
     } catch (error) {
-        toastr.error('Đã xảy ra lỗi, vui lòng thử lại!');
+        toastr.warning('Đã xảy ra lỗi, vui lòng thử lại!');
     }
 }
 

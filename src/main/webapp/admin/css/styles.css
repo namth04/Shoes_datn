@@ -13059,6 +13059,7 @@ body {
     -ms-border-radius: 10px;
     -o-border-radius: 10px;
     border-radius: 10px;
+    box-shadow: 4px 4px 10px 0px rgb(0 0 0 / 14%);
 }
 
 .thongke2 {
