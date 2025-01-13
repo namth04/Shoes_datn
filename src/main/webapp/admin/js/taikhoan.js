@@ -118,23 +118,19 @@ async function addAdmin() {
     }
 
     // Validate Phone
-    const validPhonePrefixes = [
-        "03", "05", "07", "08", "09" // Common prefixes for Vietnamese SIM cards
-    ];
-    const phoneRegex = /^0[35789]\d{8}$/; // Starts with 0, followed by valid prefixes, and exactly 10 digits
+    // Regex to validate phone numbers: starts with 0 and has exactly 10 digits
+    const phoneRegex = /^0\d{9}$/; // Starts with 0, followed by 9 more digits (total 10 digits)
 
     if (!phone) {
         toastr.warning("Số điện thoại không được để trống!");
         return;
     }
+
     if (!phoneRegex.test(phone)) {
-        toastr.warning(
-            `Số điện thoại không hợp lệ! Số điện thoại phải bắt đầu bằng ${validPhonePrefixes.join(
-                ", "
-            )} và có 10 chữ số.`
-        );
+        toastr.warning("Số điện thoại không hợp lệ! Số điện thoại phải bắt đầu bằng 0 và có đúng 10 chữ số.");
         return;
     }
+
 
     // Validate Email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
