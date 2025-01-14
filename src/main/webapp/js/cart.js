@@ -289,24 +289,22 @@ async function validateAndRedirectToCheckout() {
         const cart = JSON.parse(cartData);
         const selectedProducts = cart.filter((_, index) => selectedItems.includes(index));
 
-        // Kiểm tra nếu không có sản phẩm hợp lệ
+
         if (selectedProducts.length === 0) {
-            toastr.error("Không có sản phẩm hợp lệ được chọn để thanh toán!");
+            toastr.error("Không có sản phẩm để thanh toán!");
             return;
         }
 
         const errors = [];
 
-        // 3. Kiểm tra tính hợp lệ của từng sản phẩm được chọn
         for (const item of selectedProducts) {
-            // 3.1 Kiểm tra cấu trúc dữ liệu sản phẩm
+
             if (!item.product || !item.color || !item.size || !item.quantiy || !item.product.price) {
                 errors.push(`Sản phẩm "${item.product?.name || 'Không xác định'}" có dữ liệu không hợp lệ!`);
                 continue;
             }
 
             try {
-                // 3.2 Kiểm tra tồn tại và số lượng trong kho
                 const sizeUrl = `http://localhost:8080/api/product-size/public/find-quantity-by-color-and-size?colorId=${item.color.id}&sizeId=${item.size.id}`;
                 const response = await fetch(sizeUrl);
 
@@ -322,7 +320,6 @@ async function validateAndRedirectToCheckout() {
                     continue;
                 }
 
-                // 3.3 Kiểm tra số lượng
                 if (availableQuantity === null || availableQuantity === undefined) {
                     errors.push(`Size ${item.size.sizeName} của sản phẩm "${item.product.name}" màu ${item.color.colorName} không còn tồn tại trong hệ thống!`);
                     continue;
@@ -345,7 +342,6 @@ async function validateAndRedirectToCheckout() {
             }
         }
 
-        // 4. Hiển thị lỗi nếu có
         if (errors.length > 0) {
             errors.forEach(error => {
                 toastr.error(error);
@@ -353,7 +349,7 @@ async function validateAndRedirectToCheckout() {
             return;
         }
 
-        // 5. Chỉ chuyển trang khi mọi thứ hợp lệ
+
         window.location.href = 'checkout';
 
     } catch (error) {

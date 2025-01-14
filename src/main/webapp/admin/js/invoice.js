@@ -222,10 +222,9 @@ async function createInvoice() {
         const phone = document.getElementById("phone").value.trim();
         const customerPaidInput = document.getElementById('customerPaid').value.trim();
 
-        // Allow phone to be empty, but validate format if entered
-        const phoneRegex = /^[0-9]{10}$/;
+        const phoneRegex =  /^0\d{9}$/;
         if (phone && !phoneRegex.test(phone)) {
-            toastr.warning('Số điện thoại không hợp lệ. Vui lòng nhập đúng định dạng (10 chữ số).');
+            toastr.warning('Số điện thoại không hợp lệ!');
             return;
         }
 
@@ -625,35 +624,28 @@ function createInvoiceHTML(invoiceDetails) {
     `;
 }
 
-function calculateChange() {
-    let totalAmountText = document.getElementById('tongtientt').innerText;
 
-    let totalAmount = parseFloat(totalAmountText.replace(/[^\d]/g, ''));
+function autoUpdateChange() {
+    const customerPaidInput = document.getElementById('customerPaid');
+    const changeAmountInput = document.getElementById('changeAmount');
 
-    if (isNaN(totalAmount) || totalAmount < 0) {
-        toastr.warning('Tổng tiền không thể là số âm. Vui lòng kiểm tra lại.');
-        totalAmount = 0;
+    if (customerPaidInput.value.trim()) {
+        calculateChange();
+    } else {
+        changeAmountInput.value = formatCurrency(0);
     }
-    const customerPaidInput = document.getElementById('customerPaid').value.trim();
-    let customerPaid = customerPaidInput ? parseFloat(customerPaidInput) : 0;
-
-
-    if (customerPaid < 0) {
-        customerPaid = 0;
-        document.getElementById('customerPaid').value = 0;
-    }
-    if (!customerPaidInput) {
-        document.getElementById('changeAmount').value = "";
-        return;
-    }
-    let change = customerPaid - totalAmount;
-
-    const formattedChange = change < 0
-        ? `- ${Math.abs(change).toLocaleString()}đ`
-        : `${change.toLocaleString()}đ`;
-
-
-    document.getElementById('changeAmount').value = formattedChange;
 }
+
+function calculateChange() {
+    const totalAmountText = document.getElementById('tongtientt').innerText;
+    const totalAmount = parseFloat(totalAmountText.replace(/[^\d]/g, '')) || 0;
+
+    const customerPaidInput = document.getElementById('customerPaid').value.trim();
+    const customerPaid = parseFloat(customerPaidInput) || 0;
+
+    const change = customerPaid - totalAmount;
+    document.getElementById('changeAmount').value = formatCurrency(change);
+}
+
 
 

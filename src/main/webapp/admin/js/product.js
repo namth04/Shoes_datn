@@ -783,7 +783,6 @@ async function loadColor() {
         listColor.push(obj);
     }
 
-    // Handle file uploads after all validations pass
     const listF = Array.from(list).map(singleColor =>
         singleColor.getElementsByClassName("fileimgclo")[0]
     );
@@ -989,7 +988,8 @@ async function loadChiTietMauSac(idproduct){
     }
 }
 
-var listProductTam = JSON.parse(localStorage.getItem("listProductTam")) || [];
+var listProductTam;
+
 async function addTam(idsize, e) {
     if (e.checked == false) {
         removeTam(idsize);
@@ -1004,6 +1004,11 @@ async function addTam(idsize, e) {
     });
     var result = await response.json();
 
+    const existingCart = JSON.parse(localStorage.getItem("listProductTam")) || [];
+    const existingProduct = existingCart.find(item => item.productSize.id === idsize);
+
+    const quantity = existingProduct ? existingProduct.quantity : 1;
+
     const formattedResult = {
         product: result.product,
         productColor: {
@@ -1015,13 +1020,58 @@ async function addTam(idsize, e) {
             sizeName: result.productSize.sizeName,
             quantity: result.productSize.quantity
         },
-        quantity: 1
+        quantity: quantity
     };
 
     listProductTam.push(formattedResult);
     saveToLocalStorage();
     loadSizeProduct();
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    const storedCart = JSON.parse(localStorage.getItem("listProductTam")) || [];
+    console.log("Dữ liệu từ localStorage khi reload:", storedCart);
+
+    listProductTam = storedCart;
+    loadSizeProduct();
+});
+
+function upDownQuantity(idsize, amount) {
+    console.log(`Thay đổi số lượng cho sản phẩm ID ${idsize}, thay đổi: ${amount}`);
+    for (let i = 0; i < listProductTam.length; i++) {
+        if (listProductTam[i].productSize.id == idsize) {
+            const newQuantity = listProductTam[i].quantity + amount;
+            const maxQuantity = listProductTam[i].productSize.quantity;
+
+            if (newQuantity >= 1 && newQuantity <= maxQuantity) {
+                listProductTam[i].quantity = newQuantity;
+                console.log("Số lượng mới:", listProductTam[i].quantity);
+
+                // Lưu lại thay đổi vào localStorage
+                saveToLocalStorage();
+
+                // Hiển thị lại giao diện
+                loadSizeProduct();
+            }
+            break;
+        }
+    }
+}
+function saveToLocalStorage() {
+    console.log("Dữ liệu trước khi lưu vào localStorage:", listProductTam);
+    localStorage.setItem("listProductTam", JSON.stringify(listProductTam));
+    console.log("Dữ liệu sau khi lưu vào localStorage:", localStorage.getItem("listProductTam"));
+}
+document.addEventListener("DOMContentLoaded", () => {
+    const storedCart = JSON.parse(localStorage.getItem("listProductTam")) || [];
+    console.log("Dữ liệu từ localStorage khi reload:", storedCart);
+
+    listProductTam = storedCart;
+    loadSizeProduct();
+});
+
+
+
 
 function removeTam(idsize) {
     listProductTam = listProductTam.filter(item => item.productSize.id !== idsize);
@@ -1038,57 +1088,58 @@ function checkTonTai(idsize) {
     return false;
 }
 
-function saveToLocalStorage() {
-    localStorage.setItem("listProductTam", JSON.stringify(listProductTam));
-}
-
-function loadSizeProduct() {
-    console.log(listProductTam);
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-    listProductTam = JSON.parse(localStorage.getItem("listProductTam")) || [];
-    loadSizeProduct();
-});
 
 
-function removeTam(idsize){
-    for(i=0; i< listProductTam.length; i++){
-        if(listProductTam[i].productSize.id == idsize){
-            listProductTam.splice(i, 1);
+function validateInputQuantity(idsize, input) {
+    let value = parseInt(input.value);
+    const maxQuantity = parseInt(input.max);
+
+    if(isNaN(value) || value < 1) value = 1;
+    if(value > maxQuantity) value = maxQuantity;
+
+    for(let i = 0; i < listProductTam.length; i++) {
+        if(listProductTam[i].productSize.id == idsize) {
+            listProductTam[i].quantity = value;
+            saveToLocalStorage();
+            loadSizeProduct();
+            break;
         }
     }
-    loadSizeProduct();
+
+    input.value = value;
 }
 
-function loadSizeProduct(){
-    var main = '';
-    var tongtientt = 0;
-    for(i=0; i< listProductTam.length; i++){
-        tongtientt = Number(tongtientt) + Number(listProductTam[i].product.price) * Number(listProductTam[i].quantity);
-        const colorName = listProductTam[i].productColor.colorName;
-        const sizeName = listProductTam[i].productSize.sizeName;
-        const maxQuantity = listProductTam[i].productSize.quantity;
 
-        main += `<tr>
-            <td>Size: ${sizeName}, Màu: ${colorName}<br>${listProductTam[i].product.name}</td>
-            <td>${formatmoney(listProductTam[i].product.price)}</td>
-            <td>
-                <div class="clusinp">
-                    <button onclick="upDownQuantity(${listProductTam[i].productSize.id},-1)" class="cartbtn"> - </button>
-                    <input type="number" value="${listProductTam[i].quantity}" 
-                           onchange="validateInputQuantity(${listProductTam[i].productSize.id}, this)" 
-                           min="1" max="${maxQuantity}" 
-                           class="inputslcart no-spinners">
-                    <button onclick="upDownQuantity(${listProductTam[i].productSize.id},1)" class="cartbtn"> + </button>
-                </div>
-            </td>
-            <td><i onclick="removeTam(${listProductTam[i].productSize.id})" class="fa fa-trash-alt pointer"></i></td>
-        </tr>`
-    }
+
+function loadSizeProduct() {
+    let main = '';
+    let tongtientt = 0;
+    console.log("Dữ liệu trong listProductTam khi hiển thị:", listProductTam);
+    listProductTam.forEach(item => {
+        tongtientt += item.product.price * item.quantity;
+        main += `
+            <tr>
+                <td>Size: ${item.productSize.sizeName}, Màu: ${item.productColor.colorName}<br>${item.product.name}</td>
+                <td>${formatmoney(item.product.price)}</td>
+                <td>
+                    <div class="clusinp">
+                        <button onclick="upDownQuantity(${item.productSize.id},-1)" class="cartbtn"> - </button>
+                        <input type="number" value="${item.quantity}" 
+                               onchange="validateInputQuantity(${item.productSize.id}, this)" 
+                               min="1" max="${item.productSize.quantity}" 
+                               class="inputslcart no-spinners">
+                        <button onclick="upDownQuantity(${item.productSize.id},1)" class="cartbtn"> + </button>
+                    </div>
+                </td>
+                <td><i onclick="removeTam(${item.productSize.id})" class="fa fa-trash-alt pointer"></i></td>
+            </tr>`;
+    });
+
     document.getElementById("listproducttam").innerHTML = main;
     document.getElementById("tongtientt").innerHTML = formatmoney(tongtientt);
+    autoUpdateChange();
 }
+
 
 const style = document.createElement('style');
 style.textContent = `
@@ -1103,55 +1154,6 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-function validateInputQuantity(idsize, input) {
-    const newQuantity = parseInt(input.value);
-    const item = listProductTam.find(item => item.productSize.id === idsize);
-
-    if (!item) return;
-
-    if (isNaN(newQuantity)) {
-        input.value = 1;
-        item.quantity = 1;
-        toastr.error("Vui lòng nhập số");
-        return;
-    }
-
-    if (newQuantity < 1) {
-        input.value = 1;
-        item.quantity = 1;
-        toastr.error("Số lượng không thể nhỏ hơn 1");
-        return;
-    }
-    if (newQuantity > item.productSize.quantity) {
-        input.value = item.productSize.quantity;
-        item.quantity = item.productSize.quantity;
-        toastr.error(`Số lượng sản phẩm chỉ còn ${item.productSize.quantity}`);
-        return;
-    }
-
-    item.quantity = newQuantity;
-    loadSizeProduct();
-}
-
-function upDownQuantity(idsize, quantity){
-    const item = listProductTam.find(item => item.productSize.id === idsize);
-    if (!item) return;
-
-    const newQuantity = Number(item.quantity) + Number(quantity);
-
-    if (newQuantity < 1) {
-        toastr.error("Số lượng không thể nhỏ hơn 1");
-        return;
-    }
-
-    if (newQuantity > item.productSize.quantity) {
-        toastr.error(`Số lượng sản phẩm chỉ còn ${item.productSize.quantity}`);
-        return;
-    }
-
-    item.quantity = newQuantity;
-    loadSizeProduct();
-}
 async function loadSelect() {
     var response = await fetch('http://localhost:8080/api/material/public/all', {
     });

@@ -333,14 +333,13 @@ async function paymentCod() {
         return;
     }
 
-    // Get the selected address
-    var userAddressId = document.getElementById("sodiachi").value;
-    if (!userAddressId || userAddressId.trim() === "") {
+
+    var userAddressId = document.getElementById("sodiachi")?.value?.trim();
+    if (!userAddressId) {
         toastr.error("Vui lòng chọn địa chỉ giao hàng!");
         return;
     }
 
-    // Prepare the order data
     var orderDto = {
         "payType": "PAYMENT_DELIVERY",
         "userAddressId": userAddressId,
@@ -363,14 +362,10 @@ async function paymentCod() {
         });
 
         if (res.ok) {
-            // Successfully placed order
             var currentCart = JSON.parse(localStorage.getItem("product_cart")) || [];
             var selectedItems = JSON.parse(localStorage.getItem("selected_items") || "[]");
 
-            // Remove selected items from cart
             var remainingCart = currentCart.filter((_, index) => !selectedItems.includes(index));
-
-
             localStorage.setItem("product_cart", JSON.stringify(remainingCart));
             localStorage.removeItem("selected_items");
 
@@ -379,9 +374,9 @@ async function paymentCod() {
                 text: "Đặt hàng thành công!",
                 type: "success"
             }, function () {
-                window.location.href = 'account#invoice';            });
+                window.location.href = 'account#invoice';
+            });
         } else {
-            // Handle errors from the server response
             const errorData = await res.json();
             toastr.error(errorData.message || "Có lỗi xảy ra khi đặt hàng!");
         }
@@ -389,7 +384,8 @@ async function paymentCod() {
         console.error("Lỗi khi đặt hàng:", error);
         toastr.error("Có lỗi xảy ra khi đặt hàng!");
     }
-}async function paymentOnline() {
+}
+async function paymentOnline() {
     var uls = new URL(document.URL);
     var statusGpay = uls.searchParams.get("status");
     var merchantOrderId = uls.searchParams.get("merchant_order_id");
@@ -496,89 +492,61 @@ function checkout() {
             requestPayMentGpay();
         }
     }
+
 async function requestPayMentGpay() {
-    var ghichu = document.getElementById("ghichudonhang").value;
-    var sodiachi = document.getElementById("sodiachi").value;
-    var returnurl = 'http://localhost:8080/payment';
-
-    // Save necessary data to session storage
-    sessionStorage.setItem('ghichudonhang', ghichu);
-    sessionStorage.setItem('voucherCode', voucherCode);
-    sessionStorage.setItem('paytype', "GPAY");
-    sessionStorage.setItem('sodiachi', sodiachi);
-
-    let paymentDto;
-    const urlParams = new URLSearchParams(window.location.search);
-    const isBuyNow = urlParams.get('type') === 'buynow';
-
-
-    showLoadingOverlay();
-
-    if (isBuyNow) {
-        var buyNowData = sessionStorage.getItem("buy_now_item");
-        if (!buyNowData) {
-            hideLoadingOverlay();
-            toastr.error("Không tìm thấy thông tin sản phẩm!");
-            return;
-        }
-
-        var buyNowList = JSON.parse(buyNowData);
-        sessionStorage.setItem('payment_type', 'buy_now');
-        sessionStorage.setItem('buy_now_data', buyNowData);
-
-        paymentDto = {
-            "content": "Thanh toán đơn hàng mua ngay",
-            "returnUrl": returnurl,
-            "notifyUrl": returnurl,
-            "codeVoucher": voucherCode,
-            "listProductSize": buyNowList.map(item => ({
-                "idProductSize": item.size.id,
-                "quantity": item.quantiy
-            }))
-        };
-    } else {
-        if (!listSize || listSize.length === 0) {
-            hideLoadingOverlay();
-            toastr.error("Không có sản phẩm nào được chọn!");
-            return;
-        }
-
-        sessionStorage.setItem('payment_type', 'cart');
-        sessionStorage.setItem('cart_list_size', JSON.stringify(listSize));
-
-        paymentDto = {
-            "content": "Thanh toán đơn hàng từ giỏ hàng",
-            "returnUrl": returnurl,
-            "notifyUrl": returnurl,
-            "codeVoucher": voucherCode,
-            "listProductSize": listSize
-        };
+    if (!listSize || listSize.length === 0) {
+        toastr.error("Không có sản phẩm nào được chọn!");
+        return;
     }
 
+    var userAddressId = document.getElementById("sodiachi")?.value?.trim();
+
+    if (!userAddressId) {
+        toastr.error("Vui lòng chọn địa chỉ giao hàng!");
+        return;
+    }
+
+    var orderDto = {
+        "payType": "GPAY",
+        "userAddressId": userAddressId,
+        "voucherCode": voucherCode,
+        "note": document.getElementById("ghichudonhang").value.trim(),
+        "listProductSize": listSize
+    };
+
+    var url = 'http://localhost:8080/api/gpay/payment/init';
+    var token = localStorage.getItem("token");
+
     try {
-        const res = await fetch('http://localhost:8080/api/gpay/urlpayment', {
+        const res = await fetch(url, {
             method: 'POST',
             headers: new Headers({
                 'Authorization': 'Bearer ' + token,
                 'Content-Type': 'application/json'
             }),
-            body: JSON.stringify(paymentDto)
+            body: JSON.stringify(orderDto)
         });
 
-        var result = await res.json();
-        if (res.status < 300) {
-            window.location.href = result.url;
-        }
-        if (res.status == exceptionCode) {
-            hideLoadingOverlay();
-            toastr.warning(result.defaultMessage);
+        if (res.ok) {
+
+            const responseData = await res.json();
+            const paymentUrl = responseData.paymentUrl;
+
+            if (paymentUrl) {
+                window.location.href = paymentUrl;
+            } else {
+                toastr.error("Không thể lấy URL thanh toán từ GPay!");
+            }
+        } else {
+            const errorData = await res.json();
+            toastr.error(errorData.message || "Có lỗi xảy ra khi khởi tạo thanh toán GPay!");
         }
     } catch (error) {
-        console.error("Lỗi khi thực hiện thanh toán qua GPay:", error);
-        hideLoadingOverlay();
-        toastr.error("Có lỗi xảy ra khi thực hiện thanh toán!");
+        console.error("Lỗi khi gọi API GPay:", error);
+        toastr.error("Có lỗi xảy ra khi thanh toán qua GPay!");
     }
 }
+
 
 function showLoadingOverlay() {
     // Create loading overlay if it doesn't exist

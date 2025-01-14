@@ -111,15 +111,13 @@ async function addAdmin() {
         "password": password
     };
 
-    // Validate Fullname
     if (!fullname) {
         toastr.warning("Tên không được để trống!");
         return;
     }
 
-    // Validate Phone
-    // Regex to validate phone numbers: starts with 0 and has exactly 10 digits
-    const phoneRegex = /^0\d{9}$/; // Starts with 0, followed by 9 more digits (total 10 digits)
+
+    const phoneRegex = /^0\d{9}$/;
 
     if (!phone) {
         toastr.warning("Số điện thoại không được để trống!");
@@ -131,8 +129,6 @@ async function addAdmin() {
         return;
     }
 
-
-    // Validate Email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email) {
         toastr.warning("Email không được để trống!");
@@ -143,7 +139,6 @@ async function addAdmin() {
         return;
     }
 
-    // Validate Password and Repassword
     if (password !== repassword) {
         toastr.warning("Mật khẩu không trùng khớp!");
         return;
