@@ -74,7 +74,6 @@ async function loadInvoice(page) {
 
     document.getElementById("pageable").innerHTML = mainpage
 }
-
 async function loadDetailInvoice(id) {
     var url = 'http://localhost:8080/api/invoice-detail/admin/find-by-invoice?idInvoice=' + id;
     const res = await fetch(url, {
@@ -84,7 +83,13 @@ async function loadDetailInvoice(id) {
         })
     });
     var list = await res.json();
-    var main = ''
+    console.log("Invoice Details Response: ", list);  // Log to check the data
+
+    var main = '';
+    var totalAmount = 0;
+    var subtotal = 0;  // Initialize subtotal
+
+    // Iterate through the products and calculate subtotal and totalAmount
     for (i = 0; i < list.length; i++) {
         main += `<tr>
                     <td><img src="${list[i].product.imageBanner}" class="imgdetailacc"></td>
@@ -97,10 +102,12 @@ async function loadDetailInvoice(id) {
                     <td>${formatmoney(list[i].price)}</td>
                     <td class="sldetailacc">${list[i].quantity}</td>
                     <td class="pricedetailacc yls">${formatmoney(list[i].price * list[i].quantity)}</td>
-                </tr>`
+                </tr>`;
+        totalAmount += list[i].price * list[i].quantity;
+        subtotal += list[i].price * list[i].quantity;  // Add to subtotal
     }
 
-    document.getElementById("listDetailinvoice").innerHTML = main
+    document.getElementById("listDetailinvoice").innerHTML = main;
 
     var url = 'http://localhost:8080/api/invoice/admin/find-by-id?idInvoice=' + id;
     const resp = await fetch(url, {
@@ -111,7 +118,28 @@ async function loadDetailInvoice(id) {
     });
 
     var result = await resp.json();
-    document.getElementById("ngaytaoinvoice").innerHTML = result.createdTime + " " + result.createdDate
+    console.log("Invoice Info Response: ", result);  // Log to check the data
+
+    const voucherBlock = document.getElementById("voucher-info-block");
+    const voucherAmount = result.totalAmount - subtotal;  // Make sure subtotal is used
+
+    // Check if there is a voucher
+    if (voucherAmount < 0) {
+        voucherBlock.style.display = "block";  // Show voucher block
+        const voucherDiscountText = result.voucherName ?
+            `Voucher "${result.voucherName}" giảm: ${formatmoney(Math.abs(voucherAmount))}` :
+            `Voucher giảm: ${formatmoney(Math.abs(voucherAmount))}`;
+        document.getElementById("voucherDiscountAmount").innerHTML = voucherDiscountText;
+
+        // Display total after voucher discount
+        const totalAfterVoucher = result.totalAmount;
+        document.getElementById("totalAfterVoucher").innerHTML =
+            `Tổng tiền: ${formatmoney(totalAfterVoucher)}`;
+    } else {
+        voucherBlock.style.display = "none";  // Hide voucher block if no voucher
+    }
+
+    document.getElementById("ngaytaoinvoice").innerHTML = result.createdTime + " " + result.createdDate;
 
     let paymentStatusText = "Chưa thanh toán";
 
@@ -123,7 +151,6 @@ async function loadDetailInvoice(id) {
         paymentStatusText = "Đã thanh toán";
     }
 
-
     let paymentText = "Thanh toán khi nhận hàng (COD)";
 
     if (result.payType === "PAYMENT_GPAY") {
@@ -132,17 +159,25 @@ async function loadDetailInvoice(id) {
         paymentText = "Thanh toán tại quầy";
     }
 
-
-    document.getElementById("loaithanhtoan").innerHTML = paymentStatusText;
-
-    document.getElementById("trangthaitt").innerHTML = paymentStatusText;
-
-    document.getElementById("ttvanchuyen").innerHTML = result.status.name
-    document.getElementById("tennguoinhan").innerHTML = result.receiverName
     document.getElementById("loaithanhtoan").innerHTML = paymentText;
-    document.getElementById("addnhan").innerHTML = result.address
-    document.getElementById("phonenhan").innerHTML = result.phone
-    document.getElementById("ghichunh").innerHTML = result.note == "" || result.note == null ? 'Không có ghi chú' : result.note
+    document.getElementById("trangthaitt").innerHTML = paymentStatusText;
+    document.getElementById("ttvanchuyen").innerHTML = result.status.name;
+    document.getElementById("tennguoinhan").innerHTML = result.receiverName;
+    document.getElementById("addnhan").innerHTML = result.address;
+    document.getElementById("phonenhan").innerHTML = result.phone;
+    document.getElementById("ghichunh").innerHTML = result.note == "" || result.note == null ? 'Không có ghi chú' : result.note;
+
+    if (result.couponCode) {
+        document.getElementById("voucherCode").innerHTML = `Mã voucher: ${result.couponCode}`;
+    } else {
+        document.getElementById("voucherCode").innerHTML = "Không có mã voucher";
+    }
+
+    if (result.totalAmountAfterDiscount) {
+        document.getElementById("totalAmount").innerHTML = formatmoney(result.totalAmountAfterDiscount);
+    } else {
+        document.getElementById("totalAmount").innerHTML = formatmoney(totalAmount);
+    }
 }
 
 async function openStatus(idinvoice, idstatus) {
@@ -166,7 +201,7 @@ async function updateStatus() {
         toastr.success("Cập nhật trạng thái đơn hàng thành công!");
         $("#capnhatdonhang").modal("hide");
 
-        // Lấy trang hiện tại từ giao diện
+
         let currentPage = document.querySelector('.page-item.active')?.textContent?.trim() || 1;
         loadInvoice(currentPage - 1); // Gọi lại loadInvoice để làm mới dữ liệu
     } else if (res.status === exceptionCode) {
@@ -222,12 +257,15 @@ async function createInvoice() {
         const phone = document.getElementById("phone").value.trim();
         const customerPaidInput = document.getElementById('customerPaid').value.trim();
 
-        const phoneRegex =  /^0\d{9}$/;
+        const phoneRegex = /^(0[3|5|7|8|9])([0-9]{8})$/;
         if (phone && !phoneRegex.test(phone)) {
             toastr.warning('Số điện thoại không hợp lệ!');
             return;
         }
-
+        if (!listProductTam || listProductTam.length === 0) {
+            toastr.warning('Giỏ hàng trống. Vui lòng chọn sản phẩm');
+            return;
+        }
         if (!customerPaidInput) {
             toastr.warning('Vui lòng nhập số tiền khách đưa.');
             return;
@@ -239,10 +277,7 @@ async function createInvoice() {
             return;
         }
 
-        if (!listProductTam || listProductTam.length === 0) {
-            toastr.warning('Giỏ hàng trống. Vui lòng chọn sản phẩm');
-            return;
-        }
+
 
         const totalAmount = parseFloat(document.getElementById('tongtientt').innerText.replace(/[^\d]/g, '')) || 0;
         if (customerPaid < totalAmount) {

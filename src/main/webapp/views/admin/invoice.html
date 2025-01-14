@@ -2,7 +2,7 @@
 <html class="fixed" lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <head th:replace="fragment/libAdmin :: libheaderadmin"></head>
+    <th:block th:replace="fragment/libAdmin :: libheaderadmin"></th:block>
     <script src="js/menu.js"></script>
     <script src="js/invoice.js"></script>
     <script>
@@ -49,7 +49,9 @@
                         </div>
                         <div class="col-md-2">
                             <label>&ThinSpace;</label>
-                            <button onclick="loadInvoice(0)" class="btn btn-warning form-control"><i class="fa fa-filter"></i> Lọc</button>
+                            <button onclick="loadInvoice(0)" class="btn btn-warning form-control">
+                                <i class="fa fa-filter"></i> Lọc
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -105,13 +107,18 @@
         </section>
     </div>
 </section>
+
 <th:block th:replace="fragment/libAdmin :: jdadmin"></th:block>
 </body>
+
+<!-- Modals -->
 <div class="modal fade" id="capnhatdonhang" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Cập nhật trạng thái đơn hàng</h5> <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+                <h5 class="modal-title" id="exampleModalLabel">Cập nhật trạng thái đơn hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
             <div class="modal-body">
                 <input type="hidden" id="iddonhangupdate">
                 <select class="form-control" id="trangthaiupdate">
@@ -163,7 +170,15 @@
                             <span id="ghichunh">Không có ghi chú</span>
                         </div>
                     </div>
-                </div><br><br>
+                </div>
+                <div id="voucher-info-block" style="display: none;">
+                    <span id="voucherDiscountAmount" class="voucher-details"></span>
+                    <div>
+                        <span id="totalAfterVoucher" class="voucher-details"></span>
+                    </div>
+                </div>
+
+                <br><br>
                 <table class="table table-cart table-order" id="detailInvoice">
                     <thead class="thead-default theaddetail">
                     <tr>

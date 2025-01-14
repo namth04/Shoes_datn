@@ -366,7 +366,6 @@ async function saveProduct() {
             degiay: document.getElementById("degiay").value.trim()
         };
 
-        // Basic validations first
         if (!formData.codesp) {
             toastr.warning('Vui lòng nhập mã sản phẩm!');
             document.getElementById("loading").style.display = 'none';

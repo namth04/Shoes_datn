@@ -248,22 +248,33 @@ public class InvoiceServiceImp implements InvoiceService {
         if (status.isEmpty()) {
             throw new MessageException("Status ID not found");
         }
-
         Long idSt = status.get().getId();
+
         if (idSt == StatusUtils.DANG_CHO_XAC_NHAN) {
             throw new MessageException("Không thể cập nhật trạng thái này");
         }
-
         Optional<Invoice> invoice = invoiceRepository.findById(invoiceId);
         if (invoice.isEmpty()) {
             throw new MessageException("Invoice ID not found");
+        }
+
+
+        Long currentStatusId = invoice.get().getStatus().getId();
+        if (currentStatusId == StatusUtils.KHONG_NHAN_HANG ||
+                currentStatusId == StatusUtils.DA_HUY ||
+                currentStatusId == StatusUtils.DA_NHAN) {
+            throw new MessageException("Không thể cập nhật trạng thái từ trạng thái hiện tại");
+        }
+
+        if (statusId == StatusUtils.DANG_CHO_XAC_NHAN) {
+            throw new MessageException("Không thể cập nhật trạng thái này");
         }
 
         if (invoiceStatusRepository.findByInvoiceAndStatus(invoiceId, statusId).isPresent()) {
             throw new MessageException("Trạng thái đơn hàng này đã được cập nhật");
         }
 
-        if (idSt == StatusUtils.KHONG_NHAN_HANG) {
+        if (statusId == StatusUtils.KHONG_NHAN_HANG) {
             List<InvoiceDetail> listInvoiceDetails = invoiceDetailRepository.findByInvoiceId(invoiceId);
             for (InvoiceDetail detail : listInvoiceDetails) {
                 ProductSize productSize = detail.getProductSize();
@@ -290,6 +301,7 @@ public class InvoiceServiceImp implements InvoiceService {
 
         return invoiceMapper.invoiceToInvoiceResponse(invoice.get());
     }
+
 
 
     @Override
@@ -417,13 +429,6 @@ public class InvoiceServiceImp implements InvoiceService {
             throw new MessageException("Hãy chọn 1 sản phẩm");
         }
 
-        if (invoiceRequestCounter.getFullName() == null || invoiceRequestCounter.getFullName().trim().isEmpty()) {
-            throw new MessageException("Vui lòng nhập tên khách hàng");
-        }
-
-        if (invoiceRequestCounter.getPhone() == null || invoiceRequestCounter.getPhone().trim().isEmpty()) {
-            throw new MessageException("Vui lòng nhập số điện thoại");
-        }
 
         Double totalAmount = 0D;
         for (ProductSizeRequest p : invoiceRequestCounter.getListProductSize()) {
