@@ -65,20 +65,22 @@ async function saveBlog() {
         "primaryBlog": primaryBlog
     }
     if (!title){
-        toastr.warning("không đển trống tiêu đề")
+        toastr.warning("Không để trống tiêu đề")
         return;
     }
     if (!linkImage){
-        toastr.warning("không đển trống ảnh bài viết")
+        toastr.warning("Không để trống ảnh bài viết")
         return;
     }
     if (!description){
-        toastr.warning("không đển trống mô tả")
+        toastr.warning("Không để trống mô tả")
         return;
     }
     if (!content){
-        toastr.warning("không đển trống nội dung")
+        toastr.warning("Không để trống nội dung")
+        return;
     }
+
 
     const response = await fetch(url, {
         method: 'POST',
@@ -91,7 +93,7 @@ async function saveBlog() {
     if (response.status < 300) {
         swal({
                 title: "Thông báo",
-                text: "thêm/sửa blog thành công!",
+                text: "Thêm/sửa blog thành công!",
                 type: "success"
             },
             function() {
@@ -138,7 +140,7 @@ async function deleteBlog(id) {
     if (response.status < 300) {
         swal({
                 title: "Thông báo",
-                text: "xóa bài viết thành công!",
+                text: "Xóa bài viết thành công!",
                 type: "success"
             },
             function() {
