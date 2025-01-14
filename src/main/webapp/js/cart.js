@@ -282,6 +282,13 @@ async function validateAndRedirectToCheckout() {
     try {
         const cart = JSON.parse(cartData);
         const selectedProducts = cart.filter((_, index) => selectedItems.includes(index));
+
+        // Kiểm tra nếu không có sản phẩm hợp lệ
+        if (selectedProducts.length === 0) {
+            toastr.error("Không có sản phẩm hợp lệ được chọn để thanh toán!");
+            return;
+        }
+
         const errors = [];
 
         // 3. Kiểm tra tính hợp lệ của từng sản phẩm được chọn
