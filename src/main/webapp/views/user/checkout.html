@@ -131,10 +131,15 @@
                     <div class="voucher-input-group">
                         <input type="text" class="voucher-input" id="codevoucher" placeholder="Nhập mã voucher của Shop">
                         <button class="voucher-apply-btn" onclick="loadVoucher()">Áp dụng</button>
+                        <button class="voucher-clear-btn" onclick="clearVoucher()">Xóa</button>
                     </div>
                     <div class="error-message" id="blockmessErr" style="display:none;">
                         <i class="fa fa-warning"></i>
                         <span id="messerr">Mã giảm giá không hợp lệ</span>
+                    </div>
+                    <div class="success-message" id="blockmess" style="display:none">
+                        <i class="fa fa-check"></i>
+                        <span style="color:#0c4128">Áp dụng mã giảm giá thành công</span>
                     </div>
                 </div>
 

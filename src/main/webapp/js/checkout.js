@@ -150,8 +150,53 @@ function formatmoneyCheck(money) {
 var voucherId = null;
 var voucherCode = null;
 var discountVou = 0;
+function showError(message) {
+    const errorElement = document.getElementById("blockmessErr");
+    const messageElement = document.getElementById("messerr");
+
+    if (errorElement && messageElement) {
+        messageElement.textContent = message;
+        errorElement.style.display = "block";
+    } else {
+        console.error("Element blockmessErr or messerr not found in DOM.");
+    }
+}
+
+function clearVoucher() {
+    resetVoucherState();
+    const voucherModal = bootstrap.Modal.getInstance(document.getElementById("voucherModal"));
+    if (voucherModal) {
+        voucherModal.hide();
+    }
+}
+
+
+function resetVoucherState() {
+
+    voucherId = null;
+    voucherCode = null;
+    discountVou = 0;
+
+
+    const moneyDiscount = document.getElementById("moneyDiscount");
+    const totalFi = document.getElementById("totalfi");
+    const blockMessErr = document.getElementById("blockmessErr");
+    const blockMess = document.getElementById("blockmess");
+    const codevoucher = document.getElementById("codevoucher");
+
+    if (moneyDiscount) moneyDiscount.innerHTML = formatmoneyCheck(0);
+    if (totalFi) totalFi.innerHTML = formatmoneyCheck(total);
+    if (blockMessErr) blockMessErr.style.display = "none";
+    if (blockMess) blockMess.style.display = "none";
+    if (codevoucher) codevoucher.value = '';
+}
+
+
 async function loadVoucher() {
     var code = document.getElementById("codevoucher").value.trim();
+
+    const blockMess = document.getElementById("blockmess");
+    if (blockMess) blockMess.style.display = "none"; // Hide success message
 
     if (!code) {
         showError("Vui lòng nhập mã voucher!");
@@ -170,13 +215,11 @@ async function loadVoucher() {
             return;
         }
 
-        // Nếu API trả về voucher hợp lệ
         voucherId = result.id;
         voucherCode = result.code;
         discountVou = result.discount;
 
         const blockMessErr = document.getElementById("blockmessErr");
-        const blockMess = document.getElementById("blockmess");
         const moneyDiscount = document.getElementById("moneyDiscount");
         const totalFi = document.getElementById("totalfi");
 
@@ -191,43 +234,7 @@ async function loadVoucher() {
         resetVoucherState();
     }
 }
-function showError(message) {
-    const errorElement = document.getElementById("blockmessErr");
-    const messageElement = document.getElementById("messerr");
 
-    if (errorElement && messageElement) {
-        messageElement.textContent = message;
-        errorElement.style.display = "block";
-    } else {
-        console.error("Element blockmessErr or messerr not found in DOM.");
-    }
-}
-
-function resetVoucherState() {
-    voucherId = null;
-    voucherCode = null;
-    discountVou = 0;
-
-    const moneyDiscount = document.getElementById("moneyDiscount");
-    const totalFi = document.getElementById("totalfi");
-
-    if (moneyDiscount) {
-        moneyDiscount.innerHTML = formatmoneyCheck(0);
-    }
-
-    if (totalFi) {
-        totalFi.innerHTML = formatmoneyCheck(total);
-    }
-}
-
-
-function resetVoucherState() {
-    voucherId = null;
-    voucherCode = null;
-    discountVou = 0;
-    document.getElementById("moneyDiscount").innerHTML = formatmoneyCheck(0);
-    document.getElementById("totalfi").innerHTML = formatmoneyCheck(total);
-}
 
 function toggleVoucherList() {
     const voucherList = document.getElementById('voucherList');
@@ -504,7 +511,7 @@ async function requestPayMentGpay() {
     const urlParams = new URLSearchParams(window.location.search);
     const isBuyNow = urlParams.get('type') === 'buynow';
 
-    // Show loading state
+
     showLoadingOverlay();
 
     if (isBuyNow) {
@@ -560,7 +567,6 @@ async function requestPayMentGpay() {
 
         var result = await res.json();
         if (res.status < 300) {
-            // Instead of opening in new window, redirect current window
             window.location.href = result.url;
         }
         if (res.status == exceptionCode) {
