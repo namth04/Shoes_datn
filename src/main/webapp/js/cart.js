@@ -222,7 +222,7 @@ async function loadAllCart() {
                     <td>
                         <div class="clusinp">
                             <button onclick="upDownQuantity(${product.size.id}, -1)" class="cartbtn"> - </button>
-                            <input value="${product.quantiy}" class="inputslcart">
+                            <input value="${product.quantiy}" class="inputslcart" data-index="${i}">
                             <button onclick="upDownQuantity(${product.size.id}, 1)" class="cartbtn"> + </button>
                         </div>
                     </td>
@@ -269,6 +269,21 @@ async function loadAllCart() {
             updateTotal();
         });
     });
+    // Ngăn nhập số âm trong ô nhập số lượng
+    const quantityInputs = document.querySelectorAll(".inputslcart");
+    quantityInputs.forEach((input) => {
+        input.addEventListener("input", function () {
+            if (this.value < 1) {
+                this.value = 1; // Đặt lại giá trị thành 1 nếu nhập số âm
+            }
+        });
+
+        input.addEventListener("change", function () {
+            if (this.value < 1) {
+                this.value = 1; // Đặt lại giá trị thành 1 khi thay đổi
+            }
+        });
+    });
 }
 async function validateAndRedirectToCheckout() {
     // 1. Kiểm tra giỏ hàng có dữ liệu không
@@ -291,7 +306,7 @@ async function validateAndRedirectToCheckout() {
 
         // Kiểm tra nếu không có sản phẩm hợp lệ
         if (selectedProducts.length === 0) {
-            toastr.error("Không có sản phẩm hợp lệ được chọn để thanh toán!");
+            toastr.error("Không có sản phẩm được chọn để thanh toán!");
             return;
         }
 
