@@ -205,8 +205,8 @@ async function deleteCategory(id) {
         type: "warning",
         showCancelButton: true,
         confirmButtonColor: "#DD6B55",
-        confirmButtonText: "Có, xóa nó!",
-        cancelButtonText: "Hủy bỏ",
+        confirmButtonText: "Xác nhận",
+        cancelButtonText: "Hủy",
         closeOnConfirm: false
     }, async function() {
         try {
