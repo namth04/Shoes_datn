@@ -35,74 +35,95 @@ async function loadBlog(page) {
 
 var linkImage = ''
 async function saveBlog() {
-    document.getElementById("loading").style.display = 'block'
-    var uls = new URL(document.URL)
-    var id = uls.searchParams.get("id");
-    var url = 'http://localhost:8080/api/blog/admin/create';
+    const loadingElement = document.getElementById("loading");
+    const title = document.getElementById("title").value.trim();
+    const description = document.getElementById("description").value.trim();
+    const content = tinyMCE.get('editor').getContent().trim();
+    const primaryBlog = document.getElementById("primaryBlog").checked;
+    const fileInput = document.getElementById('fileimage');
+    const uls = new URL(document.URL);
+    const id = uls.searchParams.get("id");
+    const url = 'http://localhost:8080/api/blog/admin/create';
+    const uploadUrl = 'http://localhost:8080/api/public/upload-file';
 
-    var title = document.getElementById("title").value
-    var description = document.getElementById("description").value
-    var content = tinyMCE.get('editor').getContent()
-    var primaryBlog = document.getElementById("primaryBlog").checked
+    // Display loading spinner
+    loadingElement.style.display = 'block';
 
-    const filePath = document.getElementById('fileimage')
-    const formData = new FormData()
-    formData.append("file", filePath.files[0])
-    var urlUpload = 'http://localhost:8080/api/public/upload-file';
-    const res = await fetch(urlUpload, {
-        method: 'POST',
-        body: formData
-    });
-    if (res.status < 300) {
-        linkImage = await res.text();
-    }
-    var blog = {
-        "id": id,
-        "title": title,
-        "description": description,
-        "content": content,
-        "imageBanner": linkImage,
-        "primaryBlog": primaryBlog
-    }
-    if (!title){
-        toastr.warning("không đển trống tiêu đề")
-        return;
-    }
-    if (!linkImage){
-        toastr.warning("không đển trống ảnh bài viết")
-        return;
-    }
-    if (!description){
-        toastr.warning("không đển trống mô tả")
-        return;
-    }
-    if (!content){
-        toastr.warning("không đển trống nội dung")
-    }
+    try {
+        // Validate required fields
+        if (!title) {
+            toastr.warning("Không để trống tiêu đề");
+            return;
+        }
+        if (!fileInput.files[0]) {
+            toastr.warning("Không để trống ảnh bài viết");
+            return;
+        }
+        if (!description) {
+            toastr.warning("Không để trống mô tả");
+            return;
+        }
+        if (!content) {
+            toastr.warning("Không để trống nội dung");
+            return;
+        }
 
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: new Headers({
-            'Authorization': 'Bearer ' + token,
-            'Content-Type': 'application/json'
-        }),
-        body: JSON.stringify(blog)
-    });
-    if (response.status < 300) {
-        swal({
-                title: "Thông báo",
-                text: "thêm/sửa blog thành công!",
-                type: "success"
-            },
-            function() {
-                window.location.replace('blog')
-            });
+        // Upload image
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+        const uploadResponse = await fetch(uploadUrl, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!uploadResponse.ok) {
+            toastr.error("Lỗi khi tải ảnh lên");
+            return;
+        }
+
+        const linkImage = await uploadResponse.text();
+
+        // Create blog object
+        const blog = {
+            id,
+            title,
+            description,
+            content,
+            imageBanner: linkImage,
+            primaryBlog
+        };
+
+        // Send blog data
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: new Headers({
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }),
+            body: JSON.stringify(blog)
+        });
+
+        if (response.ok) {
+            swal({
+                    title: "Thông báo",
+                    text: "Thêm/sửa blog thành công!",
+                    type: "success"
+                },
+                function () {
+                    window.location.replace('blog');
+                });
+        } else if (response.status === exceptionCode) {
+            const result = await response.json();
+            toastr.warning(result.defaultMessage);
+        } else {
+            toastr.error("Đã xảy ra lỗi, vui lòng thử lại!");
+        }
+    } catch (error) {
+        toastr.error("Đã xảy ra lỗi: " + error.message);
+    } finally {
+        // Hide loading spinner
+        loadingElement.style.display = 'none';
     }
-    if (response.status == exceptionCode) {
-        var result = await response.json()
-        toastr.warning(result.defaultMessage);
-    }
-    document.getElementById("loading").style.display = 'none'
 }
 
 async function loadABlog() {
@@ -138,7 +159,7 @@ async function deleteBlog(id) {
     if (response.status < 300) {
         swal({
                 title: "Thông báo",
-                text: "xóa bài viết thành công!",
+                text: "Xóa bài viết thành công!",
                 type: "success"
             },
             function() {
