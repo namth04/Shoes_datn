@@ -222,7 +222,7 @@ async function loadAllCart() {
                     <td>
                         <div class="clusinp">
                             <button onclick="upDownQuantity(${product.size.id}, -1)" class="cartbtn"> - </button>
-                            <input value="${product.quantiy}" class="inputslcart" data-index="${i}">
+                            <input value="${product.quantiy}" class="inputslcart" data-index="${i}" disabled>
                             <button onclick="upDownQuantity(${product.size.id}, 1)" class="cartbtn"> + </button>
                         </div>
                     </td>
