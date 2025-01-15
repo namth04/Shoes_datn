@@ -481,18 +481,30 @@ async function paymentOnline() {
     }
 }
 function checkout() {
-        var con = confirm("Xác nhận đặt hàng!");
-        if (con == false) {
-            return;
-        }
-        var paytype = $('input[name=paytype]:checked').val()
-        if (paytype == "cod") {
-            paymentCod();
-        }
-        if (paytype == "gpay") {
-            requestPayMentGpay();
-        }
+    var confirmCheckout = confirm("Xác nhận đặt hàng!");
+    if (!confirmCheckout) {
+        return;
     }
+
+    // Kiểm tra phương thức thanh toán
+    var paytype = $('input[name=paytype]:checked').val();
+
+    // Kiểm tra địa chỉ giao hàng
+    var userAddressId = document.getElementById("sodiachi")?.value?.trim();
+    if (!userAddressId) {
+        // Hiển thị modal thêm địa chỉ
+        const addAddressModal = new bootstrap.Modal(document.getElementById("modaladd"));
+        addAddressModal.show();
+        return;
+    }
+
+    // Xử lý thanh toán dựa trên phương thức
+    if (paytype === "cod") {
+        paymentCod();
+    } else if (paytype === "gpay") {
+        requestPayMentGpay();
+    }
+}
 
 async function requestPayMentGpay() {
     var ghichu = document.getElementById("ghichudonhang").value;
