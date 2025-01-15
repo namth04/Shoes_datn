@@ -258,12 +258,19 @@ public class InvoiceServiceImp implements InvoiceService {
             throw new MessageException("Invoice ID not found");
         }
 
-
         Long currentStatusId = invoice.get().getStatus().getId();
         if (currentStatusId == StatusUtils.KHONG_NHAN_HANG ||
                 currentStatusId == StatusUtils.DA_HUY ||
                 currentStatusId == StatusUtils.DA_NHAN) {
             throw new MessageException("Không thể cập nhật trạng thái từ trạng thái hiện tại");
+        }
+
+        // Kiểm tra nếu trạng thái hiện tại là DA_GUI
+        if (currentStatusId == StatusUtils.DA_GUI) {
+            // Chỉ cho phép cập nhật sang KHONG_NHAN_HANG hoặc DA_NHAN
+            if (statusId != StatusUtils.KHONG_NHAN_HANG && statusId != StatusUtils.DA_NHAN) {
+                throw new MessageException("Đơn hàng đã được gửi đi,không thể cập nhật trạng thái này!");
+            }
         }
 
         if (statusId == StatusUtils.DANG_CHO_XAC_NHAN) {
@@ -301,8 +308,6 @@ public class InvoiceServiceImp implements InvoiceService {
 
         return invoiceMapper.invoiceToInvoiceResponse(invoice.get());
     }
-
-
 
     @Override
     public List<InvoiceResponse> findByUser() {
