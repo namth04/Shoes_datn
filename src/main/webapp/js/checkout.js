@@ -336,7 +336,8 @@ async function paymentCod() {
 
     var userAddressId = document.getElementById("sodiachi")?.value?.trim();
     if (!userAddressId) {
-        toastr.error("Vui lòng chọn địa chỉ giao hàng!");
+        // Nếu chưa có địa chỉ, hiển thị modal thêm mới địa chỉ
+        $('#modaladd').modal('show'); // Sử dụng jQuery để hiển thị modal
         return;
     }
 
