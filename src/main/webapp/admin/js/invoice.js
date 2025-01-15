@@ -192,28 +192,55 @@ async function openStatus(idinvoice, idstatus) {
 }
 
 async function updateStatus() {
+    // Get the status values first
     var idtrangthai = document.getElementById("trangthaiupdate").value;
     var idinvoice = document.getElementById("iddonhangupdate").value;
-    var url = 'http://localhost:8080/api/invoice/admin/update-status?idInvoice=' + idinvoice + '&idStatus=' + idtrangthai;
 
-    const res = await fetch(url, {
-        method: 'POST',
-        headers: new Headers({
-            'Authorization': 'Bearer ' + token
-        })
+    // Show confirmation dialog using SweetAlert
+    swal({
+        title: "Xác nhận",
+        text: "Bạn có chắc chắn muốn cập nhật trạng thái đơn hàng này?",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#4caf50",
+        confirmButtonText: "Xác nhận",
+        cancelButtonText: "Hủy",
+        closeOnConfirm: false,
+        showLoaderOnConfirm: true
+    }, async function(isConfirm) {
+        if (isConfirm) {
+            try {
+                var url = 'http://localhost:8080/api/invoice/admin/update-status?idInvoice=' + idinvoice + '&idStatus=' + idtrangthai;
+
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: new Headers({
+                        'Authorization': 'Bearer ' + token
+                    })
+                });
+
+                if (res.status < 300) {
+                    swal({
+                        title: "Thành công!",
+                        text: "Cập nhật trạng thái đơn hàng thành công",
+                        type: "success"
+                    }, function() {
+                        $("#capnhatdonhang").modal("hide");
+                        let currentPage = document.querySelector('.page-item.active')?.textContent?.trim() || 1;
+                        loadInvoice(currentPage - 1);
+                    });
+                } else if (res.status === exceptionCode) {
+                    var result = await res.json();
+                    swal("Thất bại!", result.defaultMessage, "error");
+                } else {
+                    swal("Thất bại!", "Có lỗi xảy ra khi cập nhật trạng thái", "error");
+                }
+            } catch (error) {
+                console.error("Error updating status:", error);
+                swal("Thất bại!", "Có lỗi xảy ra khi cập nhật trạng thái", "error");
+            }
+        }
     });
-
-    if (res.status < 300) {
-        toastr.success("Cập nhật trạng thái đơn hàng thành công!");
-        $("#capnhatdonhang").modal("hide");
-
-
-        let currentPage = document.querySelector('.page-item.active')?.textContent?.trim() || 1;
-        loadInvoice(currentPage - 1); // Gọi lại loadInvoice để làm mới dữ liệu
-    } else if (res.status === exceptionCode) {
-        var result = await res.json();
-        toastr.warning(result.defaultMessage);
-    }
 }
 
 
