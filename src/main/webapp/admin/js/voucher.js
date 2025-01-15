@@ -59,12 +59,22 @@ async function autoBlockVoucher(id) {
 }
 
 async function filter() {
-    var start = document.getElementById("start").value
-    var end = document.getElementById("end").value
-    if (start != "" && end != "") {
-        loadVoucher(0, start, end);
+    var start = document.getElementById("start").value.trim();
+    var end = document.getElementById("end").value.trim();
+
+    if (start && end) {
+        const startDate = new Date(start);
+        const endDate = new Date(end);
+
+        if (endDate < startDate) {
+            toastr.error("Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.");
+            return;
+        }
     }
+
+    loadVoucher(0, start || null, end || null);
 }
+
 
 async function loadAVoucher() {
     var uls = new URL(document.URL)

@@ -989,19 +989,29 @@ async function loadChiTietMauSac(idproduct){
 
 var listProductTam;
 
+var listProductTam;
+
 async function addTam(idsize, e) {
+    // Kiểm tra trạng thái checkbox và số lượng
+    const url = 'http://localhost:8080/api/product-size/public/find-by-id?id=' + idsize;
+    const response = await fetch(url, {
+        method: 'GET'
+    });
+    const result = await response.json();
+
+    if (result.productSize.quantity <= 0) {
+        e.checked = false;
+        return;
+    }
+
     if (e.checked == false) {
         removeTam(idsize);
         return;
     }
+
     if (checkTonTai(idsize) == true) {
         return;
     }
-    var url = 'http://localhost:8080/api/product-size/public/find-by-id?id=' + idsize;
-    const response = await fetch(url, {
-        method: 'GET'
-    });
-    var result = await response.json();
 
     const existingCart = JSON.parse(localStorage.getItem("listProductTam")) || [];
     const existingProduct = existingCart.find(item => item.productSize.id === idsize);
@@ -1022,18 +1032,97 @@ async function addTam(idsize, e) {
         quantity: quantity
     };
 
+    if (!listProductTam) {
+        listProductTam = [];
+    }
+
     listProductTam.push(formattedResult);
     saveToLocalStorage();
     loadSizeProduct();
 }
 
+// Khởi tạo dữ liệu khi trang load
 document.addEventListener("DOMContentLoaded", () => {
+    // Khởi tạo listProductTam từ localStorage
     const storedCart = JSON.parse(localStorage.getItem("listProductTam")) || [];
-    console.log("Dữ liệu từ localStorage khi reload:", storedCart);
-
     listProductTam = storedCart;
+
+    // Load dữ liệu sản phẩm
     loadSizeProduct();
+
+    // Thêm style cho checkbox disabled
+    const style = document.createElement('style');
+    style.textContent = `
+        .color-option-disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .color-checkbox:disabled + label {
+            color: #999;
+            cursor: not-allowed;
+        }
+    `;
+    document.head.appendChild(style);
 });
+
+function loadSizeProduct() {
+    if (!listProductTam) {
+        listProductTam = [];
+        return;
+    }
+
+    let main = '';
+    let tongtientt = 0;
+    console.log("Dữ liệu trong listProductTam khi hiển thị:", listProductTam);
+
+    listProductTam.forEach(item => {
+        tongtientt += item.product.price * item.quantity;
+        const isDisabled = item.productSize.quantity <= 0;
+
+        main += `
+            <tr>
+                <td>
+                    <div class="${isDisabled ? 'color-option-disabled' : ''}">
+                        Size: ${item.productSize.sizeName}, Màu: ${item.productColor.colorName}<br>${item.product.name}
+                    </div>
+                </td>
+                <td>${formatmoney(item.product.price)}</td>
+                <td>
+                    <div class="clusinp">
+                        <button onclick="upDownQuantity(${item.productSize.id},-1)" class="cartbtn" ${isDisabled ? 'disabled' : ''}> - </button>
+                        <input type="number" 
+                            value="${item.quantity}" 
+                            onchange="validateInputQuantity(${item.productSize.id}, this)" 
+                            min="1" 
+                            max="${item.productSize.quantity}" 
+                            class="inputslcart no-spinners"
+                            ${isDisabled ? 'disabled' : ''}>
+                        <button onclick="upDownQuantity(${item.productSize.id},1)" class="cartbtn" ${isDisabled ? 'disabled' : ''}> + </button>
+                    </div>
+                </td>
+                <td><i onclick="removeTam(${item.productSize.id})" class="fa fa-trash-alt pointer"></i></td>
+            </tr>`;
+    });
+
+    const productList = document.getElementById("listproducttam");
+    if (productList) {
+        productList.innerHTML = main;
+    }
+
+    const totalElement = document.getElementById("tongtientt");
+    if (totalElement) {
+        totalElement.innerHTML = formatmoney(tongtientt);
+    }
+
+    autoUpdateChange();
+}
+
+function saveToLocalStorage() {
+    if (!listProductTam) {
+        listProductTam = [];
+    }
+    localStorage.setItem("listProductTam", JSON.stringify(listProductTam));
+}
 
 function upDownQuantity(idsize, amount) {
     console.log(`Thay đổi số lượng cho sản phẩm ID ${idsize}, thay đổi: ${amount}`);
@@ -1056,11 +1145,7 @@ function upDownQuantity(idsize, amount) {
         }
     }
 }
-function saveToLocalStorage() {
-    console.log("Dữ liệu trước khi lưu vào localStorage:", listProductTam);
-    localStorage.setItem("listProductTam", JSON.stringify(listProductTam));
-    console.log("Dữ liệu sau khi lưu vào localStorage:", localStorage.getItem("listProductTam"));
-}
+
 document.addEventListener("DOMContentLoaded", () => {
     const storedCart = JSON.parse(localStorage.getItem("listProductTam")) || [];
     console.log("Dữ liệu từ localStorage khi reload:", storedCart);
@@ -1110,34 +1195,7 @@ function validateInputQuantity(idsize, input) {
 
 
 
-function loadSizeProduct() {
-    let main = '';
-    let tongtientt = 0;
-    console.log("Dữ liệu trong listProductTam khi hiển thị:", listProductTam);
-    listProductTam.forEach(item => {
-        tongtientt += item.product.price * item.quantity;
-        main += `
-            <tr>
-                <td>Size: ${item.productSize.sizeName}, Màu: ${item.productColor.colorName}<br>${item.product.name}</td>
-                <td>${formatmoney(item.product.price)}</td>
-                <td>
-                    <div class="clusinp">
-                        <button onclick="upDownQuantity(${item.productSize.id},-1)" class="cartbtn"> - </button>
-                        <input type="number" value="${item.quantity}" 
-                               onchange="validateInputQuantity(${item.productSize.id}, this)" 
-                               min="1" max="${item.productSize.quantity}" 
-                               class="inputslcart no-spinners">
-                        <button onclick="upDownQuantity(${item.productSize.id},1)" class="cartbtn"> + </button>
-                    </div>
-                </td>
-                <td><i onclick="removeTam(${item.productSize.id})" class="fa fa-trash-alt pointer"></i></td>
-            </tr>`;
-    });
 
-    document.getElementById("listproducttam").innerHTML = main;
-    document.getElementById("tongtientt").innerHTML = formatmoney(tongtientt);
-    autoUpdateChange();
-}
 
 
 const style = document.createElement('style');
