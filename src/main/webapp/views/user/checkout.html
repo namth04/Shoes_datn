@@ -23,11 +23,17 @@
     <script src="js/menu.js"></script>
     <script src="js/checkout.js"></script>
     <script src="js/addressuser.js"></script>
+    <script src="js/address.js"></script>
     <script>
         window.onload = function() {
             checkroleUser();
             loadAddressUserSelect();
             loadCartCheckOut();
+            loadAddressUser();
+            loadAddress();
+            loadAddressUser();
+            loadMyInvoice();
+            loadUserInfo();
         }
     </script>
 </head>
@@ -185,6 +191,60 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modaladd" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-fullscreen-sm-down modeladdres">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Thêm địa chỉ mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <input type="hidden" id="idadduser">
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-12 formadd">
+                        <input id="fullnameadd" class="form-control fomd" placeholder="Họ tên">
+                        <label class="lbsa">Họ tên</label>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-12 formadd">
+                        <input id="phoneadd" class="form-control fomd" placeholder="Số điện thoại">
+                        <label class="lbsa">Số điện thoại</label>
+                    </div>
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-12 formadd">
+                        <input id="stressadd" class="form-control fomd" placeholder="Tên đường, số nhà">
+                        <label class="lbsa">Tên đường, số nhà</label>
+                    </div>
+                    <div class="col-lg-4 col-md-4 col-sm-12 col-12 formadd">
+                        <select onclick="loadHuyenOnchange()" id="tinh" class="form-control fomd">
+                            <option value="" hidden="" disabled>---</option>
+                            <option value="haf npio">hà nội</option>
+                        </select>
+                        <label class="lbsatop">Tỉnh thành</label>
+                    </div>
+                    <div class="col-lg-4 col-md-4 col-sm-12 col-12 formadd">
+                        <select onchange="loadXaOnchange()" id="huyen" class="form-control fomd">
+                            <option value="" hidden="">---</option>
+                        </select>
+                        <label class="lbsatop">Quận/ huyện</label>
+                    </div>
+                    <div class="col-lg-4 col-md-4 col-sm-12 col-12 formadd">
+                        <select id="xa" class="form-control fomd">
+                            <option value="" hidden="">---</option>
+                        </select>
+                        <label class="lbsatop">Phường/ xã</label>
+                    </div>
+                </div>
+                <br><label class="checkbox-custom">Đặt làm địa chỉ mặc định
+                <input id="primaryadd" type="checkbox">
+                <span class="checkmark-checkbox"></span>
+            </label>
+                <div class="col-lg-6 col-md-6">
+                    <br><button class="btnhuylogin" onclick="window.location.href='checkout'">HỦY</button>
+                    <button onclick="addAddressUser()" class="btntt">LƯU</button>
+                </div>
             </div>
         </div>
     </div>

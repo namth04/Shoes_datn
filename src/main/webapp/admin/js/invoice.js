@@ -7,11 +7,18 @@ function formatmoney(num) {
 }
 
 async function loadInvoice(page) {
-    var start = document.getElementById("start").value
-    var end = document.getElementById("end").value
-    var type = document.getElementById("type").value
-    var trangthai = document.getElementById("trangthai").value
-    var sort = document.getElementById("sort").value
+    var start = document.getElementById("start").value;
+    var end = document.getElementById("end").value;
+    var type = document.getElementById("type").value;
+    var trangthai = document.getElementById("trangthai").value;
+    var sort = document.getElementById("sort").value;
+
+
+    if (start && end && new Date(end) < new Date(start)) {
+        toastr.warning("Ngày kết thúc phải lớn hơn ngày bắt đầu");
+        return;
+    }
+
     var url = 'http://localhost:8080/api/invoice/admin/find-all?page=' + page + '&size=' + size + '&sort=' + sort;
 
     if (start != "" && end != "") {
@@ -21,7 +28,7 @@ async function loadInvoice(page) {
         url += '&paytype=' + type;
     }
     if (trangthai != -1) {
-        url += '&status=' + trangthai
+        url += '&status=' + trangthai;
     }
 
     const response = await fetch(url, {
@@ -32,13 +39,12 @@ async function loadInvoice(page) {
     });
 
     var result = await response.json();
-    console.log(result)
+    console.log(result);
     var list = result.content;
     var totalPage = result.totalPages;
     var main = '';
 
     for (i = 0; i < list.length; i++) {
-
         let paymentStatusHtml = '<span class="chuathanhtoan">Thanh toán khi nhận hàng(COD)</span>';
 
         if (list[i].payType === 'PAYMENT_GPAY') {
@@ -53,7 +59,6 @@ async function loadInvoice(page) {
                     <td>${list[i].id}</td>
                     <td>${list[i].createdTime}<br>${list[i].createdDate}</td>
                     <td> ${list[i].address != null ? list[i].address : " "}</td>
-                   
                     <td>${formatmoney(list[i].totalAmount)}</td>
                     <td>${paymentStatusHtml}</td>
                     <td>${list[i].status.name}</td>
@@ -62,18 +67,19 @@ async function loadInvoice(page) {
                         <i onclick="loadDetailInvoice(${list[i].id})" data-bs-toggle="modal" data-bs-target="#modaldeail" class="fa fa-eye iconaction"></i>
                         <i onclick="openStatus(${list[i].id},${list[i].status.id})" data-bs-toggle="modal" data-bs-target="#capnhatdonhang" class="fa fa-edit iconaction"></i><br>
                     </td>
-                </tr>`
+                </tr>`;
     }
 
-    document.getElementById("listinvoice").innerHTML = main
+    document.getElementById("listinvoice").innerHTML = main;
 
-    var mainpage = ''
+    var mainpage = '';
     for (i = 1; i <= totalPage; i++) {
-        mainpage += `<li onclick="loadInvoice(${(Number(i) - 1)})" class="page-item"><a class="page-link" href="#listsp">${i}</a></li>`
+        mainpage += `<li onclick="loadInvoice(${(Number(i) - 1)})" class="page-item"><a class="page-link" href="#listsp">${i}</a></li>`;
     }
 
-    document.getElementById("pageable").innerHTML = mainpage
+    document.getElementById("pageable").innerHTML = mainpage;
 }
+
 async function loadDetailInvoice(id) {
     var url = 'http://localhost:8080/api/invoice-detail/admin/find-by-invoice?idInvoice=' + id;
     const res = await fetch(url, {
